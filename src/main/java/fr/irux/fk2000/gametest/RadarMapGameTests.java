@@ -26,15 +26,20 @@ public final class RadarMapGameTests {
             level.setBlockAndUpdate(red, Blocks.RED_WOOL.defaultBlockState());
             level.setBlockAndUpdate(blue, Blocks.BLUE_WOOL.defaultBlockState());
             int[] local = RadarMaps.sample(level, center.getX(), center.getZ(), 32);
-            int redPixel = local[32 * 64 + 32], bluePixel = local[32 * 64 + 33];
+            int redPixel = local[64 * RadarMaps.SIZE + 64], bluePixel = local[64 * RadarMaps.SIZE + 66];
             helper.assertTrue((redPixel >> 16 & 255) > (redPixel & 255), "A red terrain block must produce a red-dominant map pixel");
             helper.assertTrue((bluePixel & 255) > (bluePixel >> 16 & 255), "A blue terrain block must produce a blue-dominant map pixel");
             int before = level.getChunkSource().getLoadedChunksCount();
             int[] distant = RadarMaps.sample(level, center.getX(), center.getZ(), 2048);
-            helper.assertTrue(distant.length == 4096, "A distant radar map must remain a bounded 64 by 64 snapshot");
+            helper.assertTrue(distant.length == RadarMaps.PIXELS, "A distant radar map must remain a bounded 128 by 128 snapshot");
             helper.assertTrue(level.getChunkSource().getLoadedChunksCount() == before,
                     "Sampling a 4096-block-wide map must not load any distant terrain chunks: before="
                             + before + ", after=" + level.getChunkSource().getLoadedChunksCount());
+            var atlas = fr.irux.fk2000.network.TerrainAtlas.get(level);
+            var restored = fr.irux.fk2000.network.TerrainAtlas.load(atlas.save(new net.minecraft.nbt.CompoundTag()));
+            helper.assertTrue(restored.color(red.getX(), red.getZ()) == atlas.color(red.getX(), red.getZ()), "Observed terrain must survive persistence");
+            helper.assertTrue(restored.height(red.getX(), red.getZ()) == red.getY(), "Map targeting must retain the real surface height");
+            helper.assertTrue(java.util.Arrays.stream(distant).anyMatch(c -> c != RadarMaps.UNKNOWN_COLOR), "Maximum zoom-out must retain observed terrain");
             helper.succeed();
         } finally {
             level.setBlockAndUpdate(red, oldRed); level.setBlockAndUpdate(blue, oldBlue);

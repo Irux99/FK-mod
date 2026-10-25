@@ -169,6 +169,19 @@ public final class TacticalScreen extends Screen {
                     g.vLine(px + 5, py - 5, py + 5, color);
                 }
             }
+            for (var flight : s.flights()) {
+                double dx = flight.position().x - s.x(), dz = flight.position().z - s.z();
+                double distance = Math.hypot(dx,dz);
+                double scale = radius / Math.max(range,distance);
+                int px = cx + (int)Math.round(dx * scale), py = cy + (int)Math.round(dz * scale);
+                double heading = Math.atan2(flight.velocity().z,flight.velocity().x);
+                int nx = (int)Math.round(Math.cos(heading)*5), ny = (int)Math.round(Math.sin(heading)*5);
+                drawLine(g,px-nx,py-ny,px+nx,py+ny,0xff62dcff);
+                drawLine(g,px+nx,py+ny,px-ny,py+nx,0xff62dcff);
+                drawLine(g,px+nx,py+ny,px+ny,py-nx,0xff62dcff);
+                if (Math.abs(mouseX-px) <= 7 && Math.abs(mouseY-py) <= 7)
+                    g.renderTooltip(font,Component.literal(String.format(Locale.ROOT,"Missile #%d / %.0f m / Y %.0f",flight.id(),distance,flight.position().y)),mouseX,mouseY);
+            }
             if (s.targetMode() == TargetMode.COORDINATES && s.targetCoordinates() != null) {
                 double dx = s.targetCoordinates().x - s.x(), dz = s.targetCoordinates().z - s.z();
                 double scale = radius / Math.max(range, Math.sqrt(dx * dx + dz * dz));
@@ -199,6 +212,12 @@ public final class TacticalScreen extends Screen {
             if (hover != null) g.renderTooltip(font, Component.literal(hover.name() + " / " + Math.round(hover.distance()) + " m"), mouseX, mouseY);
         }
         g.drawString(font, Component.translatable("screen.iruxfk2000.drive_help"), radarX, height - 17, 0xff8da69b, false);
+        if (s != null && s.targetMode() == TargetMode.COORDINATES && mouseX >= radarX && mouseX < radarX + radarSize
+                && mouseY >= radarY && mouseY < radarY + radarSize) {
+            double x = s.x() + (mouseX - radarX - radarSize / 2) * (double)viewRadius / radius;
+            double z = s.z() + (mouseY - radarY - radarSize / 2) * (double)viewRadius / radius;
+            g.renderTooltip(font, Component.translatable("screen.iruxfk2000.map_point", (int)Math.floor(x), (int)Math.floor(z)), mouseX, mouseY);
+        }
         super.render(g, mouseX, mouseY, partialTick);
         if (mouseX >= radarX + radarSize - 13 && mouseX <= radarX + radarSize
                 && mouseY >= radarY && mouseY <= radarY + 14)
@@ -241,6 +260,15 @@ public final class TacticalScreen extends Screen {
         VehicleStatus s = ClientHooks.status();
         if (button == 0 && s != null && mouseX >= radarX && mouseX <= radarX + radarSize
                 && mouseY >= radarY && mouseY <= radarY + radarSize) {
+            if (s.targetMode() == TargetMode.COORDINATES) {
+                int radius = radarSize / 2 - 9;
+                double dx = (mouseX - (radarX + radarSize / 2)) / radius;
+                double dz = (mouseY - (radarY + radarSize / 2)) / radius;
+                if (dx * dx + dz * dz <= 1) {
+                    RadarMaps.selectPoint(vehicleId, s.x() + dx * viewRadius, s.z() + dz * viewRadius);
+                    return true;
+                }
+            }
             RadarContact contact = nearestContact(s, mouseX, mouseY);
             if (contact != null) {
                 selectedId = contact.entityId();

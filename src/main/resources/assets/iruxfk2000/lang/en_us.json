@@ -77,5 +77,7 @@
   "screen.iruxfk2000.zoom_radius": "View ±%s m",
   "screen.iruxfk2000.engagement_range": "Firing range (m)",
   "button.iruxfk2000.apply_range": "Apply",
-  "screen.iruxfk2000.terrain_unknown": "Dark areas: terrain not loaded or not observed yet. The map retains its last observation at the same position and zoom."
+  "screen.iruxfk2000.terrain_unknown": "Dark areas: terrain not loaded or not observed yet. The map retains its last observation at the same position and zoom.",
+  "screen.iruxfk2000.map_point": "Select ground: X %s / Z %s (left click)",
+  "screen.iruxfk2000.map_point_unknown": "Unknown terrain or out of range. Explore this area or enter X/Y/Z."
 }

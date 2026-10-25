@@ -35,6 +35,14 @@ public final class VehicleGeometry {
                 (hingeZ + relativeZ * Math.cos(angle) - relativeY * Math.sin(angle)) * SCALE);
     }
 
+    public static AABB segmentBounds(Vec3 origin, float yaw, double offset, double length) {
+        Vec3 center = localToWorld(origin, yaw, new Vec3(0, 0, offset));
+        double angle = Math.toRadians(yaw);
+        double x = (Math.abs(Math.cos(angle)) * BODY_WIDTH + Math.abs(Math.sin(angle)) * length) / 2;
+        double z = (Math.abs(Math.sin(angle)) * BODY_WIDTH + Math.abs(Math.cos(angle)) * length) / 2;
+        return new AABB(center.x - x, center.y, center.z - z, center.x + x, center.y + BODY_HEIGHT, center.z + z);
+    }
+
     /** Vanilla collisions require an AABB: rotate the rectangular chassis, not a square footprint. */
     public static AABB bodyBounds(Vec3 position, float yawDegrees) {
         double yaw = Math.toRadians(yawDegrees);

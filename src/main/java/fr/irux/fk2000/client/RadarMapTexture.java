@@ -47,10 +47,10 @@ public final class RadarMapTexture implements AutoCloseable {
     }
 
     void render(GuiGraphics graphics, int cx, int cy, int pixelRadius, int viewRadius, VehicleStatus status) {
-        if (location == null || status == null || radius != viewRadius) return;
-        int size = pixelRadius * 2;
-        int x = cx - pixelRadius + (int) Math.round((centerX - status.x()) / viewRadius * pixelRadius);
-        int y = cy - pixelRadius + (int) Math.round((centerZ - status.z()) / viewRadius * pixelRadius);
+        if (location == null || status == null) return;
+        int size = Math.max(1, (int)Math.round(pixelRadius * 2.0 * radius / viewRadius));
+        int x = cx - size / 2 + (int) Math.round((centerX - status.x()) / viewRadius * pixelRadius);
+        int y = cy - size / 2 + (int) Math.round((centerZ - status.z()) / viewRadius * pixelRadius);
         graphics.enableScissor(cx - pixelRadius, cy - pixelRadius, cx + pixelRadius, cy + pixelRadius);
         graphics.blit(location, x, y, 0f, 0f, size, size, size, size);
         graphics.disableScissor();

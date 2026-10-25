@@ -131,14 +131,19 @@ public class MissileEntity extends Entity {
 
     public FlightState getFlightState() { return FlightState.fromId(entityData.get(STATE)); }
     public boolean getMotorActive() { return getFlightState().motorActive(); }
+    public UUID getLauncherUUID() { return launcherId; }
+
     public TerminationReason getTerminationReason() { return terminationReason; }
     public Vec3 getCorrection() {
         return new Vec3(entityData.get(CORRECTION_X), entityData.get(CORRECTION_Y), entityData.get(CORRECTION_Z));
     }
 
+    private long lastClientPoseTick = Long.MIN_VALUE;
+
     @Override
     public void tick() {
         super.tick();
+        if (level().isClientSide) lastClientPoseTick = level().getGameTime();
         if (level().isClientSide) {
             interpolateClientTransform();
             drawFlightEffects();
@@ -376,6 +381,7 @@ public class MissileEntity extends Entity {
     }
 
     private boolean canHit(Entity entity) {
+        if (entity instanceof net.minecraftforge.entity.PartEntity<?> part) return canHit(part.getParent());
         if (entity == this || entity instanceof MissileEntity || entity instanceof WreckEntity
                 || !entity.isAlive() || entity.isSpectator() || !entity.isPickable()) return false;
         if (entity.getUUID().equals(ownerId) || entity.getUUID().equals(launcherId)) return false;
@@ -421,6 +427,7 @@ public class MissileEntity extends Entity {
         DamageSource source = level().registryAccess().registryOrThrow(Registries.DAMAGE_TYPE).getHolder(sbwExplosion)
                 .<DamageSource>map(holder -> new DamageSource(holder, this, owner))
                 .orElseGet(() -> damageSources().explosion(this, owner));
+        java.util.Set<UUID> damaged = new java.util.HashSet<>();
         for (Entity entity : level().getEntities(this, getBoundingBox().inflate(radius), this::canHit)) {
             AABB box = entity.getBoundingBox();
             Vec3 closest = new Vec3(Mth.clamp(getX(), box.minX, box.maxX),
@@ -431,7 +438,8 @@ public class MissileEntity extends Entity {
             if (cover.getType() != HitResult.Type.MISS && cover.getLocation().distanceTo(closest) > .25) continue;
             double falloff = 1 - Math.max(0, distance - ModConfig.PROXIMITY_FUSE.get())
                     / Math.max(.1, radius - ModConfig.PROXIMITY_FUSE.get());
-            entity.hurt(source, (float) (ModConfig.MISSILE_DAMAGE.get() * falloff));
+            Entity recipient = entity instanceof net.minecraftforge.entity.PartEntity<?> part ? part.getParent() : entity;
+            if (damaged.add(recipient.getUUID())) recipient.hurt(source, (float) (ModConfig.MISSILE_DAMAGE.get() * falloff));
         }
     }
 
@@ -504,6 +512,12 @@ public class MissileEntity extends Entity {
 
     @Override
     public void lerpTo(double x, double y, double z, float yaw, float pitch, int steps, boolean teleport) {
+        // A client optimizer may skip entity ticks while network packets still arrive.
+        // Apply the authoritative transform in that case; never simulate server physics here.
+        if (level().isClientSide && (lastClientPoseTick == Long.MIN_VALUE
+                || level().getGameTime() < lastClientPoseTick || level().getGameTime() - lastClientPoseTick > 2)) {
+            setPos(x,y,z); setYRot(yaw); setXRot(pitch);
+        }
         interpolationX = x;
         interpolationY = y;
         interpolationZ = z;

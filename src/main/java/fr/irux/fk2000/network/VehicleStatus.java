@@ -12,9 +12,10 @@ public record VehicleStatus(int vehicleId, boolean engine, boolean radar, boolea
     boolean autoFire, int missiles, float health, float maxHealth, float speed, float launcher, int targetId,
     double x, double y, double z, double radarRange, TargetMode targetMode,
     Vec3 targetCoordinates, TubeCapMode tubeCapMode, AutoFireMode autoFireMode,
-    List<Integer> selectedTargetIds, List<RadarContact> contacts) {
+    List<Integer> selectedTargetIds, List<RadarContact> contacts, List<MissileTelemetry.Track> flights) {
     public VehicleStatus {
         selectedTargetIds = List.copyOf(selectedTargetIds);
         contacts = List.copyOf(contacts);
+        flights = List.copyOf(flights);
     }
 }

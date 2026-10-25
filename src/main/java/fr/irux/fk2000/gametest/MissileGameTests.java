@@ -192,21 +192,25 @@ public final class MissileGameTests {
         });
     }
 
-    @GameTest(template = "empty", timeoutTicks = 240)
+    @GameTest(template = "empty", timeoutTicks = 240, batch = "mountain")
     public static void guidanceClimbsOverMountainBeforeIntercept(GameTestHelper helper) {
+        // Run above natural terrain: overshooting the artificial ridge must not
+        // collide with the underground arena's unrelated stone roof.
+        int skyOffset = helper.getLevel().getMaxBuildHeight() - 120
+                - helper.absolutePos(BlockPos.ZERO).getY();
         // The ridge is taller than the direct path and the complete cold-ejection arc.
         // It spans the arena's width, so reaching the target requires climbing above it.
         for (int x = 14; x <= 17; x++) {
             for (int y = 2; y <= 44; y++) {
-                for (int z = 1; z <= 30; z++) helper.setBlock(new BlockPos(x, y, z), Blocks.STONE);
+                for (int z = 1; z <= 30; z++) helper.setBlock(new BlockPos(x, y + skyOffset, z), Blocks.STONE);
             }
         }
-        Pig target = helper.spawnWithNoFreeWill(EntityType.PIG, new Vec3(26.5, 30, 7.5));
+        Pig target = helper.spawnWithNoFreeWill(EntityType.PIG, new Vec3(26.5, 30 + skyOffset, 7.5));
         target.setNoGravity(true);
         float initialHealth = target.getHealth();
         ServerPlayer owner = VehicleGameTests.onlinePlayerFixture(helper);
-        MissileEntity missile = missile(helper, new Vec3(4.5, 3, 7.5), target, owner);
-        double ridgeTop = helper.absolutePos(new BlockPos(14, 45, 7)).getY();
+        MissileEntity missile = missile(helper, new Vec3(4.5, 3 + skyOffset, 7.5), target, owner);
+        double ridgeTop = helper.absolutePos(new BlockPos(14, 45 + skyOffset, 7)).getY();
         Vec3 launchPosition = missile.position();
         Vec3 corridor = target.position().subtract(launchPosition).multiply(1, 0, 1).normalize();
         boolean[] crossedAbove = {false};
@@ -223,8 +227,8 @@ public final class MissileGameTests {
                     "Missile must reach the target beyond the mountain: " + diagnostic(missile));
             helper.assertTrue(crossedAbove[0], "Missile must physically cross above the mountain instead of striking or bypassing it: " + diagnostic(missile));
             helper.assertTrue(!target.isAlive() || target.getHealth() < initialHealth,
-                    "The target beyond the intact mountain must receive server-side damage");
-            helper.assertBlockPresent(Blocks.STONE, new BlockPos(14, 44, 7));
+                    "The target beyond the intact mountain must receive server-side damage: " + diagnostic(missile) + ", target=" + target.position() + ", health=" + target.getHealth());
+            helper.assertBlockPresent(Blocks.STONE, new BlockPos(14, 44 + skyOffset, 7));
             target.discard();
             VehicleGameTests.removePlayerFixture(helper, owner);
             helper.succeed();

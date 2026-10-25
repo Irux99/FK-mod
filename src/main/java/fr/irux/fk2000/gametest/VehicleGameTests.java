@@ -173,7 +173,7 @@ public final class VehicleGameTests {
         Player owner = helper.makeMockSurvivalPlayer();
         vehicle.setOwnerUUID(owner.getUUID());
         vehicle.setYRot(0);
-        helper.assertTrue(Math.abs(vehicle.getBoundingBox().getZsize() - VehicleGeometry.BODY_LENGTH) < 0.01,
+        helper.assertTrue(Math.abs(java.util.Arrays.stream(vehicle.getParts()).map(Entity::getBoundingBox).reduce(net.minecraft.world.phys.AABB::minmax).orElseThrow().getZsize() - VehicleGeometry.BODY_LENGTH) < 0.01,
                 "The enlarged model must have a twelve-block chassis hitbox, not its former square hitbox");
         helper.assertTrue(Math.abs(vehicle.getBoundingBox().getXsize() - VehicleGeometry.BODY_WIDTH) < 0.01,
                 "The narrow side of the enlarged chassis must follow the real body width");
@@ -187,11 +187,20 @@ public final class VehicleGameTests {
                 "The driver must be inside the low front cabin");
         vehicle.setYRot(90);
         vehicle.positionRider(owner);
-        helper.assertTrue(Math.abs(vehicle.getBoundingBox().getXsize() - VehicleGeometry.BODY_LENGTH) < 0.01,
+        helper.assertTrue(Math.abs(java.util.Arrays.stream(vehicle.getParts()).map(Entity::getBoundingBox).reduce(net.minecraft.world.phys.AABB::minmax).orElseThrow().getXsize() - VehicleGeometry.BODY_LENGTH) < 0.01,
                 "Turning must rotate the chassis collision footprint immediately");
         helper.assertTrue(owner.getX() < vehicle.getX() - 4,
                 "The driver's seat must rotate together with the cab");
         owner.stopRiding();
+        vehicle.setYRot(45);
+        var broad = VehicleGeometry.bodyBounds(vehicle.position(),45);
+        var corner = new net.minecraft.world.phys.Vec3(broad.maxX - .1, vehicle.getY() + 1, broad.maxZ - .1);
+        helper.assertTrue(!vehicle.getBoundingBox().contains(corner)
+                && java.util.Arrays.stream(vehicle.getParts()).noneMatch(part -> part.getBoundingBox().contains(corner)),
+                "Empty diagonal corners must not belong to any chassis hitbox");
+        for (int i = 0; i < 120; i++) vehicle.setYRot(i * 17);
+        helper.assertTrue(vehicle.getBoundingBox().getXsize() < 4.1 && vehicle.getParts().length == 8,
+                "Repeated rotations must retain eight bounded chassis sections");
         float originalHealth = vehicle.getHealth();
         helper.assertTrue(originalHealth == vehicle.getMaxHealth() && originalHealth >= 240,
                 "A newly deployed vehicle must start with its full armored health pool");

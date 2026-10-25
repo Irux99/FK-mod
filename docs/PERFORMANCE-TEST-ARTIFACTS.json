@@ -1,0 +1,59 @@
+[
+  {
+    "id": "75GMC9GD",
+    "name": "CreateBetterFps 1.1.2",
+    "version_number": "1.1.2",
+    "files": [
+      {
+        "id": "O3cIKCYC",
+        "hashes": {
+          "sha512": "44ce50b3180f76e383c3d7f2ef96dfe62168b2e9a95b78c65e1d835f477ca7cd307ac2a05486ddf728739061d089ae158bf794826cbae7d20253b701f1c17020",
+          "sha1": "e3906e1b5cc33ad9ff930fc65b316564a3059fbf"
+        },
+        "url": "https://cdn.modrinth.com/data/lMYIHZNH/versions/75GMC9GD/createbetterfps-1.20.1-1.1.2.jar",
+        "filename": "createbetterfps-1.20.1-1.1.2.jar",
+        "primary": true,
+        "size": 25214,
+        "file_type": null
+      }
+    ]
+  },
+  {
+    "id": "8amzvn9x",
+    "name": "Create 6.0.8 for mc1.20.1",
+    "version_number": "mc1.20.1-6.0.8",
+    "files": [
+      {
+        "id": "WyoEI6Wi",
+        "hashes": {
+          "sha1": "b13d912b9247a38d66d11598c121442585a1c1e9",
+          "sha512": "5b51f5d31437d9bfbf221b67459abd87260d284874e1e23b7ed1d522b23a48059a3b1d2c1c541428da35dc6be15561b4f3c7f36aac6df3a0e8db6a278f6b0316"
+        },
+        "url": "https://cdn.modrinth.com/data/LNytGWDc/versions/8amzvn9x/create-1.20.1-6.0.8.jar",
+        "filename": "create-1.20.1-6.0.8.jar",
+        "primary": true,
+        "size": 19170905,
+        "file_type": null
+      }
+    ]
+  },
+  {
+    "id": "HUUJcFnt",
+    "name": "1.11.3-1.20.1 - Forge",
+    "version_number": "1.11.3",
+    "files": [
+      {
+        "id": "RzqAFJAg",
+        "hashes": {
+          "sha1": "d3c513e88ef9f5cdd7e27d17d923d4dca69c6d55",
+          "sha512": "be5be53897ae7403a202e4b0b094701bcc4ecdb94afcf2ea144cd07d9a4553a1fc6a88917732a72c477d01c33583162cffb9c4a19d259089deb018878eec1da8"
+        },
+        "url": "https://cdn.modrinth.com/data/NNAgCjsB/versions/HUUJcFnt/entityculling-forge-1.11.3-mc1.20.1.jar",
+        "filename": "entityculling-forge-1.11.3-mc1.20.1.jar",
+        "primary": true,
+        "size": 1515076,
+        "file_type": null
+      }
+    ]
+  }
+]

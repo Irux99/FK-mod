@@ -31,18 +31,46 @@ import java.util.function.Supplier;
 /** Small snapshots of observed terrain around the authorized remote truck; sampling never loads a chunk. */
 @Mod.EventBusSubscriber(modid = IruxFk2000Mod.MOD_ID)
 public final class RadarMaps {
-    public static final int SIZE = 64, PIXELS = SIZE * SIZE, MIN_RADIUS = 32, MAX_RADIUS = 2048;
+    public static final int SIZE = 128, PIXELS = SIZE * SIZE, MIN_RADIUS = 32, MAX_RADIUS = 2048;
     public static final int UNKNOWN_COLOR = 0xff08131a;
+    private static final Map<UUID, Long> LAST_POINT = new HashMap<>();
     private static final Map<UUID, Long> LAST_REQUEST = new HashMap<>();
     private static final SimpleChannel CHANNEL = NetworkRegistry.newSimpleChannel(
-            new ResourceLocation(IruxFk2000Mod.MOD_ID, "radar_maps"), () -> "1", "1"::equals, "1"::equals);
+            new ResourceLocation(IruxFk2000Mod.MOD_ID, "radar_maps"), () -> "2", "2"::equals, "2"::equals);
     private RadarMaps() {}
 
     public static void register() {
         CHANNEL.registerMessage(0, Request.class, Request::encode, Request::decode, Request::handle,
                 Optional.of(NetworkDirection.PLAY_TO_SERVER));
+        CHANNEL.registerMessage(2, Point.class, Point::encode, Point::decode, Point::handle,
+                Optional.of(NetworkDirection.PLAY_TO_SERVER));
         CHANNEL.registerMessage(1, Snapshot.class, Snapshot::encode, Snapshot::decode, Snapshot::handle,
                 Optional.of(NetworkDirection.PLAY_TO_CLIENT));
+    }
+
+    public static void selectPoint(int vehicleId, double x, double z) {
+        CHANNEL.sendToServer(new Point(vehicleId, x, z));
+    }
+
+    private record Point(int vehicleId, double x, double z) {
+        private void encode(FriendlyByteBuf b) { b.writeVarInt(vehicleId).writeDouble(x).writeDouble(z); }
+        private static Point decode(FriendlyByteBuf b) { return new Point(b.readVarInt(), b.readDouble(), b.readDouble()); }
+        private void handle(Supplier<NetworkEvent.Context> context) {
+            context.get().enqueueWork(() -> {
+                ServerPlayer player = context.get().getSender();
+                if (player == null || !Double.isFinite(x) || !Double.isFinite(z) || Math.abs(x) > 30000000 || Math.abs(z) > 30000000) return;
+                Fk2000Entity vehicle = ModNetwork.authorizedVehicle(player);
+                if (vehicle == null || vehicle.getId() != vehicleId || vehicle.getTargetMode() != fr.irux.fk2000.radar.TargetMode.COORDINATES) return;
+                long now = player.serverLevel().getGameTime();
+                Long last = LAST_POINT.get(player.getUUID());
+                if (last != null && now >= last && now - last < 5) return;
+                LAST_POINT.put(player.getUUID(), now);
+                Integer height = TerrainAtlas.get(player.serverLevel()).height((int)Math.floor(x), (int)Math.floor(z));
+                if (height == null || !vehicle.setTargetCoordinates(new net.minecraft.world.phys.Vec3(Math.floor(x) + .5, height + 1, Math.floor(z) + .5)))
+                    player.displayClientMessage(net.minecraft.network.chat.Component.translatable("screen.iruxfk2000.map_point_unknown"), true);
+            });
+            context.get().setPacketHandled(true);
+        }
     }
 
     public static void request(int vehicleId, int radius) {
@@ -67,32 +95,33 @@ public final class RadarMaps {
     public static int[] sample(ServerLevel level, double centerX, double centerZ, int radius) {
         if (!Double.isFinite(centerX) || !Double.isFinite(centerZ) || radius < MIN_RADIUS || radius > MAX_RADIUS)
             throw new IllegalArgumentException("Invalid radar map bounds");
+        TerrainAtlas atlas = TerrainAtlas.get(level);
+        // Capture a detailed neighbourhood once; retain it across zoom and restarts.
+        int chunkX = (int)Math.floor(centerX) >> 4, chunkZ = (int)Math.floor(centerZ) >> 4;
+        for (int dz = -1; dz <= 1; dz++) for (int dx = -1; dx <= 1; dx++)
+            atlas.observe(level, chunkX + dx, chunkZ + dz);
         int[] colors = new int[PIXELS];
         for (int y = 0; y < SIZE; y++) for (int x = 0; x < SIZE; x++) {
-            int columnX = (int) Math.floor(centerX + ((x + .5) / SIZE * 2 - 1) * radius);
-            int columnZ = (int) Math.floor(centerZ + ((y + .5) / SIZE * 2 - 1) * radius);
-            int index = y * SIZE + x;
-            colors[index] = UNKNOWN_COLOR;
-            // Query resident chunks without completing pending generation futures.
-            var chunk = level.getChunkSource().getChunkNow(columnX >> 4, columnZ >> 4);
-            if (chunk == null) continue;
-            int top = chunk.getHeight(Heightmap.Types.MOTION_BLOCKING_NO_LEAVES, columnX & 15, columnZ & 15);
-            if (top < level.getMinBuildHeight()) continue;
-            BlockPos surface = new BlockPos(columnX, top, columnZ);
-            MapColor material = chunk.getBlockState(surface).getMapColor(level, surface);
-            if (material == MapColor.NONE) continue;
-            int rgb = material.col;
-            // The subdued terrain remains readable behind bright radar contacts.
-            int red = (rgb >> 16 & 255) * 62 / 100;
-            int green = (rgb >> 8 & 255) * 70 / 100;
-            int blue = (rgb & 255) * 62 / 100;
-            colors[index] = 0xff000000 | red << 16 | green << 8 | blue;
+            int columnX = (int)Math.floor(centerX + ((x + .5) / SIZE * 2 - 1) * radius);
+            int columnZ = (int)Math.floor(centerZ + ((y + .5) / SIZE * 2 - 1) * radius);
+            int color = atlas.observeColumn(level, columnX, columnZ);
+            // At overview scale a pixel spans several chunks. Include observed
+            // columns inside that footprint rather than missing the entire base.
+            if (color == UNKNOWN_COLOR && radius * 2 > SIZE) {
+                int half = Math.max(1, radius / SIZE);
+                outer: for (int dz = -half; dz <= half; dz += Math.max(1, half))
+                    for (int dx = -half; dx <= half; dx += Math.max(1, half)) {
+                        color = atlas.color(columnX + dx, columnZ + dz);
+                        if (color != UNKNOWN_COLOR) break outer;
+                    }
+            }
+            colors[y * SIZE + x] = color;
         }
         return colors;
     }
 
-    @SubscribeEvent public static void logout(PlayerEvent.PlayerLoggedOutEvent event) { LAST_REQUEST.remove(event.getEntity().getUUID()); }
-    @SubscribeEvent public static void stopped(ServerStoppedEvent event) { LAST_REQUEST.clear(); }
+    @SubscribeEvent public static void logout(PlayerEvent.PlayerLoggedOutEvent event) { LAST_REQUEST.remove(event.getEntity().getUUID()); LAST_POINT.remove(event.getEntity().getUUID()); }
+    @SubscribeEvent public static void stopped(ServerStoppedEvent event) { LAST_REQUEST.clear(); LAST_POINT.clear(); }
 
     private record Request(int vehicleId, int radius) {
         private void encode(FriendlyByteBuf buffer) { buffer.writeVarInt(vehicleId).writeVarInt(radius); }
@@ -113,7 +142,7 @@ public final class RadarMaps {
             int vehicle = buffer.readVarInt(), radius = buffer.readVarInt();
             double x = buffer.readDouble(), z = buffer.readDouble();
             int size = buffer.readVarInt();
-            if (size != PIXELS) throw new IllegalArgumentException("Radar terrain snapshot must contain exactly 4096 pixels");
+            if (size != PIXELS) throw new IllegalArgumentException("Radar terrain snapshot must contain exactly 16384 pixels");
             int[] pixels = new int[size];
             for (int i = 0; i < size; i++) pixels[i] = buffer.readInt();
             return new Snapshot(vehicle, radius, x, z, pixels);

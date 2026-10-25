@@ -1,6 +1,15 @@
 # Télécharger Irux FK-2000
 
-## Version 0.4.0 — tir distant, radar et effets
+## Version d'essai 0.5.0-preview1
+
+- [Télécharger le mod d'essai](https://github.com/Irux99/FK-mod/raw/refs/heads/main/downloads/iruxfk2000-0.5.0-preview1.jar)
+- [Améliorations et validations restantes](../docs/VALIDATION-0.5.md)
+
+Collisions du camion découpées, carte détaillée avec relief et mémoire du terrain au dézoom, sélection au sol par clic en mode Coordonnées, missiles visibles sur la carte et nouvelles icônes. Caisse orange conservée. Intégration optionnelle des listes d'exclusion Entity Culling et secours sur les positions réseau. Même JAR requis sur le client et le serveur, protocole 4.
+
+Cette préversion est fournie à la demande de l'utilisateur avant la validation complète du pack de performances. Conserver une sauvegarde du monde de test et garder le JAR 0.4 pour revenir à la version précédente.
+
+## Historique 0.4.0 — tir distant, radar et effets
 
 - [Télécharger le mod 0.4.0](https://github.com/Irux99/FK-mod/raw/refs/heads/main/downloads/iruxfk2000-0.4.0.jar)
 - [Projet Java et JAR 0.4.0](https://github.com/Irux99/FK-mod/raw/refs/heads/main/downloads/irux-fk2000-0.4.0-project.zip)

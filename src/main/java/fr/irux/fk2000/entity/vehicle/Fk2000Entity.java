@@ -322,19 +322,61 @@ public class Fk2000Entity extends PathfinderMob implements OwnableEntity {
                 Mth.lerp(partialTick, zo, getZ()));
     }
 
+    private final ChassisPart[] chassisParts = java.util.stream.IntStream.range(0, 8)
+            .mapToObj(i -> new ChassisPart(this, i)).toArray(ChassisPart[]::new);
+
+    @Override public boolean canCollideWith(Entity other) {
+        if (other instanceof net.minecraftforge.entity.PartEntity<?> part && part.getParent() == this) return false;
+        return super.canCollideWith(other);
+    }
+    @Override public boolean isMultipartEntity() { return true; }
+    @Override public ChassisPart[] getParts() { return chassisParts; }
+    @Override public void setId(int id) {
+        super.setId(id);
+        if (chassisParts != null) for (int i = 0; i < chassisParts.length; i++) chassisParts[i].setId(id + i + 1);
+    }
+    private void updateParts() {
+        if (chassisParts != null) for (ChassisPart part : chassisParts) part.follow();
+    }
     @Override
-    protected AABB makeBoundingBox() { return VehicleGeometry.bodyBounds(position(), getYRot()); }
+    protected AABB makeBoundingBox() { return VehicleGeometry.segmentBounds(position(), getYRot(), 0, 1.5); }
+
+    private Vec3 clipChassis(Vec3 motion, Vec3 offset) {
+        Vec3 result = motion;
+        for (int i = 0; i < 8; i++) {
+            AABB box = VehicleGeometry.segmentBounds(position(), getYRot(), -5.25 + i * 1.5, 1.5).move(offset);
+            result = Entity.collideBoundingBox(this, result, box, level(), level().getEntityCollisions(this, box.expandTowards(result)));
+        }
+        return result;
+    }
+
+    @Override public void move(MoverType type, Vec3 motion) {
+        if (type != MoverType.SELF || noPhysics || level().isClientSide) { super.move(type, motion); return; }
+        Vec3 resolved = clipChassis(motion, Vec3.ZERO);
+        if (onGround() && (Math.abs(resolved.x - motion.x) > 1e-6 || Math.abs(resolved.z - motion.z) > 1e-6)) {
+            Vec3 up = clipChassis(new Vec3(0, maxUpStep(), 0), Vec3.ZERO);
+            Vec3 across = clipChassis(new Vec3(motion.x, 0, motion.z), up);
+            Vec3 down = clipChassis(new Vec3(0, motion.y - up.y, 0), up.add(across));
+            Vec3 step = up.add(across).add(down);
+            if (step.horizontalDistanceSqr() > resolved.horizontalDistanceSqr() + 1e-8) resolved = step;
+        }
+        super.move(type, resolved);
+        horizontalCollision |= Math.abs(resolved.x - motion.x) > 1e-6 || Math.abs(resolved.z - motion.z) > 1e-6;
+        if (motion.y < 0 && resolved.y > motion.y + 1e-6) { verticalCollision = true; setOnGround(true); }
+        updateParts();
+    }
 
     @Override
     public void setYRot(float yaw) {
         super.setYRot(yaw);
         setBoundingBox(makeBoundingBox());
+        updateParts();
     }
 
     @Override
     public AABB getBoundingBoxForCulling() {
         // The elevated radar and raised launcher extend above the solid chassis.
-        AABB body = getBoundingBox();
+        AABB body = VehicleGeometry.bodyBounds(position(), getYRot());
         return new AABB(body.minX, body.minY, body.minZ, body.maxX, body.minY + 8.0, body.maxZ);
     }
 
@@ -460,11 +502,22 @@ public class Fk2000Entity extends PathfinderMob implements OwnableEntity {
         level().playSound(null, blockPosition(), ModSounds.RELOAD.get(), SoundSource.NEUTRAL, 1.0F, 1.0F);
     }
 
+    @Override public void lerpTo(double x, double y, double z, float yaw, float pitch, int steps, boolean teleport) {
+        super.lerpTo(x,y,z,yaw,pitch,steps,teleport);
+        if (level().isClientSide && (lastClientPoseTick == Long.MIN_VALUE
+                || level().getGameTime() < lastClientPoseTick || level().getGameTime() - lastClientPoseTick > 2)) {
+            setPos(x,y,z); setYRot(yaw); setXRot(pitch); updateParts();
+        }
+    }
+
+    private long lastClientPoseTick = Long.MIN_VALUE;
+
     @Override
     public void tick() {
         previousSuspension = entityData.get(SUSPENSION);
         for (int tube = 0; tube < 6; tube++) previousCapProgress[tube] = entityData.get(CAP_PROGRESS.get(tube));
         super.tick();
+        if (level().isClientSide) lastClientPoseTick = level().getGameTime();
         if (!level().isClientSide && isAlive()) {
             FkChunkLoading.refreshVehicle(this);
             if (launchCooldown > 0) launchCooldown--;
@@ -475,6 +528,7 @@ public class Fk2000Entity extends PathfinderMob implements OwnableEntity {
             tickLaunchMechanics();
         }
         // Keep the renderer and mounted passenger oriented with the chassis.
+        updateParts();
         yBodyRot = getYRot();
         yHeadRot = getYRot();
     }
@@ -508,7 +562,8 @@ public class Fk2000Entity extends PathfinderMob implements OwnableEntity {
         AABB nextBounds = VehicleGeometry.bodyBounds(position(), nextYaw);
         // Turning cannot sweep the long rear chassis through a cliff or a wall.
         if (rotation != 0 && isLoadedFootprint(nextBounds)
-                && level().noCollision(this, nextBounds.deflate(1.0E-5))) {
+                && java.util.stream.IntStream.range(0, 8).allMatch(i -> level().noCollision(this,
+                        VehicleGeometry.segmentBounds(position(), nextYaw, -5.25 + i * 1.5, 1.5).deflate(1e-5)))) {
             setYRot(nextYaw);
         }
         double yaw = Math.toRadians(getYRot());
@@ -516,7 +571,7 @@ public class Fk2000Entity extends PathfinderMob implements OwnableEntity {
         double vertical = isNoGravity() ? oldMotion.y : Math.max(-1.5, oldMotion.y - 0.08);
         if (onGround() && vertical < 0) vertical = -0.08;
         Vec3 motion = new Vec3(-Math.sin(yaw) * speed, vertical, Math.cos(yaw) * speed);
-        if (!isLoadedFootprint(getBoundingBox().expandTowards(motion).inflate(0, VehicleGeometry.MAX_STEP, 0))) {
+        if (!isLoadedFootprint(VehicleGeometry.bodyBounds(position(), getYRot()).expandTowards(motion).inflate(0, VehicleGeometry.MAX_STEP, 0))) {
             // A remote command never creates tickets or pulls neighboring chunks into memory.
             // Check before vanilla collision queries, which may otherwise request terrain.
             speed = 0;

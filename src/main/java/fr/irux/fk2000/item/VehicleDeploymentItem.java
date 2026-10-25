@@ -26,7 +26,7 @@ public final class VehicleDeploymentItem extends Item {
         pos = pos.add(-Math.sin(yaw) * offset, 0, Math.cos(yaw) * offset);
         vehicle.moveTo(pos.x, pos.y, pos.z, context.getPlayer().getYRot(), 0);
         vehicle.setOwnerUUID(context.getPlayer().getUUID());
-        var bounds = vehicle.getBoundingBox();
+        var bounds = VehicleGeometry.bodyBounds(vehicle.position(), vehicle.getYRot());
         ServerLevel level = (ServerLevel) context.getLevel();
         for (int x = (int) Math.floor(bounds.minX) >> 4; x <= (int) Math.floor(bounds.maxX) >> 4; x++) {
             for (int z = (int) Math.floor(bounds.minZ) >> 4; z <= (int) Math.floor(bounds.maxZ) >> 4; z++) {
@@ -36,8 +36,8 @@ public final class VehicleDeploymentItem extends Item {
                 }
             }
         }
-        if (!context.getLevel().getWorldBorder().isWithinBounds(vehicle.getBoundingBox())
-                || !context.getLevel().noCollision(vehicle) || !context.getLevel().addFreshEntity(vehicle)) {
+        if (!context.getLevel().getWorldBorder().isWithinBounds(bounds)
+                || java.util.Arrays.stream(vehicle.getParts()).anyMatch(part -> !context.getLevel().noCollision(vehicle, part.getBoundingBox())) || !context.getLevel().addFreshEntity(vehicle)) {
             vehicle.discard();
             return InteractionResult.FAIL;
         }

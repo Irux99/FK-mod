@@ -38,7 +38,7 @@ import java.util.function.Supplier;
 @Mod.EventBusSubscriber(modid = IruxFk2000Mod.MOD_ID)
 public final class ModNetwork {
     private static final SimpleChannel CHANNEL = NetworkRegistry.newSimpleChannel(
-        new ResourceLocation(IruxFk2000Mod.MOD_ID, "control"), () -> "3", "3"::equals, "3"::equals);
+        new ResourceLocation(IruxFk2000Mod.MOD_ID, "control"), () -> "4", "4"::equals, "4"::equals);
     private static final Map<UUID, UUID> SESSIONS = new HashMap<>();
     private static final Map<UUID, Rate> RATES = new HashMap<>();
     public enum Command { DRIVE, ENGINE, RADAR, AUTO_ACQUIRE, AUTO_FIRE, SELECT_TARGET, FIRE, RELOAD, CYCLE_CAP_MODE, CYCLE_FIRE_MODE, CLOSE }
@@ -119,7 +119,7 @@ public final class ModNetwork {
         List<RadarContact> contacts = v.getRadarContacts().stream().limit(32).toList();
         VehicleStatus status = new VehicleStatus(v.getId(), v.isEngineOn(), v.isRadarEnabled(), v.isAutoAcquire(), v.isAutoFire(),
             v.getMissileCount(), v.getHealth(), v.getMaxHealth(), v.getSpeed(), v.getLauncherProgress(), v.getLockedTargetId(),
-            v.getX(), v.getY(), v.getZ(), v.getEngagementRange(), v.getTargetMode(), v.getTargetCoordinates(), v.getTubeCapMode(), v.getAutoFireMode(), v.getSelectedTargetIds().stream().limit(32).toList(), contacts);
+            v.getX(), v.getY(), v.getZ(), v.getEngagementRange(), v.getTargetMode(), v.getTargetCoordinates(), v.getTubeCapMode(), v.getAutoFireMode(), v.getSelectedTargetIds().stream().limit(32).toList(), contacts, MissileTelemetry.scan(v));
         CHANNEL.send(PacketDistributor.PLAYER.with(() -> player), new StatusPacket(status));
     }
     private record ControlPacket(Command action, float throttle, float steering, boolean brake, int targetId) {
@@ -228,6 +228,12 @@ public final class ModNetwork {
                 String name = contact.name(); b.writeUtf(name.substring(0, Math.min(name.length(), 128)), 128);
                 b.writeDouble(contact.x()); b.writeDouble(contact.y()); b.writeDouble(contact.z()); b.writeDouble(contact.distance());
             }
+            b.writeVarInt(s.flights().size());
+            for (var flight : s.flights()) {
+                b.writeVarInt(flight.id());
+                b.writeDouble(flight.position().x); b.writeDouble(flight.position().y); b.writeDouble(flight.position().z);
+                b.writeDouble(flight.velocity().x); b.writeDouble(flight.velocity().y); b.writeDouble(flight.velocity().z);
+            }
         }
         static StatusPacket decode(FriendlyByteBuf b) {
             int id = b.readVarInt(); boolean engine = b.readBoolean(), radar = b.readBoolean(), acquire = b.readBoolean(), fire = b.readBoolean();
@@ -245,7 +251,12 @@ public final class ModNetwork {
             int size = b.readVarInt(); if (size < 0 || size > 32) throw new IllegalArgumentException("Invalid radar contact count");
             List<RadarContact> contacts = new ArrayList<>(size);
             for (int i = 0; i < size; i++) contacts.add(new RadarContact(b.readVarInt(), b.readUUID(), b.readUtf(128), b.readDouble(), b.readDouble(), b.readDouble(), b.readDouble()));
-            return new StatusPacket(new VehicleStatus(id, engine, radar, acquire, fire, missiles, health, maxHealth, speed, launcher, target, x, y, z, range, mode, coordinates, capMode, fireMode, selected, contacts));
+            int flightCount = b.readVarInt();
+            if (flightCount < 0 || flightCount > 32) throw new IllegalArgumentException("Invalid flight count");
+            List<MissileTelemetry.Track> flights = new ArrayList<>(flightCount);
+            for (int i = 0; i < flightCount; i++) flights.add(new MissileTelemetry.Track(b.readVarInt(),
+                    new Vec3(b.readDouble(), b.readDouble(), b.readDouble()), new Vec3(b.readDouble(), b.readDouble(), b.readDouble())));
+            return new StatusPacket(new VehicleStatus(id, engine, radar, acquire, fire, missiles, health, maxHealth, speed, launcher, target, x, y, z, range, mode, coordinates, capMode, fireMode, selected, contacts, flights));
         }
         static void handle(StatusPacket p, Supplier<NetworkEvent.Context> supplier) {
             NetworkEvent.Context c = supplier.get();

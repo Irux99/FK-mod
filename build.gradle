@@ -5,7 +5,7 @@ plugins {
 }
 
 group = 'fr.irux.fk2000'
-version = '0.4.0'
+version = '0.5.0-preview1'
 base { archivesName = 'iruxfk2000' }
 java.toolchain.languageVersion = JavaLanguageVersion.of(17)
 
@@ -33,7 +33,8 @@ if (suppliedSbwJar != null) {
 }
 
 def selectedRunDirectory = providers.gradleProperty('runDirectory').getOrElse('run')
-def shaderTest = providers.gradleProperty('shaderTest').map { it.toBoolean() }.getOrElse(false)
+def performanceTest = providers.gradleProperty('performanceTest').map { it.toBoolean() }.getOrElse(false)
+def shaderTest = performanceTest || providers.gradleProperty('shaderTest').map { it.toBoolean() }.getOrElse(false)
 
 minecraft {
     mappings channel: 'official', version: '1.20.1'
@@ -73,6 +74,11 @@ repositories {
 }
 dependencies {
     minecraft 'net.minecraftforge:forge:1.20.1-47.4.10'
+    if (performanceTest) {
+        runtimeOnly fg.deobf('maven.modrinth:create:8amzvn9x') // 6.0.8, Forge 1.20.1
+        runtimeOnly fg.deobf('maven.modrinth:entityculling:HUUJcFnt') // 1.11.3, Forge 1.20.1
+        runtimeOnly fg.deobf('maven.modrinth:createbetterfps:75GMC9GD') // 1.1.2, Forge 1.20.1
+    }
     if (shaderTest) {
         // Optional client validation only. Shader loaders are never embedded in the addon.
         runtimeOnly fg.deobf('maven.modrinth:oculus:iQ1SwGc3') // 1.8.0, Minecraft 1.20.1

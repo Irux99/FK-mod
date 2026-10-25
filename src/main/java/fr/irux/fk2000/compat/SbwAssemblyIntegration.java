@@ -66,7 +66,7 @@ public final class SbwAssemblyIntegration {
                 ? state.getValue(BlockStateProperties.HORIZONTAL_FACING).toYRot() : Direction.NORTH.toYRot();
         preview.moveTo(pos.getX() + .5, pos.getY() + .5, pos.getZ() + .5, yaw, 0);
         // SBW adds up to +/-0.1 block random displacement to all three coordinates.
-        AABB deployment = preview.getBoundingBox().inflate(.11);
+        AABB deployment = fr.irux.fk2000.entity.vehicle.VehicleGeometry.bodyBounds(preview.position(), preview.getYRot()).inflate(.11);
         if (!canDeploy(level, pos, preview, deployment)) {
             preview.discard();
             reject(event, "message.iruxfk2000.crate_space");
