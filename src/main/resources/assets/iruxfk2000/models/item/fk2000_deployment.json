@@ -1,0 +1,6 @@
+{
+  "parent": "minecraft:item/generated",
+  "textures": {
+    "layer0": "iruxfk2000:item/fk2000_deployment"
+  }
+}

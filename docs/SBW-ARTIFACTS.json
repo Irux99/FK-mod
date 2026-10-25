@@ -1,0 +1,65 @@
+{
+  "source": "https://api.modrinth.com/v2/project/superb-warfare/version",
+  "verified_downloads": [
+    {
+      "version": "0.8.9.2",
+      "modrinth_version_id": "81Iyv9ao",
+      "files": [
+        {
+          "filename": "superbwarfare-0.8.9.2-mc1.20.1-65d985a64-all.jar",
+          "url": "https://cdn.modrinth.com/data/Cd3DYqzn/versions/81Iyv9ao/superbwarfare-0.8.9.2-mc1.20.1-65d985a64-all.jar",
+          "sha512": "985e0a3f02deddfaec95db72a3761994030fc2b72ccd53e90c0265c59d9467e09fabac111b1ab1d777b4a66c03e1fa3f9f58c963c471ef40462cf25573bbe4ad",
+          "size": 42118965,
+          "primary": true
+        },
+        {
+          "filename": "superbwarfare-0.8.9.2-mc1.20.1-65d985a64-sources.jar",
+          "url": "https://cdn.modrinth.com/data/Cd3DYqzn/versions/81Iyv9ao/superbwarfare-0.8.9.2-mc1.20.1-65d985a64-sources.jar",
+          "sha512": "09593131a79117a1935836411b5b0ee01639186ff73889738dbf502ba4463203907e550bff005e6fd36e98a6a15e60c08ea516825da8339610d9164ad683d630",
+          "size": 31115305,
+          "primary": false
+        }
+      ]
+    },
+    {
+      "version": "0.8.9.1-hotfix",
+      "modrinth_version_id": "mHmtMuKF",
+      "files": [
+        {
+          "filename": "superbwarfare-0.8.9.1-hotfix-mc1.20.1-993063bed-all.jar",
+          "url": "https://cdn.modrinth.com/data/Cd3DYqzn/versions/mHmtMuKF/superbwarfare-0.8.9.1-hotfix-mc1.20.1-993063bed-all.jar",
+          "sha512": "8d186b97928711217a8fa97a88bea7072c58d2e2761a15a04a27100d5677bbc12e876f711a84c6cb0779d9b0cb7a1bbd74140b90a099f99115a3b76c6fc8325e",
+          "size": 42162514,
+          "primary": true
+        },
+        {
+          "filename": "superbwarfare-0.8.9.1-hotfix-mc1.20.1-993063bed-sources.jar",
+          "url": "https://cdn.modrinth.com/data/Cd3DYqzn/versions/mHmtMuKF/superbwarfare-0.8.9.1-hotfix-mc1.20.1-993063bed-sources.jar",
+          "sha512": "ae534d43d83693c2534f61255431ec550fe0dbc2cec5e0f7811f5173445c4dcf4e2b657ed720a520f6df31e6a7ec77b041dbaf808000ba91e13a9a98fbc114c1",
+          "size": 31158026,
+          "primary": false
+        }
+      ]
+    },
+    {
+      "version": "0.8.9-final",
+      "modrinth_version_id": "LAITrju0",
+      "files": [
+        {
+          "filename": "superbwarfare-0.8.9-final-mc1.20.1-6effe4385-all.jar",
+          "url": "https://cdn.modrinth.com/data/Cd3DYqzn/versions/LAITrju0/superbwarfare-0.8.9-final-mc1.20.1-6effe4385-all.jar",
+          "sha512": "a4f5b102a0508de4d5f6170be22cd8956bea5cafd865d4d92b9f933a783b3a84887373e823608e928c0d8d79ef010f1e9d67961bbf2561d1d94df97d828de792",
+          "size": 31691008,
+          "primary": true
+        },
+        {
+          "filename": "superbwarfare-0.8.9-final-mc1.20.1-6effe4385-sources.jar",
+          "url": "https://cdn.modrinth.com/data/Cd3DYqzn/versions/LAITrju0/superbwarfare-0.8.9-final-mc1.20.1-6effe4385-sources.jar",
+          "sha512": "733e841341ab2e1a2c7cbe619fbc639addef240589d6431488763cdd965500858b863e4f53b7c7a3b9ac857f8e04ee04db9609a45b079096f3c8acdace7800ab",
+          "size": 27247177,
+          "primary": false
+        }
+      ]
+    }
+  ]
+}

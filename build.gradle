@@ -1,0 +1,95 @@
+plugins {
+    id 'eclipse'
+    id 'idea'
+    id 'net.minecraftforge.gradle' version '6.0.36'
+}
+
+group = 'fr.irux.fk2000'
+version = '0.1.0'
+base { archivesName = 'iruxfk2000' }
+java.toolchain.languageVersion = JavaLanguageVersion.of(17)
+
+// Explicit opt-in release matrix; SBW is never linked into our public Java API.
+def sbwReleases = [
+    '0.8.9-final': 'LAITrju0',
+    '0.8.9.1-hotfix': 'mHmtMuKF',
+    '0.8.9.2': '81Iyv9ao'
+]
+def selectedSbw = providers.gradleProperty('sbwVersion').orNull
+if (selectedSbw != null && !sbwReleases.containsKey(selectedSbw)) {
+    throw new GradleException('Unknown sbwVersion. Choose 0.8.9-final, 0.8.9.1-hotfix or 0.8.9.2.')
+}
+def selectedRunDirectory = providers.gradleProperty('runDirectory').getOrElse('run')
+
+minecraft {
+    mappings channel: 'official', version: '1.20.1'
+    copyIdeResources = true
+    runs {
+        configureEach {
+            workingDirectory project.file(selectedRunDirectory)
+            property 'forge.logging.console.level', 'info'
+            if (selectedSbw != null) {
+                // Official SBW development settings: remap production mixin refmaps at launch.
+                property 'mixin.env.remapRefMap', 'true'
+                property 'mixin.env.refMapRemappingFile', project.file('build/createSrgToMcp/output.srg').absolutePath
+            }
+            // JavaExec game processes also need the platform proxy and managed trust store.
+            ['http.proxyHost', 'http.proxyPort', 'https.proxyHost', 'https.proxyPort',
+             'javax.net.ssl.trustStore'].each { proxyProperty ->
+                def configuredValue = System.getProperty(proxyProperty)
+                if (configuredValue != null) property proxyProperty, configuredValue
+            }
+            mods { iruxfk2000 { source sourceSets.main } }
+        }
+        client {}
+        server { args '--nogui' }
+        gameTestServer { property 'forge.enabledGameTestNamespaces', selectedSbw == null ? 'iruxfk2000' : 'iruxfk2000,iruxfk2000_sbw' }
+    }
+}
+
+repositories {
+    mavenCentral()
+    maven {
+        name = 'Modrinth'
+        url = 'https://api.modrinth.com/maven'
+        content { includeGroup 'maven.modrinth' }
+    }
+}
+dependencies {
+    minecraft 'net.minecraftforge:forge:1.20.1-47.4.10'
+    if (selectedSbw != null) {
+        // ForgeGradle remaps into its cache; official downloaded jars are untouched.
+        runtimeOnly fg.deobf("maven.modrinth:superb-warfare:${sbwReleases[selectedSbw]}")
+        runtimeOnly fg.deobf('maven.modrinth:kotlin-for-forge:hmeyC41q') // KFF 4.11.0
+        if (selectedSbw == '0.8.9-final') {
+            // These are embedded by the newer releases, separate in 0.8.9-final.
+            runtimeOnly fg.deobf('maven.modrinth:curios:IPQlZkz1') // 5.14.1+1.20.1
+            runtimeOnly fg.deobf('maven.modrinth:geckolib:iS7jylhp') // 4.4.6
+        }
+    }
+    testImplementation platform('org.junit:junit-bom:5.10.3')
+    testImplementation 'org.junit.jupiter:junit-jupiter'
+    testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
+}
+
+// Production uses original release jars in mods/. Development uses -PsbwVersion
+// so ForgeGradle remaps external mods for official development mappings.
+// No compile-time SBW API dependency: compat/SbwCompatibility isolates the adapter.
+tasks.withType(JavaCompile).configureEach {
+    options.encoding = 'UTF-8'
+    options.release = 17
+}
+tasks.named('test', Test) { useJUnitPlatform() }
+tasks.named('jar', Jar) {
+    from('LICENSE') { into 'META-INF' }
+    manifest.attributes('Specification-Title': 'Irux FK-2000',
+        'Specification-Version': '1', 'Implementation-Title': project.name,
+        'Implementation-Version': project.version)
+    finalizedBy 'reobfJar'
+}
+
+if (selectedSbw != null) {
+    tasks.matching { it.name in ['runClient', 'runServer', 'runGameTestServer', 'genIntellijRuns'] }.configureEach {
+        dependsOn 'createSrgToMcp'
+    }
+}

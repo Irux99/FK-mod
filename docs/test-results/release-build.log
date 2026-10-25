@@ -1,0 +1,62 @@
+To honour the JVM settings for this build a single-use Daemon process will be forked. For more on this, please refer to https://docs.gradle.org/8.8/userguide/gradle_daemon.html#sec:disabling_the_daemon in the Gradle documentation.
+Daemon will be stopped at the end of the build 
+> Task :clean
+
+> Task :compileJava
+/workspace/FK-mod/src/main/java/fr/irux/fk2000/gametest/SbwGameTests.java:123: warning: [removal] ResourceLocation(String,String) in ResourceLocation has been deprecated and marked for removal
+        ResourceLocation id = new ResourceLocation("superbwarfare", path);
+                              ^
+/workspace/FK-mod/src/main/java/fr/irux/fk2000/network/ModNetwork.java:36: warning: [removal] ResourceLocation(String,String) in ResourceLocation has been deprecated and marked for removal
+        new ResourceLocation(IruxFk2000Mod.MOD_ID, "control"), () -> "1", "1"::equals, "1"::equals);
+        ^
+/workspace/FK-mod/src/main/java/fr/irux/fk2000/client/VehicleRenderer.java:22: warning: [removal] ResourceLocation(String,String) in ResourceLocation has been deprecated and marked for removal
+    private static final ResourceLocation TEXTURE = new ResourceLocation("iruxfk2000", "textures/entity/fk2000.png");
+                                                    ^
+/workspace/FK-mod/src/main/java/fr/irux/fk2000/client/MissileRenderer.java:20: warning: [removal] ResourceLocation(String,String) in ResourceLocation has been deprecated and marked for removal
+    private static final ResourceLocation TEXTURE = new ResourceLocation("iruxfk2000", "textures/entity/missile.png");
+                                                    ^
+/workspace/FK-mod/src/main/java/fr/irux/fk2000/compat/SbwCompatibility.java:27: warning: [removal] ResourceLocation(String,String) in ResourceLocation has been deprecated and marked for removal
+            TagKey.create(Registries.ENTITY_TYPE, new ResourceLocation("iruxfk2000", "aerial_targets"));
+                                                  ^
+/workspace/FK-mod/src/main/java/fr/irux/fk2000/IruxFk2000Mod.java:15: warning: [removal] get() in FMLJavaModLoadingContext has been deprecated and marked for removal
+        ModContent.register(FMLJavaModLoadingContext.get().getModEventBus());
+                                                    ^
+/workspace/FK-mod/src/main/java/fr/irux/fk2000/IruxFk2000Mod.java:16: warning: [removal] get() in ModLoadingContext has been deprecated and marked for removal
+        ModLoadingContext.get().registerConfig(Type.SERVER, ModConfig.SPEC);
+                         ^
+Note: Some input files use or override a deprecated API.
+Note: Recompile with -Xlint:deprecation for details.
+7 warnings
+
+> Task :processResources
+> Task :classes
+> Task :jar
+> Task :downloadMcpConfig
+> Task :extractSrg
+> Task :createMcpToSrg
+> Task :reobfJar
+> Task :jarJar SKIPPED
+> Task :reobfJarJar SKIPPED
+> Task :assemble
+> Task :compileTestJava
+> Task :processTestResources NO-SOURCE
+> Task :testClasses
+> Task :test
+> Task :check
+> Task :build
+> Task :createSrgToMcp
+> Task :downloadMCMeta
+> Task :downloadAssets UP-TO-DATE
+> Task :extractNatives
+> Task :makeSrcDirs
+> Task :prepareRuns
+> Task :genIntellijRuns
+
+Deprecated Gradle features were used in this build, making it incompatible with Gradle 9.0.
+
+You can use '--warning-mode all' to show the individual deprecation warnings and determine if they come from your own scripts or plugins.
+
+For more on this, please refer to https://docs.gradle.org/8.8/userguide/command_line_interface.html#sec:command_line_warnings in the Gradle documentation.
+
+BUILD SUCCESSFUL in 14s
+16 actionable tasks: 15 executed, 1 up-to-date

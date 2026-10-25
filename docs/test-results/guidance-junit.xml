@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="fr.irux.fk2000.physics.GuidanceMathTest" tests="10" skipped="0" failures="0" errors="0" timestamp="2026-10-25T00:53:26" hostname="f9a6175a194f" time="0.031">
+  <properties/>
+  <testcase name="antiparallelTargetDoesNotProduceNanOrInstantTurn()" classname="fr.irux.fk2000.physics.GuidanceMathTest" time="0.012"/>
+  <testcase name="zeroInputKeepsAValidLaunchOrientation()" classname="fr.irux.fk2000.physics.GuidanceMathTest" time="0.01"/>
+  <testcase name="zeroAngularRatePreservesDirection()" classname="fr.irux.fk2000.physics.GuidanceMathTest" time="0.0"/>
+  <testcase name="unreachableFastTargetHasFiniteBoundedLead()" classname="fr.irux.fk2000.physics.GuidanceMathTest" time="0.001"/>
+  <testcase name="stationarySweepIsSafeAndFinite()" classname="fr.irux.fk2000.physics.GuidanceMathTest" time="0.001"/>
+  <testcase name="orientationIsProgressiveAndLimitedToConfiguredAngularRate()" classname="fr.irux.fk2000.physics.GuidanceMathTest" time="0.001"/>
+  <testcase name="crossingTargetIsLedAheadRatherThanChasedAtOldPosition()" classname="fr.irux.fk2000.physics.GuidanceMathTest" time="0.0"/>
+  <testcase name="stationaryTargetIsNotLed()" classname="fr.irux.fk2000.physics.GuidanceMathTest" time="0.0"/>
+  <testcase name="proximityFuseDoesNotHitPointsBeyondSweptSegment()" classname="fr.irux.fk2000.physics.GuidanceMathTest" time="0.001"/>
+  <testcase name="proximityFuseSeesTargetPassedBetweenTicks()" classname="fr.irux.fk2000.physics.GuidanceMathTest" time="0.001"/>
+  <system-out><![CDATA[]]></system-out>
+  <system-err><![CDATA[]]></system-err>
+</testsuite>

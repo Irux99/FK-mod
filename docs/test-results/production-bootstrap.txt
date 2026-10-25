@@ -1,0 +1,20 @@
+Contrôle du JAR distribué — Forge de production (hors environnement Gradle de développement)
+
+Installation officielle : Forge 1.20.1-47.4.10 installer.jar, SHA-1 vérifiée contre le fichier publié par maven.minecraftforge.net.
+Java : Temurin JDK 17.0.17.
+Contenu du dossier mods/ : addon réobfusqué Irux FK-2000 0.1.0, distribution officielle SBW 0.8.9.2, Kotlin for Forge 4.11.0.
+Les empreintes et tailles exactes figurent dans artifact-receipt.json. Les JAR SBW/KFF ont été vérifiés SHA-512 contre les métadonnées officielles Modrinth avant copie.
+
+Commandes exécutées depuis /workspace/production-smoke :
+source /workspace/FK-mod/scripts/cloud-env.sh
+java $GRADLE_OPTS -jar installer.jar --installServer /workspace/production-smoke
+java $GRADLE_OPTS -Xms512M -Xmx3G @user_jvm_args.txt @libraries/net/minecraftforge/forge/1.20.1-47.4.10/unix_args.txt nogui
+
+Résultats :
+- Installation Forge terminée, exit 0 (installer.log).
+- JAR addon vérifié : 33 classes Java, ressources et licence présentes ; copie stable vérifiée par SHA-256 avant/après/copie.
+- Bootstrap de production démarré avec la cible forgeserver, dépendances Jar-in-Jar trouvées, Mixin en Java 17, aucune erreur de liaison dans cette phase (production-start.log).
+- Le serveur s'arrête ensuite normalement, exit 0, car eula.txt n'a pas été accepté : message Minecraft « You need to agree to the EULA in order to run the server ».
+- Aucune acceptation de l'EULA n'a été écrite par cet essai. Aucun monde de jeu n'a démarré ; aucun GameTest ni gameplay de production n'est revendiqué.
+
+Forge 47.4.10 expose forgegametestserverdev et forgegametestserveruserdev, sans cible GameTest de production enregistrée. Les contrôles fonctionnels GameTest du projet sont exécutés séparément dans les environnements de développement Forge ; leurs résultats par distribution officielle SBW sont consignés dans docs/VALIDATION.md du projet.

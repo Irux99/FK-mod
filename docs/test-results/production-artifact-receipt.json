@@ -1,0 +1,18 @@
+[
+  {
+    "file": "iruxfk2000-0.1.0.jar",
+    "sha256": "a200aa7cc702bb9bca3391fce959894ba91ca168ff32a3b33c8c87102d4c8a15",
+    "size": 115391,
+    "classes": 33
+  },
+  {
+    "file": "kotlinforforge-4.11.0-all.jar",
+    "sha256": "ef988f86d170af499d147ea8a5c34c99dbd6d8f4a5ad236a4b43818dc4470a10",
+    "size": 7193768
+  },
+  {
+    "file": "superbwarfare-0.8.9.2-mc1.20.1-65d985a64-all.jar",
+    "sha256": "559930003f638080de648a8621821d785158768c3f69a762094ef4c8d3c4cc12",
+    "size": 42118965
+  }
+]
