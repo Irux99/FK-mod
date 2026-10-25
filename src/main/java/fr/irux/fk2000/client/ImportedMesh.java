@@ -64,9 +64,15 @@ final class ImportedMesh {
     }
     void render(PoseStack pose, MultiBufferSource buffers, int light, float wheelRotation, float launcherProgress,
                 boolean clearCabWindows) {
+        render(pose, buffers, light, wheelRotation, launcherProgress, clearCabWindows, 0);
+    }
+    void render(PoseStack pose, MultiBufferSource buffers, int light, float wheelRotation, float launcherProgress,
+                boolean clearCabWindows, float suspensionCompression) {
         VertexConsumer consumer = buffers.getBuffer(RenderType.entityCutout(texture));
         for (Part part : parts) {
             pose.pushPose();
+            // The sprung body moves around the front axle; tires remain planted on the road.
+            if (!part.animation.equals("wheel")) VehicleVisuals.applyModelSuspension(pose, suspensionCompression);
             pose.translate(part.x,-part.y,part.z);
             if (part.animation.equals("wheel")) pose.mulPose(Axis.XP.rotation(-wheelRotation));
             if (part.animation.equals("launcher")) pose.mulPose(Axis.XP.rotation(launcherProgress*(float)Math.PI/2));

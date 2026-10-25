@@ -1,0 +1,54 @@
+[
+  {
+    "name": "complementary-reimagined",
+    "version": "r5.9.3",
+    "version_id": "Bqen1mJX",
+    "url": "https://cdn.modrinth.com/data/HVnmMxH1/versions/Bqen1mJX/ComplementaryReimagined_r5.9.3.zip",
+    "sha512": "45304b1d7862afdb2177b7e6226fc9c6737911d17a4ad46cc9c519ca4deb935f05072cd337cd8b19a15bb8062b57b54eceec7bdee4cd572d94858e2946d37d85",
+    "license": {
+      "id": "LicenseRef-Custom",
+      "name": "",
+      "url": "https://github.com/ComplementaryDevelopment/ComplementaryReimagined/blob/main/License.txt"
+    },
+    "project_url": "https://modrinth.com/shader/complementary-reimagined"
+  },
+  {
+    "name": "hysteria-shaders",
+    "version": "1.2.1",
+    "version_id": "u7oNAXa5",
+    "url": "https://cdn.modrinth.com/data/iHC8BZn4/versions/u7oNAXa5/Hysteria-Shaders-Universal-v1.2.1.zip",
+    "sha512": "5781ce1d502f1d34325160e8fae511ec64322b6fcdb209c16a2e29a7f76fc38a21c276aeaedb85e593b331f7588847148a118f803c5343eca06863ce8de27a4d",
+    "license": {
+      "id": "LicenseRef-AGNYA-License",
+      "name": "",
+      "url": "https://github.com/nvb-uy/Hysteria/blob/main/LICENSE.md"
+    },
+    "project_url": "https://modrinth.com/shader/hysteria-shaders"
+  },
+  {
+    "name": "oculus",
+    "version": "1.20.1-1.8.0",
+    "version_id": "iQ1SwGc3",
+    "url": "https://cdn.modrinth.com/data/GchcoXML/versions/iQ1SwGc3/oculus-mc1.20.1-1.8.0.jar",
+    "sha512": "1bb4ac77400d6684347988ed298a692c2cb15cf7923693607eb8739b171a20fef7412259e9e157111d9ce21779badab386029956f7d2283a9e611722a373e9d5",
+    "license": {
+      "id": "LGPL-3.0-only",
+      "name": "GNU Lesser General Public License v3.0 only",
+      "url": null
+    },
+    "project_url": "https://modrinth.com/mod/oculus"
+  },
+  {
+    "name": "embeddium",
+    "version": "0.3.31+mc1.20.1",
+    "version_id": "UTbfe5d1",
+    "url": "https://cdn.modrinth.com/data/sk9rgfiA/versions/UTbfe5d1/embeddium-0.3.31%2Bmc1.20.1.jar",
+    "sha512": "ffbf2da4685260a4d5c14c621708bd20722563f084f042d3dfb0a7b87f048e39299648c854a93939129da0d23a15a91ec628560d601e76074b08e275f6e132e9",
+    "license": {
+      "id": "LGPL-3.0-only",
+      "name": "GNU Lesser General Public License v3.0 only",
+      "url": null
+    },
+    "project_url": "https://modrinth.com/mod/embeddium"
+  }
+]

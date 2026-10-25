@@ -1,8 +1,14 @@
 package fr.irux.fk2000.entity.missile;
 
 import fr.irux.fk2000.compat.SbwCompatibility;
+import fr.irux.fk2000.config.ClientEffectsConfig;
 import fr.irux.fk2000.config.ModConfig;
+import fr.irux.fk2000.entity.vehicle.WreckEntity;
+import fr.irux.fk2000.loading.FkChunkLoading;
+import fr.irux.fk2000.network.ExplosionEffects;
 import fr.irux.fk2000.physics.GuidanceMath;
+import fr.irux.fk2000.registry.ModSounds;
+import fr.irux.fk2000.registry.ModParticles;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.core.particles.ParticleTypes;
@@ -55,6 +61,8 @@ public class MissileEntity extends Entity {
     private UUID ownerId;
     private UUID launcherId;
     private UUID targetId;
+    private Vec3 fixedDestination;
+    private Vec3 lastKnownTargetPosition;
     private Vec3 nose = new Vec3(0, 1, 0);
     private int stateTicks;
     private int flightTicks;
@@ -88,10 +96,38 @@ public class MissileEntity extends Entity {
         ownerId = owner;
         launcherId = launcher;
         targetId = target.getUUID();
+        fixedDestination = null;
+        lastKnownTargetPosition = target.getBoundingBox().getCenter();
         nose = new Vec3(0, 1, 0);
         setXRot(-90);
         transitionTo(FlightState.PREPARING);
     }
+
+    /** A fixed world position is a target in its own right, never a fabricated entity. */
+    public void launchAt(UUID owner, UUID launcher, Vec3 destination) {
+        if (level().isClientSide || getFlightState() != FlightState.IDLE || !validDestination(destination)) return;
+        ownerId = owner;
+        launcherId = launcher;
+        targetId = null;
+        fixedDestination = destination;
+        lastKnownTargetPosition = destination;
+        nose = new Vec3(0, 1, 0);
+        setXRot(-90);
+        transitionTo(FlightState.PREPARING);
+    }
+
+    private boolean validDestination(@Nullable Vec3 destination) {
+        return destination != null && Double.isFinite(destination.x) && Double.isFinite(destination.y)
+                && Double.isFinite(destination.z) && destination.y >= level().getMinBuildHeight()
+                && destination.y < level().getMaxBuildHeight()
+                && level().getWorldBorder().isWithinBounds(BlockPos.containing(destination));
+    }
+
+    @Nullable public UUID getTrackedTargetUUID() { return targetId; }
+    @Nullable public Vec3 getLastKnownTargetPosition() {
+        return fixedDestination == null ? lastKnownTargetPosition : fixedDestination;
+    }
+    public boolean hasFixedDestination() { return fixedDestination != null; }
 
     public FlightState getFlightState() { return FlightState.fromId(entityData.get(STATE)); }
     public boolean getMotorActive() { return getFlightState().motorActive(); }
@@ -112,27 +148,32 @@ public class MissileEntity extends Entity {
             if (tickCount > 20) expire(TerminationReason.INVALID_SPAWN);
             return;
         }
-        if (++flightTicks > ModConfig.MISSILE_LIFETIME.get()) {
+        int lifetime = fixedDestination == null ? ModConfig.MISSILE_LIFETIME.get() : ModConfig.COORDINATE_MISSILE_LIFETIME.get();
+        if (++flightTicks > lifetime) {
             expire(TerminationReason.LIFETIME);
             return;
         }
+        // Tickets restore the last known target chunk before resolving its UUID.
+        // The manager is bounded and releases our transient tickets on removal.
+        FkChunkLoading.refreshMissile(this, null);
         Entity target = resolveTarget();
-        if (target == null) {
+        if (target == null && fixedDestination == null) {
             if (++lostTargetTicks > LOST_TARGET_GRACE_TICKS) {
                 expire(TerminationReason.TARGET_LOST);
                 return;
             }
         } else {
             lostTargetTicks = 0;
+            if (target != null) {
+                lastKnownTargetPosition = target.getBoundingBox().getCenter();
+                FkChunkLoading.refreshMissile(this, target);
+            }
         }
         ++stateTicks;
         updatePhysics(target);
         if (isRemoved() || getFlightState() == FlightState.PREPARING) return;
         updateOrientation();
         moveWithCollision(target);
-        if (getMotorActive() && flightTicks % 6 == 0) {
-            level().playSound(null, getX(), getY(), getZ(), SoundEvents.ELYTRA_FLYING, SoundSource.HOSTILE, 1.4f, .65f);
-        }
     }
 
     private void updatePhysics(@Nullable Entity target) {
@@ -158,7 +199,7 @@ public class MissileEntity extends Entity {
 
     private void orientWithThrusters(@Nullable Entity target) {
         Vec3 previousNose = nose;
-        Vec3 wanted = target == null ? nose : aimDirection(target);
+        Vec3 wanted = aimDirection(target);
         double radians = Math.PI / Math.max(1, ModConfig.ORIENTATION_TICKS.get());
         nose = turn(nose, wanted, radians);
         // Cold-gas side jets change attitude and impart a small, opposite visible exhaust impulse.
@@ -166,26 +207,28 @@ public class MissileEntity extends Entity {
         syncCorrection(correction);
         setDeltaMovement(getDeltaMovement().scale(0.985).add(correction.scale(0.08)).add(0, -0.025, 0));
         if (stateTicks >= ModConfig.ORIENTATION_TICKS.get()
-                && (target == null || nose.dot(wanted) > Math.cos(Math.toRadians(12)))) {
+                && (target == null && fixedDestination == null || nose.dot(wanted) > Math.cos(Math.toRadians(12)))) {
             transitionTo(FlightState.BOOSTING);
             syncCorrection(Vec3.ZERO);
-            level().playSound(null, blockPosition(), SoundEvents.FIRECHARGE_USE, SoundSource.HOSTILE, 2f, .7f);
-            level().playSound(null, blockPosition(), SoundEvents.FIREWORK_ROCKET_LAUNCH, SoundSource.HOSTILE, 2.5f, .55f);
+            level().playSound(null, blockPosition(), ModSounds.MISSILE_IGNITION.get(), SoundSource.HOSTILE, 2.5f, 1f);
             ((ServerLevel) level()).sendParticles(ParticleTypes.FLASH, getX(), getY(), getZ(), 1, 0, 0, 0, 0);
         }
     }
 
     private void guideUnderPower(@Nullable Entity target) {
         double turnRate = Math.toRadians(ModConfig.MISSILE_TURN_RATE.get());
-        Vec3 wanted = target == null ? nose : aimDirection(target);
-        if (target != null) nose = turn(nose, wanted, turnRate);
+        Vec3 wanted = aimDirection(target);
+        Vec3 previousNose = nose;
+        if (target != null || fixedDestination != null) nose = turn(nose, wanted, turnRate);
+        syncCorrection(nose.subtract(previousNose));
         double currentSpeed = getDeltaMovement().length();
         double speedLimit = ModConfig.MISSILE_MAX_SPEED.get();
-        if (target != null && getDeltaMovement().normalize().dot(wanted) < Math.cos(Math.toRadians(15))) {
+        if ((target != null || fixedDestination != null)
+                && getDeltaMovement().normalize().dot(wanted) < Math.cos(Math.toRadians(15))) {
             // A 2.5-block/tick missile turning at five degrees has a ~29-block radius.
             // Reduce terminal speed progressively so low/nearby targets do not cause an endless orbit.
-            double range = target.getBoundingBox().getCenter().distanceTo(position());
-            double pursuitFloor = Math.max(.3, target.getDeltaMovement().length() + .35);
+            double range = (target == null ? fixedDestination : target.getBoundingBox().getCenter()).distanceTo(position());
+            double pursuitFloor = Math.max(.3, (target == null ? 0 : target.getDeltaMovement().length()) + .35);
             speedLimit = Math.min(speedLimit, Math.max(pursuitFloor, range * Math.sin(turnRate) * .8));
         }
         double acceleration = ModConfig.MISSILE_ACCELERATION.get();
@@ -196,9 +239,11 @@ public class MissileEntity extends Entity {
         if (getFlightState() == FlightState.BOOSTING && stateTicks >= BOOST_TICKS) transitionTo(FlightState.GUIDING);
     }
 
-    private Vec3 aimDirection(Entity target) {
-        Vec3 center = target.getBoundingBox().getCenter();
-        GuidanceMath.Vector intercept = GuidanceMath.intercept(vector(position()), vector(center), vector(target.getDeltaMovement()),
+    private Vec3 aimDirection(@Nullable Entity target) {
+        Vec3 center = target == null ? fixedDestination : target.getBoundingBox().getCenter();
+        if (center == null) return nose;
+        Vec3 velocity = target == null ? Vec3.ZERO : target.getDeltaMovement();
+        GuidanceMath.Vector intercept = GuidanceMath.intercept(vector(position()), vector(center), vector(velocity),
                 Math.max(getDeltaMovement().length(), 0.6), 60);
         Vec3 predicted = vec3(intercept);
         if (flightTicks >= nextTerrainScan) {
@@ -210,8 +255,8 @@ public class MissileEntity extends Entity {
 
     /**
      * Plan the climb during cold orientation, before a fast missile reaches the hillside.
-     * Heightmaps are queried only after a loaded-chunk check; there are no chunk tickets,
-     * remote entity searches or getChunk calls. Three columns cover a small flight corridor.
+     * Heightmaps are queried only after the chunk manager has prepared a bounded corridor.
+     * Three columns cover the immediate flight path without searching unloaded entities.
      */
     @Nullable
     private Vec3 findTerrainWaypoint(Vec3 predicted) {
@@ -229,11 +274,13 @@ public class MissileEntity extends Entity {
         boolean obstructed = false;
         // A bounded scan prevents a very fast target's lead point making the work unbounded.
         double scanDistance = Math.min(distance - 3, 512);
-        for (double along = 2; along <= scanDistance; along += 2) {
+        scanColumns: for (double along = 2; along <= scanDistance; along += 2) {
             for (int lateral = -1; lateral <= 1; lateral++) {
                 Vec3 column = position().add(direction.scale(along)).add(side.scale(lateral * 1.5));
                 BlockPos sample = BlockPos.containing(column);
-                if (!level().hasChunkAt(sample)) return null;
+                // A long coordinate shot may exceed the bounded loaded corridor.
+                // Keep the obstacles already found instead of throwing that plan away.
+                if (!level().hasChunkAt(sample)) break scanColumns;
                 double directAltitude = Mth.lerp(along / distance, getY(), predicted.y);
                 double localClearance = Math.min(clearance, Math.max(2, (distance - along) * .25));
                 int top = surfaceNearFlightLine(sample, directAltitude, localClearance);
@@ -288,7 +335,7 @@ public class MissileEntity extends Entity {
         Vec3 start = position();
         Vec3 end = start.add(getDeltaMovement());
         if (!isPathLoaded(start, end)) {
-            expire(TerminationReason.UNLOADED_PATH); // Never force chunks to remain loaded or load a remote target chunk.
+            expire(TerminationReason.UNLOADED_PATH); // A refused/out-of-budget ticket never permits unchecked movement.
             return;
         }
         HitResult hit = level().clip(new ClipContext(start, end, ClipContext.Block.COLLIDER, ClipContext.Fluid.NONE, this));
@@ -302,7 +349,8 @@ public class MissileEntity extends Entity {
             return;
         }
         // Arm only after the main motor ignites so the ejection cannot detonate beside the vehicle.
-        if (getMotorActive() && target != null && GuidanceMath.distanceToSegment(vector(target.getBoundingBox().getCenter()),
+        Vec3 targetPoint = target == null ? fixedDestination : target.getBoundingBox().getCenter();
+        if (getMotorActive() && targetPoint != null && GuidanceMath.distanceToSegment(vector(targetPoint),
                 vector(start), vector(end)) <= ModConfig.PROXIMITY_FUSE.get()) {
             setPos(end);
             detonate();
@@ -328,7 +376,8 @@ public class MissileEntity extends Entity {
     }
 
     private boolean canHit(Entity entity) {
-        if (entity == this || entity instanceof MissileEntity || !entity.isAlive() || entity.isSpectator() || !entity.isPickable()) return false;
+        if (entity == this || entity instanceof MissileEntity || entity instanceof WreckEntity
+                || !entity.isAlive() || entity.isSpectator() || !entity.isPickable()) return false;
         if (entity.getUUID().equals(ownerId) || entity.getUUID().equals(launcherId)) return false;
         Entity owner = ownerId == null ? null : ((ServerLevel) level()).getEntity(ownerId);
         return !SbwCompatibility.isFriendly(this, ownerId, owner instanceof Player player ? player : null, entity);
@@ -356,10 +405,10 @@ public class MissileEntity extends Entity {
             level().explode(this, damageSources().explosion(this, owner), null, getX(), getY(), getZ(),
                     ModConfig.EXPLOSION_POWER.get().floatValue(), false, ModConfig.BLOCK_DAMAGE.get()
                             ? Level.ExplosionInteraction.TNT : Level.ExplosionInteraction.NONE);
-        } else {
-            level().playSound(null, getX(), getY(), getZ(), SoundEvents.GENERIC_EXPLODE, SoundSource.HOSTILE, 4f, .8f);
         }
+        level().playSound(null, getX(), getY(), getZ(), ModSounds.MISSILE_EXPLOSION.get(), SoundSource.HOSTILE, 4f, 1f);
         ServerLevel server = (ServerLevel) level();
+        ExplosionEffects.send(server, position(), ModConfig.EXPLOSION_POWER.get().floatValue());
         server.sendParticles(ParticleTypes.FLASH, getX(), getY(), getZ(), 1, 0, 0, 0, 0);
         server.sendParticles(ParticleTypes.LARGE_SMOKE, getX(), getY(), getZ(), 32, 1.2, 1.2, 1.2, .08);
         discard();
@@ -411,24 +460,44 @@ public class MissileEntity extends Entity {
     private void drawFlightEffects() {
         Vec3 facing = getLookAngle();
         if (getMotorActive()) {
-            Vec3 exhaust = position().subtract(facing.scale(.7));
+            // The supplied model's nose is +Z and its tail is -Z. Exhaust always
+            // starts behind the tail, including downward during the initial climb.
+            Vec3 exhaust = position().subtract(facing.scale(.95));
             Vec3 previous = exhaust.subtract(getDeltaMovement());
             int trailSteps = Math.max(2, Math.min(8, (int) Math.ceil(getDeltaMovement().length() * 3)));
             for (int i = 0; i < trailSteps; i++) {
                 Vec3 point = previous.lerp(exhaust, (i + 1.) / trailSteps);
-                level().addParticle(ParticleTypes.FLAME, point.x, point.y, point.z,
-                        -facing.x * .18, -facing.y * .18, -facing.z * .18);
-                if (i % 2 == 0) level().addParticle(ParticleTypes.CAMPFIRE_COSY_SMOKE, point.x, point.y, point.z,
-                        -facing.x * .025, -facing.y * .025, -facing.z * .025);
+                // The emissive renderer supplies the flame attached to the nozzle.
+                // Only cooling smoke remains along the path; detached fire sprites
+                // would linger far behind the rocket like a firework trail.
+                if (ClientEffectsConfig.EXHAUST_SMOKE.get()
+                        && (i == trailSteps - 1 || i == trailSteps / 2 && tickCount % 2 == 0)) {
+                    level().addParticle(ModParticles.EXHAUST_SMOKE.get(), point.x, point.y, point.z,
+                            -facing.x * .12 + random.nextGaussian() * .015,
+                            -facing.y * .12 + .012 + random.nextGaussian() * .015,
+                            -facing.z * .12 + random.nextGaussian() * .015);
+                }
             }
-        } else if (getFlightState() == FlightState.ORIENTING) {
+        } else if (getFlightState() == FlightState.EJECTING) {
+            // The main motor stays off during cold ejection. Its compressed-gas
+            // plume still leaves the rear toward the launch tube/ground.
+            Vec3 exhaust = position().subtract(facing.scale(.95));
+            level().addParticle(ParticleTypes.CLOUD, exhaust.x, exhaust.y, exhaust.z,
+                    -facing.x * .16, -facing.y * .16, -facing.z * .16);
+        }
+        if (getFlightState() == FlightState.ORIENTING || getMotorActive()) {
             Vec3 correction = getCorrection();
             if (correction.lengthSqr() < 1.0e-8) return;
-            Vec3 jet = correction.normalize().scale(-1);
-            Vec3 nozzle = position().add(facing.scale(.4)).add(jet.scale(.18));
-            int count = ModConfig.THRUSTER_PARTICLES.get();
-            for (int i = 0; i < count; i++) {
-                level().addParticle(ParticleTypes.END_ROD, nozzle.x, nozzle.y, nozzle.z, jet.x * .12, jet.y * .12, jet.z * .12);
+            for (GuidanceMath.ThrusterJet thruster : GuidanceMath.reactionJets(vector(facing), vector(correction))) {
+                if (thruster.strength() < .05) continue;
+                Vec3 jet = vec3(thruster.direction());
+                Vec3 nozzle = position().subtract(facing.scale(.60)).add(jet.scale(.18));
+                int count = (int) Math.ceil(ModConfig.THRUSTER_PARTICLES.get() * thruster.strength());
+                double speed = .12 + thruster.strength() * .12;
+                for (int i = 0; i < count; i++) {
+                    level().addParticle(ParticleTypes.CLOUD, nozzle.x, nozzle.y, nozzle.z,
+                            jet.x * speed, jet.y * speed, jet.z * speed);
+                }
             }
         }
     }
@@ -457,6 +526,13 @@ public class MissileEntity extends Entity {
         ownerId = tag.hasUUID("Owner") ? tag.getUUID("Owner") : null;
         launcherId = tag.hasUUID("Launcher") ? tag.getUUID("Launcher") : null;
         targetId = tag.hasUUID("Target") ? tag.getUUID("Target") : null;
+        fixedDestination = tag.getBoolean("HasDestination")
+                ? new Vec3(tag.getDouble("DestinationX"), tag.getDouble("DestinationY"), tag.getDouble("DestinationZ")) : null;
+        if (!validDestination(fixedDestination)) fixedDestination = null;
+        if (fixedDestination != null) targetId = null;
+        lastKnownTargetPosition = tag.getBoolean("HasLastTarget")
+                ? new Vec3(tag.getDouble("LastTargetX"), tag.getDouble("LastTargetY"), tag.getDouble("LastTargetZ")) : fixedDestination;
+        if (!validDestination(lastKnownTargetPosition)) lastKnownTargetPosition = null;
         entityData.set(STATE, FlightState.fromId(tag.getInt("FlightState")).ordinal());
         stateTicks = Math.max(0, tag.getInt("StateTicks"));
         flightTicks = Math.max(0, tag.getInt("FlightTicks"));
@@ -470,6 +546,18 @@ public class MissileEntity extends Entity {
         if (ownerId != null) tag.putUUID("Owner", ownerId);
         if (launcherId != null) tag.putUUID("Launcher", launcherId);
         if (targetId != null) tag.putUUID("Target", targetId);
+        if (fixedDestination != null) {
+            tag.putBoolean("HasDestination", true);
+            tag.putDouble("DestinationX", fixedDestination.x);
+            tag.putDouble("DestinationY", fixedDestination.y);
+            tag.putDouble("DestinationZ", fixedDestination.z);
+        }
+        if (lastKnownTargetPosition != null) {
+            tag.putBoolean("HasLastTarget", true);
+            tag.putDouble("LastTargetX", lastKnownTargetPosition.x);
+            tag.putDouble("LastTargetY", lastKnownTargetPosition.y);
+            tag.putDouble("LastTargetZ", lastKnownTargetPosition.z);
+        }
         tag.putInt("FlightState", getFlightState().ordinal());
         tag.putInt("StateTicks", stateTicks);
         tag.putInt("FlightTicks", flightTicks);

@@ -39,6 +39,7 @@ public final class PrototypeMissileRenderer extends EntityRenderer<MissileEntity
         pose.mulPose(Axis.XP.rotationDegrees(-Mth.lerp(partialTick, missile.xRotO, missile.getXRot())));
         pose.scale(1, -1, -1);
         model.render(pose, buffers.getBuffer(RenderType.entityCutoutNoCull(TEXTURE)), packedLight, OverlayTexture.NO_OVERLAY);
+        if (missile.getMotorActive()) RocketPlume.render(missile,partialTick,pose,buffers);
         pose.popPose();
         super.render(missile, yaw, partialTick, pose, buffers, packedLight);
     }

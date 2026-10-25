@@ -22,6 +22,28 @@ public final class GuidanceMath {
         }
     }
 
+    /** A radial exhaust direction and its normalized share of the requested lateral impulse. */
+    public record ThrusterJet(Vector direction, double strength) {}
+
+    /**
+     * Four nozzles around the rear body. Exhaust points away from the requested
+     * correction, so its reaction force pushes the missile toward that correction.
+     * Opposite nozzles never fire together; a diagonal correction uses two sides.
+     */
+    public static ThrusterJet[] reactionJets(Vector forward, Vector requestedCorrection) {
+        Vector axis = forward.normalizedOr(UP);
+        Vector reference = Math.abs(axis.dot(UP)) > .9 ? new Vector(0, 0, 1) : UP;
+        Vector radialX = axis.cross(reference).normalizedOr(new Vector(1, 0, 0));
+        Vector radialY = radialX.cross(axis).normalizedOr(new Vector(0, 0, 1));
+        Vector lateral = requestedCorrection.subtract(axis.scale(requestedCorrection.dot(axis)));
+        Vector impulse = lateral.length() < EPSILON ? new Vector(0, 0, 0) : lateral.normalizedOr(UP);
+        Vector[] directions = {radialX, radialX.scale(-1), radialY, radialY.scale(-1)};
+        ThrusterJet[] jets = new ThrusterJet[directions.length];
+        for (int i = 0; i < directions.length; i++)
+            jets[i] = new ThrusterJet(directions[i], Math.max(0, -impulse.dot(directions[i])));
+        return jets;
+    }
+
     /** Rotate along the shortest arc, including an explicit stable axis for opposite vectors. */
     public static Vector turnTowards(Vector current, Vector wanted, double maximumRadians) {
         Vector from = current.normalizedOr(UP);

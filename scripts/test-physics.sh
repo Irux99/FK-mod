@@ -49,8 +49,14 @@ rm -rf -- "$irux_classes" "$irux_results"
 mkdir -p "$irux_classes" "$irux_results"
 "$irux_javac" --release 17 -encoding UTF-8 --class-path "$irux_junit" -d "$irux_classes" \
     "$irux_project_root/src/main/java/fr/irux/fk2000/physics/GuidanceMath.java" \
-    "$irux_project_root/src/test/java/fr/irux/fk2000/physics/GuidanceMathTest.java"
+    "$irux_project_root/src/main/java/fr/irux/fk2000/physics/ShockwaveMath.java" \
+    "$irux_project_root/src/main/java/fr/irux/fk2000/physics/RadarDisplayMath.java" \
+    "$irux_project_root/src/test/java/fr/irux/fk2000/physics/GuidanceMathTest.java" \
+    "$irux_project_root/src/test/java/fr/irux/fk2000/physics/ShockwaveMathTest.java" \
+    "$irux_project_root/src/test/java/fr/irux/fk2000/physics/RadarDisplayMathTest.java"
 # exec preserves the underlying JUnit exit status, including failed or zero-test runs.
 exec "$irux_java" -jar "$irux_junit" execute --class-path "$irux_classes" \
-    --select-class fr.irux.fk2000.physics.GuidanceMathTest --fail-if-no-tests \
+    --select-class fr.irux.fk2000.physics.GuidanceMathTest \
+    --select-class fr.irux.fk2000.physics.ShockwaveMathTest --fail-if-no-tests \
+    --select-class fr.irux.fk2000.physics.RadarDisplayMathTest \
     --reports-dir "$irux_results" --details summary

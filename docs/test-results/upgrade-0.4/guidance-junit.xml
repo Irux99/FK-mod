@@ -1,0 +1,153 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="JUnit Jupiter" tests="16" skipped="0" failures="0" errors="0" time="0.06" hostname="3392b9411f68" timestamp="2026-10-25T20:18:28">
+<properties>
+<property name="file.encoding" value="UTF-8"/>
+<property name="file.separator" value="/"/>
+<property name="java.class.path" value="/workspace/FK-mod/build/test-tools/junit-platform-console-standalone-1.10.3.jar"/>
+<property name="java.class.version" value="61.0"/>
+<property name="java.home" value="/workspace/toolchains/jdk-17.0.17+10"/>
+<property name="java.io.tmpdir" value="/tmp"/>
+<property name="java.library.path" value="/usr/java/packages/lib:/usr/lib64:/lib64:/lib:/usr/lib"/>
+<property name="java.runtime.name" value="OpenJDK Runtime Environment"/>
+<property name="java.runtime.version" value="17.0.17+10"/>
+<property name="java.specification.maintenance.version" value="1"/>
+<property name="java.specification.name" value="Java Platform API Specification"/>
+<property name="java.specification.vendor" value="Oracle Corporation"/>
+<property name="java.specification.version" value="17"/>
+<property name="java.vendor" value="Eclipse Adoptium"/>
+<property name="java.vendor.url" value="https://adoptium.net/"/>
+<property name="java.vendor.url.bug" value="https://github.com/adoptium/adoptium-support/issues"/>
+<property name="java.vendor.version" value="Temurin-17.0.17+10"/>
+<property name="java.version" value="17.0.17"/>
+<property name="java.version.date" value="2025-10-21"/>
+<property name="java.vm.compressedOopsMode" value="Zero based"/>
+<property name="java.vm.info" value="mixed mode, sharing"/>
+<property name="java.vm.name" value="OpenJDK 64-Bit Server VM"/>
+<property name="java.vm.specification.name" value="Java Virtual Machine Specification"/>
+<property name="java.vm.specification.vendor" value="Oracle Corporation"/>
+<property name="java.vm.specification.version" value="17"/>
+<property name="java.vm.vendor" value="Eclipse Adoptium"/>
+<property name="java.vm.version" value="17.0.17+10"/>
+<property name="jdk.debug" value="release"/>
+<property name="line.separator" value="
+"/>
+<property name="native.encoding" value="UTF-8"/>
+<property name="os.arch" value="amd64"/>
+<property name="os.name" value="Linux"/>
+<property name="os.version" value="6.18.55"/>
+<property name="path.separator" value=":"/>
+<property name="sun.arch.data.model" value="64"/>
+<property name="sun.boot.library.path" value="/workspace/toolchains/jdk-17.0.17+10/lib"/>
+<property name="sun.cpu.endian" value="little"/>
+<property name="sun.io.unicode.encoding" value="UnicodeLittle"/>
+<property name="sun.java.command" value="/workspace/FK-mod/build/test-tools/junit-platform-console-standalone-1.10.3.jar execute --class-path /workspace/FK-mod/build/physics-test-classes --select-class fr.irux.fk2000.physics.GuidanceMathTest --select-class fr.irux.fk2000.physics.ShockwaveMathTest --fail-if-no-tests --select-class fr.irux.fk2000.physics.RadarDisplayMathTest --reports-dir /workspace/FK-mod/build/physics-test-results --details summary"/>
+<property name="sun.java.launcher" value="SUN_STANDARD"/>
+<property name="sun.jnu.encoding" value="UTF-8"/>
+<property name="sun.management.compiler" value="HotSpot 64-Bit Tiered Compilers"/>
+<property name="user.dir" value="/workspace/FK-mod"/>
+<property name="user.home" value="/home/agent"/>
+<property name="user.language" value="en"/>
+<property name="user.name" value="agent"/>
+<property name="user.timezone" value="Etc/UTC"/>
+</properties>
+<testcase name="stationarySweepIsSafeAndFinite()" classname="fr.irux.fk2000.physics.GuidanceMathTest" time="0">
+<system-out><![CDATA[
+unique-id: [engine:junit-jupiter]/[class:fr.irux.fk2000.physics.GuidanceMathTest]/[method:stationarySweepIsSafeAndFinite()]
+display-name: stationarySweepIsSafeAndFinite()
+]]></system-out>
+</testcase>
+<testcase name="fieldOfViewPulseIsFiniteBoundedAndEnds()" classname="fr.irux.fk2000.physics.ShockwaveMathTest" time="0">
+<system-out><![CDATA[
+unique-id: [engine:junit-jupiter]/[class:fr.irux.fk2000.physics.ShockwaveMathTest]/[method:fieldOfViewPulseIsFiniteBoundedAndEnds()]
+display-name: fieldOfViewPulseIsFiniteBoundedAndEnds()
+]]></system-out>
+</testcase>
+<testcase name="echoBrightensAtSweepThenFadesWithoutDisappearing()" classname="fr.irux.fk2000.physics.RadarDisplayMathTest" time="0">
+<system-out><![CDATA[
+unique-id: [engine:junit-jupiter]/[class:fr.irux.fk2000.physics.RadarDisplayMathTest]/[method:echoBrightensAtSweepThenFadesWithoutDisappearing()]
+display-name: echoBrightensAtSweepThenFadesWithoutDisappearing()
+]]></system-out>
+</testcase>
+<testcase name="zeroInputKeepsAValidLaunchOrientation()" classname="fr.irux.fk2000.physics.GuidanceMathTest" time="0.011">
+<system-out><![CDATA[
+unique-id: [engine:junit-jupiter]/[class:fr.irux.fk2000.physics.GuidanceMathTest]/[method:zeroInputKeepsAValidLaunchOrientation()]
+display-name: zeroInputKeepsAValidLaunchOrientation()
+]]></system-out>
+</testcase>
+<testcase name="unreachableFastTargetHasFiniteBoundedLead()" classname="fr.irux.fk2000.physics.GuidanceMathTest" time="0">
+<system-out><![CDATA[
+unique-id: [engine:junit-jupiter]/[class:fr.irux.fk2000.physics.GuidanceMathTest]/[method:unreachableFastTargetHasFiniteBoundedLead()]
+display-name: unreachableFastTargetHasFiniteBoundedLead()
+]]></system-out>
+</testcase>
+<testcase name="uncorrectedOrAxialFlightDoesNotWasteLateralGas()" classname="fr.irux.fk2000.physics.GuidanceMathTest" time="0">
+<system-out><![CDATA[
+unique-id: [engine:junit-jupiter]/[class:fr.irux.fk2000.physics.GuidanceMathTest]/[method:uncorrectedOrAxialFlightDoesNotWasteLateralGas()]
+display-name: uncorrectedOrAxialFlightDoesNotWasteLateralGas()
+]]></system-out>
+</testcase>
+<testcase name="fourRearJetsHaveOppositeReactionAndNoAxialThrust()" classname="fr.irux.fk2000.physics.GuidanceMathTest" time="0">
+<system-out><![CDATA[
+unique-id: [engine:junit-jupiter]/[class:fr.irux.fk2000.physics.GuidanceMathTest]/[method:fourRearJetsHaveOppositeReactionAndNoAxialThrust()]
+display-name: fourRearJetsHaveOppositeReactionAndNoAxialThrust()
+]]></system-out>
+</testcase>
+<testcase name="orientationIsProgressiveAndLimitedToConfiguredAngularRate()" classname="fr.irux.fk2000.physics.GuidanceMathTest" time="0">
+<system-out><![CDATA[
+unique-id: [engine:junit-jupiter]/[class:fr.irux.fk2000.physics.GuidanceMathTest]/[method:orientationIsProgressiveAndLimitedToConfiguredAngularRate()]
+display-name: orientationIsProgressiveAndLimitedToConfiguredAngularRate()
+]]></system-out>
+</testcase>
+<testcase name="crossingTargetIsLedAheadRatherThanChasedAtOldPosition()" classname="fr.irux.fk2000.physics.GuidanceMathTest" time="0">
+<system-out><![CDATA[
+unique-id: [engine:junit-jupiter]/[class:fr.irux.fk2000.physics.GuidanceMathTest]/[method:crossingTargetIsLedAheadRatherThanChasedAtOldPosition()]
+display-name: crossingTargetIsLedAheadRatherThanChasedAtOldPosition()
+]]></system-out>
+</testcase>
+<testcase name="antiparallelTargetDoesNotProduceNanOrInstantTurn()" classname="fr.irux.fk2000.physics.GuidanceMathTest" time="0.012">
+<system-out><![CDATA[
+unique-id: [engine:junit-jupiter]/[class:fr.irux.fk2000.physics.GuidanceMathTest]/[method:antiparallelTargetDoesNotProduceNanOrInstantTurn()]
+display-name: antiparallelTargetDoesNotProduceNanOrInstantTurn()
+]]></system-out>
+</testcase>
+<testcase name="zeroAngularRatePreservesDirection()" classname="fr.irux.fk2000.physics.GuidanceMathTest" time="0">
+<system-out><![CDATA[
+unique-id: [engine:junit-jupiter]/[class:fr.irux.fk2000.physics.GuidanceMathTest]/[method:zeroAngularRatePreservesDirection()]
+display-name: zeroAngularRatePreservesDirection()
+]]></system-out>
+</testcase>
+<testcase name="proximityFuseDoesNotHitPointsBeyondSweptSegment()" classname="fr.irux.fk2000.physics.GuidanceMathTest" time="0">
+<system-out><![CDATA[
+unique-id: [engine:junit-jupiter]/[class:fr.irux.fk2000.physics.GuidanceMathTest]/[method:proximityFuseDoesNotHitPointsBeyondSweptSegment()]
+display-name: proximityFuseDoesNotHitPointsBeyondSweptSegment()
+]]></system-out>
+</testcase>
+<testcase name="pressureFadesWithDistanceAndRejectsNonFiniteInput()" classname="fr.irux.fk2000.physics.ShockwaveMathTest" time="0">
+<system-out><![CDATA[
+unique-id: [engine:junit-jupiter]/[class:fr.irux.fk2000.physics.ShockwaveMathTest]/[method:pressureFadesWithDistanceAndRejectsNonFiniteInput()]
+display-name: pressureFadesWithDistanceAndRejectsNonFiniteInput()
+]]></system-out>
+</testcase>
+<testcase name="viewportZoomHasIndependentLimits()" classname="fr.irux.fk2000.physics.RadarDisplayMathTest" time="0">
+<system-out><![CDATA[
+unique-id: [engine:junit-jupiter]/[class:fr.irux.fk2000.physics.RadarDisplayMathTest]/[method:viewportZoomHasIndependentLimits()]
+display-name: viewportZoomHasIndependentLimits()
+]]></system-out>
+</testcase>
+<testcase name="stationaryTargetIsNotLed()" classname="fr.irux.fk2000.physics.GuidanceMathTest" time="0">
+<system-out><![CDATA[
+unique-id: [engine:junit-jupiter]/[class:fr.irux.fk2000.physics.GuidanceMathTest]/[method:stationaryTargetIsNotLed()]
+display-name: stationaryTargetIsNotLed()
+]]></system-out>
+</testcase>
+<testcase name="proximityFuseSeesTargetPassedBetweenTicks()" classname="fr.irux.fk2000.physics.GuidanceMathTest" time="0">
+<system-out><![CDATA[
+unique-id: [engine:junit-jupiter]/[class:fr.irux.fk2000.physics.GuidanceMathTest]/[method:proximityFuseSeesTargetPassedBetweenTicks()]
+display-name: proximityFuseSeesTargetPassedBetweenTicks()
+]]></system-out>
+</testcase>
+<system-out><![CDATA[
+unique-id: [engine:junit-jupiter]
+display-name: JUnit Jupiter
+]]></system-out>
+</testsuite>

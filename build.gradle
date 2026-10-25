@@ -5,7 +5,7 @@ plugins {
 }
 
 group = 'fr.irux.fk2000'
-version = '0.3.0'
+version = '0.4.0'
 base { archivesName = 'iruxfk2000' }
 java.toolchain.languageVersion = JavaLanguageVersion.of(17)
 
@@ -33,6 +33,7 @@ if (suppliedSbwJar != null) {
 }
 
 def selectedRunDirectory = providers.gradleProperty('runDirectory').getOrElse('run')
+def shaderTest = providers.gradleProperty('shaderTest').map { it.toBoolean() }.getOrElse(false)
 
 minecraft {
     mappings channel: 'official', version: '1.20.1'
@@ -72,6 +73,11 @@ repositories {
 }
 dependencies {
     minecraft 'net.minecraftforge:forge:1.20.1-47.4.10'
+    if (shaderTest) {
+        // Optional client validation only. Shader loaders are never embedded in the addon.
+        runtimeOnly fg.deobf('maven.modrinth:oculus:iQ1SwGc3') // 1.8.0, Minecraft 1.20.1
+        runtimeOnly fg.deobf('maven.modrinth:embeddium:UTbfe5d1') // 0.3.31, Minecraft 1.20.1
+    }
     if (selectedSbw != null) {
         // ForgeGradle remaps into its cache; official downloaded jars are untouched.
         if (suppliedSbwJar == null) runtimeOnly fg.deobf("maven.modrinth:superb-warfare:${sbwReleases[selectedSbw]}")

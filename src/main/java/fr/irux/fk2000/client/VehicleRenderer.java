@@ -46,10 +46,15 @@ public final class VehicleRenderer extends EntityRenderer<Fk2000Entity> {
         Minecraft mc = Minecraft.getInstance();
         boolean cabView = mc.options.getCameraType().isFirstPerson()
                 && (mc.getCameraEntity() == entity || mc.player != null && mc.player.getVehicle() == entity);
-        truck.render(pose,buffers,light,entity.getWheelRotation(),entity.getLauncherProgress(),cabView);
+        float compression = entity.getSuspensionCompression(partialTick);
+        truck.render(pose,buffers,light,entity.getWheelRotation(),entity.getLauncherProgress(),cabView,compression);
         radar.yRot=entity.isRadarEnabled()?(float)(((entity.level().getGameTime()+partialTick)*.075)%(Math.PI*2)):0;
+        pose.pushPose();
+        VehicleVisuals.applyModelSuspension(pose, compression);
         radarAssembly.render(pose,buffers.getBuffer(RenderType.entityCutoutNoCull(RADAR_TEXTURE)),light,OverlayTexture.NO_OVERLAY);
         pose.popPose();
+        pose.popPose();
+        VehicleVisuals.renderCaps(entity,partialTick,pose,buffers,light);
         super.render(entity,entityYaw,partialTick,pose,buffers,light);
     }
     @Override public ResourceLocation getTextureLocation(Fk2000Entity entity) { return RADAR_TEXTURE; }

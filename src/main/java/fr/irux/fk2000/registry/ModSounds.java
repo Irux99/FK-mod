@@ -14,6 +14,12 @@ public final class ModSounds {
             DeferredRegister.create(ForgeRegistries.SOUND_EVENTS, IruxFk2000Mod.MOD_ID);
     public static final RegistryObject<SoundEvent> RELOAD = SOUNDS.register("vehicle_reload", () ->
             SoundEvent.createVariableRangeEvent(new ResourceLocation(IruxFk2000Mod.MOD_ID, "vehicle_reload")));
+    public static final RegistryObject<SoundEvent> MISSILE_IGNITION = SOUNDS.register("missile_ignition", () ->
+            SoundEvent.createFixedRangeEvent(new ResourceLocation(IruxFk2000Mod.MOD_ID, "missile_ignition"), 160));
+    public static final RegistryObject<SoundEvent> MISSILE_FLIGHT = SOUNDS.register("missile_flight", () ->
+            SoundEvent.createVariableRangeEvent(new ResourceLocation(IruxFk2000Mod.MOD_ID, "missile_flight")));
+    public static final RegistryObject<SoundEvent> MISSILE_EXPLOSION = SOUNDS.register("missile_explosion", () ->
+            SoundEvent.createFixedRangeEvent(new ResourceLocation(IruxFk2000Mod.MOD_ID, "missile_explosion"), 192));
 
     public static void register(IEventBus bus) { SOUNDS.register(bus); }
 

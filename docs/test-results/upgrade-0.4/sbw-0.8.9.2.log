@@ -1,0 +1,273 @@
+To honour the JVM settings for this build a single-use Daemon process will be forked. For more on this, please refer to https://docs.gradle.org/8.8/userguide/gradle_daemon.html#sec:disabling_the_daemon in the Gradle documentation.
+Daemon will be stopped at the end of the build 
+
+> Task :compileJava
+/workspace/FK-mod/src/main/java/fr/irux/fk2000/IruxFk2000Mod.java:22: warning: [removal] get() in FMLJavaModLoadingContext has been deprecated and marked for removal
+        ModContent.register(FMLJavaModLoadingContext.get().getModEventBus());
+                                                    ^
+/workspace/FK-mod/src/main/java/fr/irux/fk2000/IruxFk2000Mod.java:23: warning: [removal] get() in FMLJavaModLoadingContext has been deprecated and marked for removal
+        ModSounds.register(FMLJavaModLoadingContext.get().getModEventBus());
+                                                   ^
+/workspace/FK-mod/src/main/java/fr/irux/fk2000/IruxFk2000Mod.java:24: warning: [removal] get() in FMLJavaModLoadingContext has been deprecated and marked for removal
+        ModParticles.register(FMLJavaModLoadingContext.get().getModEventBus());
+                                                      ^
+/workspace/FK-mod/src/main/java/fr/irux/fk2000/IruxFk2000Mod.java:25: warning: [removal] get() in FMLJavaModLoadingContext has been deprecated and marked for removal
+        FMLJavaModLoadingContext.get().getModEventBus().addListener(this::commonSetup);
+                                ^
+/workspace/FK-mod/src/main/java/fr/irux/fk2000/IruxFk2000Mod.java:26: warning: [removal] get() in ModLoadingContext has been deprecated and marked for removal
+        ModLoadingContext.get().registerConfig(Type.SERVER, ModConfig.SPEC);
+                         ^
+/workspace/FK-mod/src/main/java/fr/irux/fk2000/IruxFk2000Mod.java:27: warning: [removal] get() in ModLoadingContext has been deprecated and marked for removal
+        ModLoadingContext.get().registerConfig(Type.CLIENT, ClientEffectsConfig.SPEC);
+                         ^
+/workspace/FK-mod/src/main/java/fr/irux/fk2000/entity/missile/MissileEntity.java:420: warning: [removal] ResourceLocation(String,String) in ResourceLocation has been deprecated and marked for removal
+                new ResourceLocation("superbwarfare", "projectile_explosion"));
+                ^
+Note: Some input files use or override a deprecated API.
+Note: Recompile with -Xlint:deprecation for details.
+7 warnings
+
+> Task :processResources UP-TO-DATE
+> Task :classes
+> Task :jar
+> Task :downloadMcpConfig
+> Task :extractSrg UP-TO-DATE
+> Task :createMcpToSrg UP-TO-DATE
+> Task :reobfJar
+> Task :jarJar SKIPPED
+> Task :reobfJarJar SKIPPED
+> Task :assemble
+> Task :compileTestJava UP-TO-DATE
+> Task :processTestResources NO-SOURCE
+> Task :testClasses UP-TO-DATE
+> Task :test
+> Task :check
+> Task :build
+> Task :createSrgToMcp UP-TO-DATE
+> Task :downloadMCMeta UP-TO-DATE
+> Task :downloadAssets UP-TO-DATE
+> Task :extractNatives UP-TO-DATE
+> Task :makeSrcDirs
+> Task :prepareRuns
+> Task :prepareRunGameTestServer
+> Task :prepareRunGameTestServerCompile
+
+> Task :runGameTestServer
+2026-10-25 20:29:59,558 main WARN Advanced terminal features are not available in this environment
+[20:29:59] [main/INFO] [cp.mo.mo.Launcher/MODLAUNCHER]: ModLauncher running: args [--launchTarget, forgegametestserveruserdev, --gameDir, ., --fml.forgeVersion, 47.4.10, --fml.mcVersion, 1.20.1, --fml.forgeGroup, net.minecraftforge, --fml.mcpVersion, 20230612.114412]
+[20:29:59] [main/INFO] [cp.mo.mo.Launcher/MODLAUNCHER]: ModLauncher 10.0.9+10.0.9+main.dcd20f30 starting: java version 17.0.17 by Eclipse Adoptium; OS Linux arch amd64 version 6.18.55
+[20:29:59] [main/INFO] [ne.mi.fm.lo.ImmediateWindowHandler/]: ImmediateWindowProvider not loading because launch target is forgegametestserveruserdev
+[20:29:59] [main/INFO] [mixin/]: SpongePowered MIXIN Subsystem Version=0.8.5 Source=union:/workspace/.gradle/caches/modules-2/files-2.1/org.spongepowered/mixin/0.8.5/9d1c0c3a304ae6697ecd477218fa61b850bf57fc/mixin-0.8.5.jar%23116!/ Service=ModLauncher Env=SERVER
+[20:30:00] [main/WARN] [ne.mi.fm.lo.mo.ModFileParser/LOADING]: Mod file /workspace/.gradle/caches/modules-2/files-2.1/net.minecraftforge/javafmllanguage/1.20.1-47.4.10/ccc533c7dd67e0983217197d7549c8b49e7ab453/javafmllanguage-1.20.1-47.4.10.jar is missing mods.toml file
+[20:30:00] [main/WARN] [ne.mi.fm.lo.mo.ModFileParser/LOADING]: Mod file /workspace/.gradle/caches/modules-2/files-2.1/net.minecraftforge/lowcodelanguage/1.20.1-47.4.10/e9a2879fe3612ea34b9728ec2633304a1e67d480/lowcodelanguage-1.20.1-47.4.10.jar is missing mods.toml file
+[20:30:00] [main/WARN] [ne.mi.fm.lo.mo.ModFileParser/LOADING]: Mod file /workspace/.gradle/caches/modules-2/files-2.1/net.minecraftforge/mclanguage/1.20.1-47.4.10/ec5cefbbc65c67302b8fac317010faab85fa14b9/mclanguage-1.20.1-47.4.10.jar is missing mods.toml file
+[20:30:00] [main/WARN] [ne.mi.fm.lo.mo.ModFileParser/LOADING]: Mod file /workspace/.gradle/caches/modules-2/files-2.1/net.minecraftforge/fmlcore/1.20.1-47.4.10/94dae566be650566ea9115a1414ab76bfcf5a804/fmlcore-1.20.1-47.4.10.jar is missing mods.toml file
+[20:30:00] [main/INFO] [ne.mi.fm.lo.mo.JarInJarDependencyLocator/]: Found 14 dependencies adding them to mods collection
+[20:30:01] [main/INFO] [mixin/]: Compatibility level set to JAVA_17
+[20:30:01] [main/INFO] [cp.mo.mo.LaunchServiceHandler/MODLAUNCHER]: Launching target 'forgegametestserveruserdev' with arguments [--gameDir, .]
+[20:30:01] [main/INFO] [mixin/]: Remapping refMap geckolib.refmap.json using /workspace/FK-mod/build/createSrgToMcp/output.srg
+[20:30:01] [main/INFO] [mixin/]: Remapping refMap mixins.superbwarfare.refmap.json using /workspace/FK-mod/build/createSrgToMcp/output.srg
+[20:30:01] [main/INFO] [mixin/]: Remapping refMap curios.refmap.json using /workspace/FK-mod/build/createSrgToMcp/output.srg
+[20:30:01] [main/INFO] [mixin/]: Remapping refMap backend-flywheel.refmap.json using /workspace/FK-mod/build/createSrgToMcp/output.srg
+[20:30:01] [main/INFO] [mixin/]: Remapping refMap flywheel.refmap.json using /workspace/FK-mod/build/createSrgToMcp/output.srg
+[20:30:01] [main/INFO] [mixin/]: Remapping refMap ponder.refmap.json using /workspace/FK-mod/build/createSrgToMcp/output.srg
+[20:30:01] [main/INFO] [mixin/]: Remapping refMap ponder.refmap.json using /workspace/FK-mod/build/createSrgToMcp/output.srg
+[20:30:01] [main/INFO] [mixin/]: Remapping refMap simplebedrockmodel.refmap.json using /workspace/FK-mod/build/createSrgToMcp/output.srg
+[20:30:02] [main/INFO] [MixinExtras|Service/]: Initializing MixinExtras via com.llamalad7.mixinextras.service.MixinExtrasServiceImpl(version=0.3.6).
+[20:30:06] [modloading-worker-0/INFO] [ne.mi.co.ForgeMod/FORGEMOD]: Forge mod loading, version 47.4.10, for MC 1.20.1 with MCP 20230612.114412
+[20:30:06] [modloading-worker-0/INFO] [ne.mi.co.MinecraftForge/FORGE]: MinecraftForge v47.4.10 Initialized
+[20:30:06] [modloading-worker-0/INFO] [th.ko.te.KotlinForForge/]: Kotlin For Forge Enabled!
+[20:30:08] [Forge Version Check/INFO] [ne.mi.fm.VersionChecker/]: [forge] Starting version check at https://files.minecraftforge.net/net/minecraftforge/forge/promotions_slim.json
+[20:30:08] [modloading-worker-0/INFO] [co.at.su.Mod/]: Now Loading...
+* This Mod used to be made by MCreator *
+  _____  ______  __          __ 
+ / ____| |  __ \ \ \        / / 
+| (___   | |__) | \ \  /\  / /  
+ \___ \  |  __ (   \ \/  \/ /   
+ ____) | | |__) |   \  /\  /    
+|_____/  |_____/     \/  \/
+* Superb Warfare - Version: 0.8.9.2 *
+[20:30:09] [Forge Version Check/INFO] [ne.mi.fm.VersionChecker/]: [forge] Found status: OUTDATED Current: 47.4.10 Target: 47.4.28
+[20:30:09] [main/INFO] [mojang/YggdrasilAuthenticationService]: Environment: authHost='https://authserver.mojang.com', accountsHost='https://api.mojang.com', sessionHost='https://sessionserver.mojang.com', servicesHost='https://api.minecraftservices.com', name='PROD'
+[20:30:10] [main/WARN] [minecraft/VanillaPackResourcesBuilder]: Assets URL 'union:/workspace/FK-mod/build/fg_cache/net/minecraftforge/forge/1.20.1-47.4.10_mapped_official_1.20.1/forge-1.20.1-47.4.10_mapped_official_1.20.1.jar%23181!/assets/.mcassetsroot' uses unexpected schema
+[20:30:10] [main/WARN] [minecraft/VanillaPackResourcesBuilder]: Assets URL 'union:/workspace/FK-mod/build/fg_cache/net/minecraftforge/forge/1.20.1-47.4.10_mapped_official_1.20.1/forge-1.20.1-47.4.10_mapped_official_1.20.1.jar%23181!/data/.mcassetsroot' uses unexpected schema
+[20:30:11] [Worker-Main-4/ERROR] [ne.mi.co.ForgeHooks/]: Couldn't parse element loot_tables:superbwarfare:grant_manual
+com.google.gson.JsonSyntaxException: Expected name to be an item, was unknown string 'patchouli:guide_book'
+	at net.minecraft.util.GsonHelper.lambda$convertToItem$0(GsonHelper.java:145) ~[forge-1.20.1-47.4.10_mapped_official_1.20.1.jar%23181!/:?] {re:classloading}
+	at java.util.Optional.orElseThrow(Optional.java:403) ~[?:?] {}
+	at net.minecraft.util.GsonHelper.convertToItem(GsonHelper.java:145) ~[forge-1.20.1-47.4.10_mapped_official_1.20.1.jar%23181!/:?] {re:classloading}
+	at net.minecraft.util.GsonHelper.getAsItem(GsonHelper.java:153) ~[forge-1.20.1-47.4.10_mapped_official_1.20.1.jar%23181!/:?] {re:classloading}
+	at net.minecraft.world.level.storage.loot.entries.LootItem$Serializer.deserialize(LootItem.java:55) ~[forge-1.20.1-47.4.10_mapped_official_1.20.1.jar%23181!/:?] {re:classloading}
+	at net.minecraft.world.level.storage.loot.entries.LootItem$Serializer.deserialize(LootItem.java:40) ~[forge-1.20.1-47.4.10_mapped_official_1.20.1.jar%23181!/:?] {re:classloading}
+	at net.minecraft.world.level.storage.loot.entries.LootPoolSingletonContainer$Serializer.deserializeCustom(LootPoolSingletonContainer.java:151) ~[forge-1.20.1-47.4.10_mapped_official_1.20.1.jar%23181!/:?] {re:classloading}
+	at net.minecraft.world.level.storage.loot.entries.LootPoolSingletonContainer$Serializer.deserializeCustom(LootPoolSingletonContainer.java:129) ~[forge-1.20.1-47.4.10_mapped_official_1.20.1.jar%23181!/:?] {re:classloading}
+	at net.minecraft.world.level.storage.loot.entries.LootPoolEntryContainer$Serializer.deserialize(LootPoolEntryContainer.java:86) ~[forge-1.20.1-47.4.10_mapped_official_1.20.1.jar%23181!/:?] {re:classloading}
+	at net.minecraft.world.level.storage.loot.entries.LootPoolEntryContainer$Serializer.deserialize(LootPoolEntryContainer.java:74) ~[forge-1.20.1-47.4.10_mapped_official_1.20.1.jar%23181!/:?] {re:classloading}
+	at net.minecraft.world.level.storage.loot.GsonAdapterFactory$JsonAdapter.deserialize(GsonAdapterFactory.java:102) ~[forge-1.20.1-47.4.10_mapped_official_1.20.1.jar%23181!/:?] {re:classloading}
+	at com.google.gson.internal.bind.TreeTypeAdapter.read(TreeTypeAdapter.java:76) ~[gson-2.10.jar%23118!/:?] {}
+	at com.google.gson.internal.bind.TypeAdapterRuntimeTypeWrapper.read(TypeAdapterRuntimeTypeWrapper.java:40) ~[gson-2.10.jar%23118!/:?] {}
+	at com.google.gson.internal.bind.ArrayTypeAdapter.read(ArrayTypeAdapter.java:72) ~[gson-2.10.jar%23118!/:?] {}
+	at com.google.gson.Gson.fromJson(Gson.java:1214) ~[gson-2.10.jar%23118!/:?] {}
+	at com.google.gson.Gson.fromJson(Gson.java:1319) ~[gson-2.10.jar%23118!/:?] {}
+	at com.google.gson.Gson.fromJson(Gson.java:1290) ~[gson-2.10.jar%23118!/:?] {}
+	at com.google.gson.internal.bind.TreeTypeAdapter$GsonContextImpl.deserialize(TreeTypeAdapter.java:179) ~[gson-2.10.jar%23118!/:?] {}
+	at net.minecraft.util.GsonHelper.convertToObject(GsonHelper.java:463) ~[forge-1.20.1-47.4.10_mapped_official_1.20.1.jar%23181!/:?] {re:classloading}
+	at net.minecraft.util.GsonHelper.getAsObject(GsonHelper.java:471) ~[forge-1.20.1-47.4.10_mapped_official_1.20.1.jar%23181!/:?] {re:classloading}
+	at net.minecraft.world.level.storage.loot.LootPool$Serializer.deserialize(LootPool.java:192) ~[forge-1.20.1-47.4.10_mapped_official_1.20.1.jar%23181!/:?] {re:classloading}
+	at net.minecraft.world.level.storage.loot.LootPool$Serializer.deserialize(LootPool.java:189) ~[forge-1.20.1-47.4.10_mapped_official_1.20.1.jar%23181!/:?] {re:classloading}
+	at com.google.gson.internal.bind.TreeTypeAdapter.read(TreeTypeAdapter.java:76) ~[gson-2.10.jar%23118!/:?] {}
+	at com.google.gson.internal.bind.TypeAdapterRuntimeTypeWrapper.read(TypeAdapterRuntimeTypeWrapper.java:40) ~[gson-2.10.jar%23118!/:?] {}
+	at com.google.gson.internal.bind.ArrayTypeAdapter.read(ArrayTypeAdapter.java:72) ~[gson-2.10.jar%23118!/:?] {}
+	at com.google.gson.Gson.fromJson(Gson.java:1214) ~[gson-2.10.jar%23118!/:?] {}
+	at com.google.gson.Gson.fromJson(Gson.java:1319) ~[gson-2.10.jar%23118!/:?] {}
+	at com.google.gson.Gson.fromJson(Gson.java:1290) ~[gson-2.10.jar%23118!/:?] {}
+	at com.google.gson.internal.bind.TreeTypeAdapter$GsonContextImpl.deserialize(TreeTypeAdapter.java:179) ~[gson-2.10.jar%23118!/:?] {}
+	at net.minecraft.util.GsonHelper.convertToObject(GsonHelper.java:463) ~[forge-1.20.1-47.4.10_mapped_official_1.20.1.jar%23181!/:?] {re:classloading}
+	at net.minecraft.util.GsonHelper.getAsObject(GsonHelper.java:481) ~[forge-1.20.1-47.4.10_mapped_official_1.20.1.jar%23181!/:?] {re:classloading}
+	at net.minecraft.world.level.storage.loot.LootTable$Serializer.deserialize(LootTable.java:294) ~[forge-1.20.1-47.4.10_mapped_official_1.20.1.jar%23181!/:?] {re:classloading}
+	at net.minecraft.world.level.storage.loot.LootTable$Serializer.deserialize(LootTable.java:291) ~[forge-1.20.1-47.4.10_mapped_official_1.20.1.jar%23181!/:?] {re:classloading}
+	at com.google.gson.internal.bind.TreeTypeAdapter.read(TreeTypeAdapter.java:76) ~[gson-2.10.jar%23118!/:?] {}
+	at com.google.gson.Gson.fromJson(Gson.java:1214) ~[gson-2.10.jar%23118!/:?] {}
+	at com.google.gson.Gson.fromJson(Gson.java:1319) ~[gson-2.10.jar%23118!/:?] {}
+	at com.google.gson.Gson.fromJson(Gson.java:1261) ~[gson-2.10.jar%23118!/:?] {}
+	at net.minecraftforge.common.ForgeHooks.loadLootTable(ForgeHooks.java:872) ~[forge-1.20.1-47.4.10_mapped_official_1.20.1.jar%23180%23187!/:?] {re:classloading}
+	at net.minecraftforge.common.ForgeHooks.lambda$getLootTableDeserializer$3(ForgeHooks.java:849) ~[forge-1.20.1-47.4.10_mapped_official_1.20.1.jar%23180%23187!/:?] {re:classloading}
+	at net.minecraft.world.level.storage.loot.LootDataType.deserialize(LootDataType.java:45) ~[forge-1.20.1-47.4.10_mapped_official_1.20.1.jar%23181!/:?] {re:classloading}
+	at net.minecraft.world.level.storage.loot.LootDataManager.lambda$scheduleElementParse$4(LootDataManager.java:56) ~[forge-1.20.1-47.4.10_mapped_official_1.20.1.jar%23181!/:?] {re:classloading}
+	at java.util.HashMap.forEach(HashMap.java:1421) ~[?:?] {}
+	at net.minecraft.world.level.storage.loot.LootDataManager.lambda$scheduleElementParse$5(LootDataManager.java:55) ~[forge-1.20.1-47.4.10_mapped_official_1.20.1.jar%23181!/:?] {re:classloading}
+	at java.util.concurrent.CompletableFuture$AsyncRun.run(CompletableFuture.java:1804) ~[?:?] {}
+	at java.util.concurrent.CompletableFuture$AsyncRun.exec(CompletableFuture.java:1796) ~[?:?] {}
+	at java.util.concurrent.ForkJoinTask.doExec(ForkJoinTask.java:373) ~[?:?] {}
+	at java.util.concurrent.ForkJoinPool$WorkQueue.topLevelExec(ForkJoinPool.java:1182) ~[?:?] {}
+	at java.util.concurrent.ForkJoinPool.scan(ForkJoinPool.java:1655) ~[?:?] {}
+	at java.util.concurrent.ForkJoinPool.runWorker(ForkJoinPool.java:1622) ~[?:?] {}
+	at java.util.concurrent.ForkJoinWorkerThread.run(ForkJoinWorkerThread.java:165) ~[?:?] {}
+[20:30:11] [main/INFO] [minecraft/RecipeManager]: Loaded 9 recipes
+[20:30:11] [main/INFO] [minecraft/AdvancementList]: Loaded 1787 advancements
+[20:30:11] [main/INFO] [to.th.cu.Curios/]: Loaded 13 curio slots
+[20:30:11] [main/INFO] [to.th.cu.Curios/]: Loaded 1 curio entities
+[20:30:12] [main/INFO] [ne.mi.ga.ForgeGameTestHooks/]: Enabled Gametest Namespaces: [iruxfk2000_sbw, iruxfk2000]
+[20:30:14] [Server thread/INFO] [minecraft/MinecraftServer]: Preparing start region for dimension minecraft:overworld
+[20:30:14] [Yggdrasil Key Fetcher/ERROR] [mojang/YggdrasilServicesKeyInfo]: Failed to request yggdrasil public key
+com.mojang.authlib.exceptions.AuthenticationUnavailableException: Cannot contact authentication server
+	at com.mojang.authlib.yggdrasil.YggdrasilAuthenticationService.makeRequest(YggdrasilAuthenticationService.java:119) ~[authlib-4.0.43.jar%23121!/:?] {}
+	at com.mojang.authlib.yggdrasil.YggdrasilAuthenticationService.makeRequest(YggdrasilAuthenticationService.java:91) ~[authlib-4.0.43.jar%23121!/:?] {}
+	at com.mojang.authlib.yggdrasil.YggdrasilServicesKeyInfo.fetch(YggdrasilServicesKeyInfo.java:94) ~[authlib-4.0.43.jar%23121!/:?] {}
+	at com.mojang.authlib.yggdrasil.YggdrasilServicesKeyInfo.lambda$get$1(YggdrasilServicesKeyInfo.java:81) ~[authlib-4.0.43.jar%23121!/:?] {}
+	at java.util.concurrent.Executors$RunnableAdapter.call(Executors.java:539) ~[?:?] {}
+	at java.util.concurrent.FutureTask.runAndReset(FutureTask.java:305) ~[?:?] {}
+	at java.util.concurrent.ScheduledThreadPoolExecutor$ScheduledFutureTask.run(ScheduledThreadPoolExecutor.java:305) ~[?:?] {}
+	at java.util.concurrent.ThreadPoolExecutor.runWorker(ThreadPoolExecutor.java:1136) ~[?:?] {}
+	at java.util.concurrent.ThreadPoolExecutor$Worker.run(ThreadPoolExecutor.java:635) ~[?:?] {}
+	at java.lang.Thread.run(Thread.java:840) ~[?:?] {}
+Caused by: java.net.ConnectException: Connection refused
+	at sun.nio.ch.Net.pollConnect(Native Method) ~[?:?] {}
+	at sun.nio.ch.Net.pollConnectNow(Net.java:672) ~[?:?] {}
+	at sun.nio.ch.NioSocketImpl.timedFinishConnect(NioSocketImpl.java:554) ~[?:?] {}
+	at sun.nio.ch.NioSocketImpl.connect(NioSocketImpl.java:602) ~[?:?] {}
+	at java.net.SocksSocketImpl.connect(SocksSocketImpl.java:327) ~[?:?] {}
+	at java.net.Socket.connect(Socket.java:633) ~[?:?] {}
+	at sun.security.ssl.SSLSocketImpl.connect(SSLSocketImpl.java:304) ~[?:?] {}
+	at sun.net.NetworkClient.doConnect(NetworkClient.java:178) ~[?:?] {}
+	at sun.net.www.http.HttpClient.openServer(HttpClient.java:533) ~[?:?] {}
+	at sun.net.www.http.HttpClient.openServer(HttpClient.java:638) ~[?:?] {}
+	at sun.net.www.protocol.https.HttpsClient.<init>(HttpsClient.java:266) ~[?:?] {}
+	at sun.net.www.protocol.https.HttpsClient.New(HttpsClient.java:380) ~[?:?] {}
+	at sun.net.www.protocol.https.AbstractDelegateHttpsURLConnection.getNewHttpClient(AbstractDelegateHttpsURLConnection.java:193) ~[?:?] {}
+	at sun.net.www.protocol.http.HttpURLConnection.plainConnect0(HttpURLConnection.java:1307) ~[?:?] {}
+	at sun.net.www.protocol.http.HttpURLConnection.plainConnect(HttpURLConnection.java:1148) ~[?:?] {}
+	at sun.net.www.protocol.https.AbstractDelegateHttpsURLConnection.connect(AbstractDelegateHttpsURLConnection.java:179) ~[?:?] {}
+	at sun.net.www.protocol.http.HttpURLConnection.getInputStream0(HttpURLConnection.java:1717) ~[?:?] {}
+	at sun.net.www.protocol.http.HttpURLConnection.getInputStream(HttpURLConnection.java:1641) ~[?:?] {}
+	at sun.net.www.protocol.https.HttpsURLConnectionImpl.getInputStream(HttpsURLConnectionImpl.java:224) ~[?:?] {}
+	at com.mojang.authlib.HttpAuthenticationService.performGetRequest(HttpAuthenticationService.java:140) ~[authlib-4.0.43.jar%23121!/:?] {}
+	at com.mojang.authlib.yggdrasil.YggdrasilAuthenticationService.makeRequest(YggdrasilAuthenticationService.java:96) ~[authlib-4.0.43.jar%23121!/:?] {}
+	... 9 more
+[20:30:16] [Worker-Main-3/INFO] [minecraft/LoggerChunkProgressListener]: Preparing spawn area: 0%
+[20:30:16] [Worker-Main-2/INFO] [minecraft/LoggerChunkProgressListener]: Preparing spawn area: 0%
+[20:30:16] [Worker-Main-3/INFO] [minecraft/LoggerChunkProgressListener]: Preparing spawn area: 0%
+[20:30:16] [Worker-Main-1/INFO] [minecraft/LoggerChunkProgressListener]: Preparing spawn area: 0%
+[20:30:16] [Worker-Main-2/INFO] [minecraft/LoggerChunkProgressListener]: Preparing spawn area: 0%
+[20:30:16] [Worker-Main-1/INFO] [minecraft/LoggerChunkProgressListener]: Preparing spawn area: 0%
+[20:30:17] [Worker-Main-4/INFO] [minecraft/LoggerChunkProgressListener]: Preparing spawn area: 45%
+[20:30:17] [Server thread/INFO] [minecraft/LoggerChunkProgressListener]: Time elapsed: 3419 ms
+[20:30:17] [Server thread/INFO] [minecraft/GameTestServer]: Started game test server
+[20:30:17] [Server thread/INFO] [ne.mi.se.pe.PermissionAPI/]: Successfully initialized permission handler forge:default_handler
+[20:30:18] [Server thread/INFO] [minecraft/GameTestBatchRunner]: Running test batch 'radar_map:1' (1 tests)...
+[20:30:18] [Server thread/INFO] [minecraft/GameTestServer]: 46 tests are now running!
+[20:30:19] [Server thread/INFO] [minecraft/GameTestBatchRunner]: Running test batch 'long_range:1' (1 tests)...
+[20:30:19] [Server thread/WARN] [minecraft/MinecraftServer]: Can't keep up! Is the server overloaded? Running 2043ms or 40 ticks behind
+[20:30:20] [Server thread/INFO] [fr.ir.fk.co.SbwCompatibility/]: Irux FK-2000: SBW 0.8.9.2 adapter methods and IFF predicate resolved; gameplay compatibility still requires testing
+[20:30:21] [Server thread/INFO] [minecraft/GameTestServer]: [+_                                            ]
+[20:30:22] [Server thread/INFO] [minecraft/GameTestServer]: [+_                                            ]
+[20:30:23] [Server thread/INFO] [minecraft/GameTestServer]: [+_                                            ]
+[20:30:24] [Server thread/INFO] [minecraft/GameTestServer]: [+_                                            ]
+[20:30:25] [Server thread/INFO] [minecraft/GameTestServer]: [+_                                            ]
+[20:30:26] [Server thread/INFO] [minecraft/GameTestServer]: [+_                                            ]
+[20:30:27] [Server thread/INFO] [minecraft/GameTestServer]: [+_                                            ]
+[20:30:28] [Server thread/INFO] [minecraft/GameTestServer]: [+_                                            ]
+[20:30:28] [Server thread/INFO] [minecraft/GameTestServer]: [+_                                            ]
+[20:30:29] [Server thread/INFO] [minecraft/GameTestServer]: [+_                                            ]
+[20:30:30] [Server thread/INFO] [minecraft/GameTestServer]: [+_                                            ]
+[20:30:30] [Server thread/INFO] [minecraft/GameTestServer]: [+_                                            ]
+[20:30:31] [Server thread/INFO] [minecraft/GameTestServer]: [+_                                            ]
+[20:30:31] [Server thread/INFO] [minecraft/GameTestServer]: [+_                                            ]
+[20:30:32] [Server thread/INFO] [minecraft/GameTestServer]: [+_                                            ]
+[20:30:36] [Server thread/INFO] [minecraft/GameTestBatchRunner]: Running test batch 'defaultBatch:1' (28 tests)...
+[20:30:40] [Server thread/WARN] [minecraft/MinecraftServer]: Can't keep up! Is the server overloaded? Running 5466ms or 109 ticks behind
+[20:30:41] [Server thread/INFO] [minecraft/GameTestServer]: [++_+____++___+++_++__+___+_++_                ]
+[20:30:42] [Server thread/INFO] [minecraft/GameTestServer]: [++++____++___+++_++__+__++_++_                ]
+[20:30:43] [Server thread/INFO] [minecraft/GameTestServer]: [+++++__+++___+++_++__+__++_+++                ]
+[20:30:43] [Server thread/INFO] [minecraft/GameTestServer]: [+++++__++++++++++++__++_++_+++                ]
+[20:30:44] [Server thread/INFO] [minecraft/GameTestServer]: [+++++__+++++++++++++_+++++_+++                ]
+[20:30:44] [Server thread/INFO] [minecraft/GameTestServer]: [+++++_++++++++++++++_+++++_+++                ]
+[20:30:45] [Server thread/INFO] [minecraft/GameTestServer]: [+++++_++++++++++++++_+++++_+++                ]
+[20:30:45] [Server thread/INFO] [minecraft/GameTestServer]: [++++++++++++++++++++_+++++++++                ]
+[20:30:46] [Server thread/INFO] [minecraft/GameTestBatchRunner]: Running test batch 'auto_allocation:1' (2 tests)...
+[20:30:46] [Server thread/INFO] [minecraft/GameTestServer]: [++++++++++++++++++++++++++++++__              ]
+[20:30:47] [Server thread/INFO] [minecraft/GameTestServer]: [++++++++++++++++++++++++++++++__              ]
+[20:30:47] [Server thread/INFO] [minecraft/GameTestServer]: [++++++++++++++++++++++++++++++__              ]
+[20:30:48] [Server thread/INFO] [minecraft/GameTestServer]: [++++++++++++++++++++++++++++++__              ]
+[20:30:49] [Server thread/INFO] [minecraft/GameTestServer]: [++++++++++++++++++++++++++++++__              ]
+[20:30:49] [Server thread/INFO] [minecraft/GameTestServer]: [++++++++++++++++++++++++++++++__              ]
+[20:30:50] [Server thread/INFO] [minecraft/GameTestServer]: [++++++++++++++++++++++++++++++__              ]
+[20:30:50] [Server thread/INFO] [minecraft/GameTestServer]: [++++++++++++++++++++++++++++++__              ]
+[20:30:51] [Server thread/INFO] [minecraft/GameTestBatchRunner]: Running test batch 'sbw_compatibility:1' (5 tests)...
+[20:30:52] [Server thread/INFO] [minecraft/GameTestServer]: [++++++++++++++++++++++++++++++++_+_++         ]
+[20:30:53] [Server thread/INFO] [minecraft/GameTestServer]: [++++++++++++++++++++++++++++++++_+_++         ]
+[20:30:53] [Server thread/INFO] [minecraft/GameTestServer]: [++++++++++++++++++++++++++++++++_+_++         ]
+[20:30:54] [Server thread/INFO] [minecraft/GameTestServer]: [++++++++++++++++++++++++++++++++++_++         ]
+[20:30:54] [Server thread/INFO] [fr.ir.fk.ga.MissileSbwGameTests/]: FK-2000 warhead integration: actual AH-6 health 250.0 -> 139.4, damage 110.600006, allied AH-6 250.0 -> 250.0
+[20:30:55] [Server thread/INFO] [minecraft/GameTestBatchRunner]: Running test batch 'extended_control:1' (4 tests)...
+[20:30:58] [Server thread/INFO] [minecraft/GameTestServer]: [+++++++++++++++++++++++++++++++++++++__++     ]
+[20:30:58] [Server thread/INFO] [minecraft/GameTestServer]: [+++++++++++++++++++++++++++++++++++++__++     ]
+[20:30:59] [Server thread/INFO] [minecraft/GameTestBatchRunner]: Running test batch 'sbw_assembly:1' (2 tests)...
+[20:31:00] [Server thread/INFO] [minecraft/GameTestServer]: [+++++++++++++++++++++++++++++++++++++++++_+   ]
+[20:31:00] [Server thread/INFO] [minecraft/GameTestServer]: [+++++++++++++++++++++++++++++++++++++++++_+   ]
+[20:31:02] [Server thread/INFO] [minecraft/GameTestBatchRunner]: Running test batch 'chunk_loading:1' (3 tests)...
+[20:31:03] [Server thread/INFO] [minecraft/GameTestServer]: [+++++++++++++++++++++++++++++++++++++++++++_++]
+[20:31:04] [Server thread/INFO] [minecraft/GameTestServer]: [++++++++++++++++++++++++++++++++++++++++++++++]
+[20:31:04] [Server thread/INFO] [minecraft/GameTestServer]: ========= 46 GAME TESTS COMPLETE ======================
+[20:31:04] [Server thread/INFO] [minecraft/GameTestServer]: All 46 required tests passed :)
+[20:31:04] [Server thread/INFO] [minecraft/GameTestServer]: ====================================================
+[20:31:04] [Server thread/INFO] [minecraft/MinecraftServer]: Stopping server
+[20:31:04] [Server thread/INFO] [minecraft/MinecraftServer]: Saving players
+[20:31:04] [Server thread/INFO] [minecraft/MinecraftServer]: Saving worlds
+[20:31:04] [Server thread/INFO] [minecraft/MinecraftServer]: Saving chunks for level 'ServerLevel[world]'/minecraft:overworld
+[20:31:06] [Server thread/INFO] [minecraft/MinecraftServer]: Saving chunks for level 'ServerLevel[world]'/minecraft:the_end
+[20:31:06] [Server thread/INFO] [minecraft/MinecraftServer]: Saving chunks for level 'ServerLevel[world]'/minecraft:the_nether
+[20:31:06] [Server thread/INFO] [minecraft/MinecraftServer]: ThreadedAnvilChunkStorage (world): All chunks are saved
+[20:31:06] [Server thread/INFO] [minecraft/MinecraftServer]: ThreadedAnvilChunkStorage (DIM1): All chunks are saved
+[20:31:06] [Server thread/INFO] [minecraft/MinecraftServer]: ThreadedAnvilChunkStorage (DIM-1): All chunks are saved
+[20:31:06] [Server thread/INFO] [minecraft/MinecraftServer]: ThreadedAnvilChunkStorage: All dimensions are saved
+[20:31:07] [Server thread/INFO] [minecraft/GameTestServer]: Game test server shutting down
+
+Deprecated Gradle features were used in this build, making it incompatible with Gradle 9.0.
+
+You can use '--warning-mode all' to show the individual deprecation warnings and determine if they come from your own scripts or plugins.
+
+For more on this, please refer to https://docs.gradle.org/8.8/userguide/command_line_interface.html#sec:command_line_warnings in the Gradle documentation.
+
+BUILD SUCCESSFUL in 1m 21s
+15 actionable tasks: 7 executed, 8 up-to-date

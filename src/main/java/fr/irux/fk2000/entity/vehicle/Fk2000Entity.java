@@ -1,12 +1,18 @@
 package fr.irux.fk2000.entity.vehicle;
 
 import fr.irux.fk2000.config.ModConfig;
+import fr.irux.fk2000.compat.SbwCompatibility;
 import fr.irux.fk2000.entity.missile.MissileEntity;
+import fr.irux.fk2000.loading.FkChunkLoading;
+import fr.irux.fk2000.network.ExplosionEffects;
 import fr.irux.fk2000.radar.RadarContact;
 import fr.irux.fk2000.radar.RadarSystem;
+import fr.irux.fk2000.radar.TargetMode;
+import fr.irux.fk2000.radar.TargetCoordinates;
 import fr.irux.fk2000.registry.ModContent;
 import fr.irux.fk2000.registry.ModSounds;
 import net.minecraft.core.BlockPos;
+import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.protocol.Packet;
 import net.minecraft.network.protocol.game.ClientGamePacketListener;
@@ -19,6 +25,7 @@ import net.minecraft.sounds.SoundSource;
 import net.minecraft.util.Mth;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResult;
+import net.minecraft.world.damagesource.DamageSource;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.LivingEntity;
@@ -34,9 +41,13 @@ import net.minecraft.world.level.Level;
 import net.minecraft.world.phys.Vec3;
 import net.minecraft.world.phys.AABB;
 import net.minecraftforge.network.NetworkHooks;
+import net.minecraftforge.event.level.ExplosionEvent;
+import net.minecraftforge.eventbus.api.SubscribeEvent;
+import net.minecraftforge.fml.common.Mod;
 
 import javax.annotation.Nullable;
 import java.util.List;
+import java.util.LinkedHashSet;
 import java.util.Optional;
 import java.util.UUID;
 
@@ -46,6 +57,7 @@ import java.util.UUID;
  * Remote input is transient and expires; no controller can leave a vehicle driving
  * after disconnecting or leaving its loaded chunk.
  */
+@Mod.EventBusSubscriber(modid = "iruxfk2000")
 public class Fk2000Entity extends PathfinderMob implements OwnableEntity {
     private static final EntityDataAccessor<Optional<UUID>> OWNER =
             SynchedEntityData.defineId(Fk2000Entity.class, EntityDataSerializers.OPTIONAL_UUID);
@@ -67,9 +79,33 @@ public class Fk2000Entity extends PathfinderMob implements OwnableEntity {
             SynchedEntityData.defineId(Fk2000Entity.class, EntityDataSerializers.FLOAT);
     private static final EntityDataAccessor<Integer> TARGET =
             SynchedEntityData.defineId(Fk2000Entity.class, EntityDataSerializers.INT);
+    private static final EntityDataAccessor<Integer> TARGET_MODE =
+            SynchedEntityData.defineId(Fk2000Entity.class, EntityDataSerializers.INT);
+    private static final EntityDataAccessor<Integer> AUTO_FIRE_MODE =
+            SynchedEntityData.defineId(Fk2000Entity.class, EntityDataSerializers.INT);
+    private static final EntityDataAccessor<Float> ENGAGEMENT_RANGE =
+            SynchedEntityData.defineId(Fk2000Entity.class, EntityDataSerializers.FLOAT);
+    private static final EntityDataAccessor<Integer> CAP_MODE =
+            SynchedEntityData.defineId(Fk2000Entity.class, EntityDataSerializers.INT);
+    private static final EntityDataAccessor<Integer> CAPS_PRESENT =
+            SynchedEntityData.defineId(Fk2000Entity.class, EntityDataSerializers.INT);
+    private static final EntityDataAccessor<Integer> LAST_LAUNCH_TUBE =
+            SynchedEntityData.defineId(Fk2000Entity.class, EntityDataSerializers.INT);
+    private static final EntityDataAccessor<Float> SUSPENSION =
+            SynchedEntityData.defineId(Fk2000Entity.class, EntityDataSerializers.FLOAT);
+    private static final List<EntityDataAccessor<Float>> CAP_PROGRESS = List.of(
+            SynchedEntityData.defineId(Fk2000Entity.class, EntityDataSerializers.FLOAT),
+            SynchedEntityData.defineId(Fk2000Entity.class, EntityDataSerializers.FLOAT),
+            SynchedEntityData.defineId(Fk2000Entity.class, EntityDataSerializers.FLOAT),
+            SynchedEntityData.defineId(Fk2000Entity.class, EntityDataSerializers.FLOAT),
+            SynchedEntityData.defineId(Fk2000Entity.class, EntityDataSerializers.FLOAT),
+            SynchedEntityData.defineId(Fk2000Entity.class, EntityDataSerializers.FLOAT));
 
     private List<RadarContact> radarContacts = List.of();
     private UUID targetUUID;
+    private Vec3 targetCoordinates;
+    private final LinkedHashSet<UUID> selectedTargets = new LinkedHashSet<>();
+    private boolean salvoTargetLatched;
     private float throttle;
     private float steering;
     private boolean brake = true;
@@ -79,12 +115,21 @@ public class Fk2000Entity extends PathfinderMob implements OwnableEntity {
     private int reloadCooldown;
     private boolean preparing;
     private boolean automaticPreparation;
+    private final float[] previousCapProgress = new float[6];
+    private final int[] capCloseDelay = new int[6];
+    private float previousSuspension;
+    private float suspensionVelocity;
+    private boolean destructionStarted;
 
     public Fk2000Entity(EntityType<? extends PathfinderMob> type, Level level) {
         super(type, level);
         setNoAi(true);
         setPersistenceRequired();
         setMaxUpStep(VehicleGeometry.MAX_STEP);
+        if (!level.isClientSide) {
+            entityData.set(CAP_MODE, ModConfig.TUBE_CAP_MODE.get().ordinal());
+            setEngagementRange(ModConfig.RADAR_RANGE.get());
+        }
     }
 
     public static AttributeSupplier.Builder createAttributes() {
@@ -109,6 +154,14 @@ public class Fk2000Entity extends PathfinderMob implements OwnableEntity {
         entityData.define(LAUNCHER, 0F);
         entityData.define(WHEEL_ROLL, 0F);
         entityData.define(TARGET, -1);
+        entityData.define(TARGET_MODE, TargetMode.AIRCRAFT.ordinal());
+        entityData.define(AUTO_FIRE_MODE, AutoFireMode.SALVO.ordinal());
+        entityData.define(ENGAGEMENT_RANGE, 160F);
+        entityData.define(CAP_MODE, TubeCapMode.EJECT.ordinal());
+        entityData.define(CAPS_PRESENT, 0x3f);
+        entityData.define(LAST_LAUNCH_TUBE, -1);
+        entityData.define(SUSPENSION, 0F);
+        for (var accessor : CAP_PROGRESS) entityData.define(accessor, 0F);
     }
 
     /** Called by our placement item, never by a client packet. */
@@ -175,6 +228,84 @@ public class Fk2000Entity extends PathfinderMob implements OwnableEntity {
     public List<RadarContact> getRadarContacts() { return radarContacts; }
     public boolean isPreparingLaunch() { return preparing; }
 
+    public TargetMode getTargetMode() {
+        return TargetMode.values()[Mth.clamp(entityData.get(TARGET_MODE), 0, TargetMode.values().length - 1)];
+    }
+
+    public double getEngagementRange() { return entityData.get(ENGAGEMENT_RANGE); }
+
+    public void setEngagementRange(double range) {
+        if (level().isClientSide || !Double.isFinite(range)) return;
+        entityData.set(ENGAGEMENT_RANGE, (float) Mth.clamp(range, 16, ModConfig.MAX_ENGAGEMENT_RANGE.get()));
+    }
+
+    public void setTargetMode(TargetMode mode) {
+        if (level().isClientSide || mode == null || getTargetMode() == mode) return;
+        clearTarget();
+        selectedTargets.clear();
+        salvoTargetLatched = false;
+        radarContacts = List.of();
+        entityData.set(TARGET_MODE, mode.ordinal());
+        if (mode != TargetMode.COORDINATES) targetCoordinates = null;
+        else setAutoFireMode(AutoFireMode.SALVO);
+    }
+
+    public AutoFireMode getAutoFireMode() {
+        return AutoFireMode.values()[Mth.clamp(entityData.get(AUTO_FIRE_MODE), 0, AutoFireMode.values().length - 1)];
+    }
+
+    /** Changing allocation cancels the current engagement, so a stale launch cannot escape the new selection. */
+    public void setAutoFireMode(AutoFireMode mode) {
+        if (level().isClientSide || mode == null || getAutoFireMode() == mode
+                || getTargetMode() == TargetMode.COORDINATES && mode == AutoFireMode.ONE_PER_TARGET) return;
+        setAutoFire(false);
+        clearTarget();
+        selectedTargets.clear();
+        salvoTargetLatched = false;
+        entityData.set(AUTO_FIRE_MODE, mode.ordinal());
+    }
+
+    public List<Integer> getSelectedTargetIds() {
+        if (getAutoFireMode() == AutoFireMode.SALVO) return getLockedTargetId() >= 0 ? List.of(getLockedTargetId()) : List.of();
+        if (!(level() instanceof ServerLevel server)) return List.of();
+        return selectedTargets.stream().map(server::getEntity).filter(java.util.Objects::nonNull).map(Entity::getId).toList();
+    }
+
+    @Nullable
+    public Vec3 getTargetCoordinates() { return targetCoordinates; }
+
+    public boolean setTargetCoordinates(Vec3 coordinates) {
+        if (level().isClientSide || coordinates == null || !TargetCoordinates.isValid(this, coordinates)) return false;
+        setTargetMode(TargetMode.COORDINATES);
+        clearTarget();
+        targetCoordinates = coordinates;
+        return true;
+    }
+
+    public TubeCapMode getTubeCapMode() {
+        return TubeCapMode.values()[Mth.clamp(entityData.get(CAP_MODE), 0, TubeCapMode.values().length - 1)];
+    }
+
+    /** Covers may be changed only while idle, never in the middle of a physical launch. */
+    public void setTubeCapMode(TubeCapMode mode) {
+        if (level().isClientSide || mode == null || preparing) return;
+        for (var accessor : CAP_PROGRESS) if (entityData.get(accessor) > .01f) return;
+        entityData.set(CAP_MODE, mode.ordinal());
+        entityData.set(CAPS_PRESENT, 0x3f);
+    }
+
+    public int getCapsPresentMask() { return entityData.get(CAPS_PRESENT); }
+    public int getLastLaunchTube() { return entityData.get(LAST_LAUNCH_TUBE); }
+
+    public float getTubeCapProgress(int tube, float partialTick) {
+        int selected = Math.floorMod(tube, 6);
+        return Mth.lerp(Mth.clamp(partialTick, 0, 1), previousCapProgress[selected], entityData.get(CAP_PROGRESS.get(selected)));
+    }
+
+    public float getSuspensionCompression(float partialTick) {
+        return Mth.lerp(Mth.clamp(partialTick, 0, 1), previousSuspension, entityData.get(SUSPENSION));
+    }
+
     public Vec3 getDriverSeatPosition(float partialTick) {
         return VehicleGeometry.localToWorld(interpolatedPosition(partialTick),
                 Mth.rotLerp(partialTick, yRotO, getYRot()), VehicleGeometry.DRIVER_SEAT);
@@ -223,15 +354,43 @@ public class Fk2000Entity extends PathfinderMob implements OwnableEntity {
     }
 
     public void selectTarget(int entityId) {
-        if (level().isClientSide || !isRadarEnabled()) return;
-        if (entityId < 0) { clearTarget(); return; }
+        if (level().isClientSide || !isRadarEnabled() || getTargetMode() == TargetMode.COORDINATES) return;
+        if (entityId < 0) {
+            clearTarget();
+            selectedTargets.clear();
+            salvoTargetLatched = true;
+            return;
+        }
         // A forged entity ID must still occur in the current server-produced scan.
         Entity selected = level().getEntity(entityId);
         boolean observed = radarContacts.stream().anyMatch(contact -> contact.entityId() == entityId
                 && selected != null && contact.uuid().equals(selected.getUUID()));
         if (observed && RadarSystem.canTrack(this, selected)) {
-            targetUUID = selected.getUUID();
-            entityData.set(TARGET, selected.getId());
+            if (getAutoFireMode() == AutoFireMode.ONE_PER_TARGET) {
+                UUID id = selected.getUUID();
+                if (!selectedTargets.remove(id) && selectedTargets.size() < 32) selectedTargets.add(id);
+                refreshQueuedTarget();
+            } else {
+                if (targetUUID != null && !targetUUID.equals(selected.getUUID())) clearTarget();
+                targetUUID = selected.getUUID();
+                entityData.set(TARGET, selected.getId());
+                salvoTargetLatched = true;
+            }
+        }
+    }
+
+    private void refreshQueuedTarget() {
+        if (!(level() instanceof ServerLevel server)) return;
+        selectedTargets.removeIf(id -> !RadarSystem.canTrack(this, server.getEntity(id)));
+        UUID next = selectedTargets.isEmpty() ? null : selectedTargets.iterator().next();
+        if (java.util.Objects.equals(targetUUID, next)) return;
+        clearTarget();
+        if (next != null) {
+            Entity entity = server.getEntity(next);
+            if (entity != null) {
+                targetUUID = next;
+                entityData.set(TARGET, entity.getId());
+            }
         }
     }
 
@@ -257,7 +416,7 @@ public class Fk2000Entity extends PathfinderMob implements OwnableEntity {
 
     private boolean beginLaunch(boolean automatic) {
         if (level().isClientSide || !isRadarEnabled() || preparing || launchCooldown > 0
-                || getMissileCount() <= 0 || !RadarSystem.canTrack(this, getLockedTarget())) return false;
+                || getMissileCount() <= 0 || !hasValidFireTarget()) return false;
         // Cold launch needs a stable platform; driving commands automatically brake during preparation.
         if (Math.abs(getSpeed()) > 0.08F) return false;
         preparing = true;
@@ -265,9 +424,21 @@ public class Fk2000Entity extends PathfinderMob implements OwnableEntity {
         // An already raised automatic launcher can fire without folding down
         // and repeating the entire mechanical deployment for every missile.
         preparationTicks = Math.round(getLauncherProgress() * ModConfig.PREPARATION_TICKS.get());
+        if (getTubeCapMode() == TubeCapMode.EJECT) {
+            // The six ready tubes can be replenished internally from a larger configured magazine.
+            entityData.set(CAPS_PRESENT, getCapsPresentMask() | (1 << nextLaunchTube()));
+        }
         clearDriveInput();
         return true;
     }
+
+    private boolean hasValidFireTarget() {
+        return getTargetMode() == TargetMode.COORDINATES
+                ? targetCoordinates != null && TargetCoordinates.isValid(this, targetCoordinates)
+                : RadarSystem.canTrack(this, getLockedTarget());
+    }
+
+    private int nextLaunchTube() { return Math.floorMod(ModConfig.MISSILE_CAPACITY.get() - getMissileCount(), 6); }
 
     /** Reload exactly one physical missile item. Repeated packets cannot duplicate ammunition. */
     public void reload(Player player) {
@@ -284,19 +455,24 @@ public class Fk2000Entity extends PathfinderMob implements OwnableEntity {
             player.getInventory().setChanged();
         }
         entityData.set(MISSILES, getMissileCount() + 1);
+        entityData.set(CAPS_PRESENT, getCapsPresentMask() | (1 << nextLaunchTube()));
         reloadCooldown = ModConfig.RELOAD_TICKS.get();
         level().playSound(null, blockPosition(), ModSounds.RELOAD.get(), SoundSource.NEUTRAL, 1.0F, 1.0F);
     }
 
     @Override
     public void tick() {
+        previousSuspension = entityData.get(SUSPENSION);
+        for (int tube = 0; tube < 6; tube++) previousCapProgress[tube] = entityData.get(CAP_PROGRESS.get(tube));
         super.tick();
         if (!level().isClientSide && isAlive()) {
+            FkChunkLoading.refreshVehicle(this);
             if (launchCooldown > 0) launchCooldown--;
             if (reloadCooldown > 0) reloadCooldown--;
             tickDrive();
             tickRadar();
             tickLauncher();
+            tickLaunchMechanics();
         }
         // Keep the renderer and mounted passenger oriented with the chassis.
         yBodyRot = getYRot();
@@ -376,12 +552,18 @@ public class Fk2000Entity extends PathfinderMob implements OwnableEntity {
 
     private void tickRadar() {
         if (!isRadarEnabled()) return;
+        if (getAutoFireMode() == AutoFireMode.ONE_PER_TARGET) refreshQueuedTarget();
+        if (getTargetMode() == TargetMode.COORDINATES) {
+            radarContacts = List.of();
+            if (targetCoordinates != null && !TargetCoordinates.isValid(this, targetCoordinates)) targetCoordinates = null;
+        }
         Entity target = getLockedTarget();
         if (target != null && !RadarSystem.canTrack(this, target)) clearTarget();
         if (targetUUID != null && target == null) clearTarget();
-        if (tickCount % RadarSystem.SCAN_INTERVAL == 0) {
+        if (getTargetMode() != TargetMode.COORDINATES && tickCount % RadarSystem.SCAN_INTERVAL == 0) {
             radarContacts = RadarSystem.scan(this);
-            if (isAutoAcquire() && targetUUID == null && !radarContacts.isEmpty()) {
+            if (getAutoFireMode() == AutoFireMode.SALVO && !salvoTargetLatched
+                    && isAutoAcquire() && targetUUID == null && !radarContacts.isEmpty()) {
                 selectTarget(radarContacts.get(0).entityId());
             }
         }
@@ -394,7 +576,7 @@ public class Fk2000Entity extends PathfinderMob implements OwnableEntity {
         int duration = Math.max(1, ModConfig.PREPARATION_TICKS.get());
         if (preparing) {
             Entity target = getLockedTarget();
-            if (!isRadarEnabled() || !RadarSystem.canTrack(this, target) || getMissileCount() <= 0) {
+            if (!isRadarEnabled() || !hasValidFireTarget() || getMissileCount() <= 0) {
                 preparing = false;
                 automaticPreparation = false;
                 preparationTicks = 0;
@@ -412,24 +594,28 @@ public class Fk2000Entity extends PathfinderMob implements OwnableEntity {
         return isAutoFire() && isRadarEnabled() && getMissileCount() > 0
                 && Math.abs(getSpeed()) <= 0.08F && getOwnerUUID() != null
                 && level().getPlayerByUUID(getOwnerUUID()) != null
-                && RadarSystem.canTrack(this, getLockedTarget());
+                && hasValidFireTarget();
     }
 
-    private void fireMissile(Entity target) {
+    private void fireMissile(@Nullable Entity target) {
         MissileEntity missile = ModContent.MISSILE.get().create(level());
         if (missile != null) {
-            int tube = (ModConfig.MISSILE_CAPACITY.get() - getMissileCount()) % 6;
-            double yaw = Math.toRadians(getYRot());
-            double lateral = (tube % 3 - 1) * 0.33 * VehicleGeometry.SCALE;
-            double longitudinal = (tube < 3 ? -2.75 : -3.38) * VehicleGeometry.SCALE;
-            double x = getX() + Math.cos(yaw) * lateral - Math.sin(yaw) * longitudinal;
-            double z = getZ() + Math.sin(yaw) * lateral + Math.cos(yaw) * longitudinal;
-            missile.moveTo(x, getY() + 3.36 * VehicleGeometry.SCALE, z, getYRot(), -90);
-            missile.launch(getOwnerUUID(), getUUID(), target);
+            int tube = nextLaunchTube();
+            Vec3 mouth = VehicleGeometry.localToWorld(position(), getYRot(), VehicleGeometry.tubeMuzzleLocal(tube, 1));
+            missile.moveTo(mouth.x, mouth.y, mouth.z, getYRot(), -90);
+            if (getTargetMode() == TargetMode.COORDINATES && targetCoordinates != null) {
+                missile.launchAt(getOwnerUUID(), getUUID(), targetCoordinates);
+            } else if (target != null) missile.launch(getOwnerUUID(), getUUID(), target);
+            else return;
             if (level().addFreshEntity(missile)) {
+                animateLaunch(tube, mouth);
                 entityData.set(MISSILES, getMissileCount() - 1);
                 level().playSound(null, blockPosition(), SoundEvents.PISTON_EXTEND, SoundSource.HOSTILE, 1.0F, 0.6F);
                 launchCooldown = isAutoFire() ? ModConfig.AUTO_FIRE_INTERVAL_TICKS.get() : Math.max(durationForCooldown(), 20);
+                if (getAutoFireMode() == AutoFireMode.ONE_PER_TARGET && target != null) {
+                    selectedTargets.remove(target.getUUID());
+                    refreshQueuedTarget();
+                }
             }
         }
         preparing = false;
@@ -438,6 +624,103 @@ public class Fk2000Entity extends PathfinderMob implements OwnableEntity {
     }
 
     private int durationForCooldown() { return ModConfig.PREPARATION_TICKS.get() + 20; }
+
+    private void animateLaunch(int tube, Vec3 mouth) {
+        entityData.set(LAST_LAUNCH_TUBE, tube);
+        suspensionVelocity = Math.min(.8F, suspensionVelocity + .6F);
+        if (getTubeCapMode() == TubeCapMode.EJECT) {
+            TubeCapEntity cap = ModContent.TUBE_CAP.get().create(level());
+            if (cap != null) {
+                cap.moveTo(mouth.x, mouth.y + .15, mouth.z, getYRot(), 0);
+                cap.launch(new Vec3((random.nextDouble() - .5) * .10, 1.6, (random.nextDouble() - .5) * .10));
+                level().addFreshEntity(cap);
+            }
+            entityData.set(CAPS_PRESENT, getCapsPresentMask() & ~(1 << tube));
+        } else if (getTubeCapMode() == TubeCapMode.HINGED) {
+            entityData.set(CAP_PROGRESS.get(tube), 1F);
+            capCloseDelay[tube] = 4;
+        }
+    }
+
+    private void tickLaunchMechanics() {
+        float compression = entityData.get(SUSPENSION);
+        suspensionVelocity = (suspensionVelocity - compression * .20F) * .70F;
+        compression = Mth.clamp(compression + suspensionVelocity, 0, 1);
+        if (compression < .001F && Math.abs(suspensionVelocity) < .005F || compression == 0 && suspensionVelocity < 0) {
+            compression = 0;
+            suspensionVelocity = 0;
+        }
+        entityData.set(SUSPENSION, compression);
+        int activeTube = nextLaunchTube();
+        int duration = ModConfig.PREPARATION_TICKS.get();
+        for (int tube = 0; tube < 6; tube++) {
+            float open = entityData.get(CAP_PROGRESS.get(tube));
+            if (getTubeCapMode() == TubeCapMode.HINGED && preparing && tube == activeTube) {
+                open = Math.max(open, Mth.clamp((preparationTicks - (duration - 8)) / 8F, 0, 1));
+            } else if (capCloseDelay[tube] > 0) capCloseDelay[tube]--;
+            else open = Math.max(0, open - .10F);
+            entityData.set(CAP_PROGRESS.get(tube), open);
+        }
+    }
+
+    @Override
+    public void die(DamageSource source) {
+        if (destructionStarted) return;
+        super.die(source);
+        destructionStarted = true;
+        if (!(level() instanceof ServerLevel server)) return;
+        clearDriveInput();
+        setEngineOn(false);
+        setRadarEnabled(false);
+        setAutoFire(false);
+        entityData.set(SPEED, 0F);
+        for (Entity passenger : List.copyOf(getPassengers())) {
+            Vec3 exit = passenger instanceof LivingEntity living ? getDismountLocationForPassenger(living)
+                    : position().add(VehicleGeometry.BODY_WIDTH + 1, 0, 0);
+            passenger.stopRiding();
+            passenger.teleportTo(exit.x, exit.y, exit.z);
+        }
+        WreckEntity wreck = ModContent.WRECK.get().create(server);
+        if (wreck != null) {
+            wreck.initializeFrom(this);
+            server.addFreshEntity(wreck);
+        }
+        float power = ModConfig.VEHICLE_EXPLOSION_POWER.get().floatValue();
+        applyDestructionDamage(power);
+        server.explode(this, damageSources().explosion(this, getOwner()), null,
+                getX(), getY() + 1, getZ(), power, false,
+                ModConfig.BLOCK_DAMAGE.get() ? Level.ExplosionInteraction.TNT : Level.ExplosionInteraction.NONE);
+        server.sendParticles(ParticleTypes.LARGE_SMOKE, getX(), getY() + 1.5, getZ(), 48, 2.2, 1, 3.5, .09);
+        server.playSound(null, getX(), getY(), getZ(), ModSounds.MISSILE_EXPLOSION.get(), SoundSource.HOSTILE, 3F, .65F);
+        ExplosionEffects.send(server, position().add(0, 1, 0), power);
+        discard();
+    }
+
+    private void applyDestructionDamage(float power) {
+        double radius = Math.max(3, power * 2);
+        Entity owner = getOwner();
+        DamageSource blast = damageSources().explosion(this, owner);
+        for (Entity entity : level().getEntities(this, getBoundingBox().inflate(radius))) {
+            if (!entity.isAlive() || entity.isSpectator() || entity instanceof WreckEntity || entity instanceof TubeCapEntity
+                    || SbwCompatibility.isFriendly(this, getOwnerUUID(), owner instanceof Player player ? player : null, entity)) continue;
+            Vec3 center = entity.getBoundingBox().getCenter();
+            double distance = center.distanceTo(getBoundingBox().getCenter());
+            if (distance >= radius) continue;
+            Vec3 origin = position().add(0, 1.5, 0);
+            if (!isLoadedFootprint(new AABB(origin, center))) continue;
+            var hit = level().clip(new net.minecraft.world.level.ClipContext(origin, center,
+                    net.minecraft.world.level.ClipContext.Block.COLLIDER, net.minecraft.world.level.ClipContext.Fluid.NONE, this));
+            if (hit.getType() != net.minecraft.world.phys.HitResult.Type.MISS) continue;
+            entity.hurt(blast, (float) (ModConfig.VEHICLE_EXPLOSION_DAMAGE.get() * (1 - distance / radius)));
+        }
+    }
+
+    /** The calibrated, IFF-filtered damage above replaces the vanilla entity damage exactly once. */
+    @SubscribeEvent
+    public static void protectAlliesFromDestruction(ExplosionEvent.Detonate event) {
+        if (event.getExplosion().getDirectSourceEntity() instanceof Fk2000Entity vehicle && vehicle.destructionStarted)
+            event.getAffectedEntities().clear();
+    }
 
     @Override
     protected InteractionResult mobInteract(Player player, InteractionHand hand) {
@@ -521,6 +804,17 @@ public class Fk2000Entity extends PathfinderMob implements OwnableEntity {
         tag.putInt("Missiles", getMissileCount());
         tag.putInt("ReloadCooldown", reloadCooldown);
         tag.putInt("LaunchCooldown", launchCooldown);
+        tag.putString("TubeCapMode", getTubeCapMode().name());
+        tag.putInt("CapsPresent", getCapsPresentMask());
+        tag.putString("TargetMode", getTargetMode().name());
+        tag.putString("AutoFireMode", getAutoFireMode().name());
+        tag.putDouble("EngagementRange", getEngagementRange());
+        tag.putBoolean("SalvoTargetLatched", salvoTargetLatched);
+        if (targetCoordinates != null) {
+            tag.putDouble("TargetX", targetCoordinates.x);
+            tag.putDouble("TargetY", targetCoordinates.y);
+            tag.putDouble("TargetZ", targetCoordinates.z);
+        }
     }
 
     @Override
@@ -534,11 +828,35 @@ public class Fk2000Entity extends PathfinderMob implements OwnableEntity {
         reloadCooldown = Mth.clamp(tag.getInt("ReloadCooldown"), 0, ModConfig.RELOAD_TICKS.get());
         launchCooldown = Mth.clamp(tag.getInt("LaunchCooldown"), 0,
                 Math.max(durationForCooldown(), ModConfig.AUTO_FIRE_INTERVAL_TICKS.get()));
+        try { entityData.set(CAP_MODE, TubeCapMode.valueOf(tag.getString("TubeCapMode")).ordinal()); }
+        catch (IllegalArgumentException ignored) { entityData.set(CAP_MODE, ModConfig.TUBE_CAP_MODE.get().ordinal()); }
+        entityData.set(CAPS_PRESENT, tag.contains("CapsPresent") ? tag.getInt("CapsPresent") & 0x3f : 0x3f);
+        try { entityData.set(TARGET_MODE, TargetMode.valueOf(tag.getString("TargetMode")).ordinal()); }
+        catch (IllegalArgumentException ignored) { entityData.set(TARGET_MODE, TargetMode.AIRCRAFT.ordinal()); }
+        try { entityData.set(AUTO_FIRE_MODE, AutoFireMode.valueOf(tag.getString("AutoFireMode")).ordinal()); }
+        catch (IllegalArgumentException ignored) { entityData.set(AUTO_FIRE_MODE, AutoFireMode.SALVO.ordinal()); }
+        if (getTargetMode() == TargetMode.COORDINATES) entityData.set(AUTO_FIRE_MODE, AutoFireMode.SALVO.ordinal());
+        selectedTargets.clear();
+        salvoTargetLatched = tag.getBoolean("SalvoTargetLatched");
+        double engagementRange = tag.contains("EngagementRange") ? tag.getDouble("EngagementRange") : ModConfig.RADAR_RANGE.get();
+        setEngagementRange(Double.isFinite(engagementRange) ? engagementRange : ModConfig.RADAR_RANGE.get());
+        targetCoordinates = tag.contains("TargetX") && tag.contains("TargetY") && tag.contains("TargetZ")
+                ? new Vec3(tag.getDouble("TargetX"), tag.getDouble("TargetY"), tag.getDouble("TargetZ")) : null;
+        if (targetCoordinates != null && (!Double.isFinite(targetCoordinates.x) || !Double.isFinite(targetCoordinates.y)
+                || !Double.isFinite(targetCoordinates.z) || getTargetMode() != TargetMode.COORDINATES)) targetCoordinates = null;
         // Loading never resumes movement, partial launches, or a stale lock.
         clearDriveInput();
         setEngineOn(false);
         clearTarget();
         entityData.set(SPEED, 0F);
         entityData.set(LAUNCHER, 0F);
+        entityData.set(SUSPENSION, 0F);
+        suspensionVelocity = 0;
+        previousSuspension = 0;
+        for (int tube = 0; tube < 6; tube++) {
+            entityData.set(CAP_PROGRESS.get(tube), 0F);
+            previousCapProgress[tube] = 0;
+            capCloseDelay[tube] = 0;
+        }
     }
 }

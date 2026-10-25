@@ -77,6 +77,18 @@ public final class SbwCompatibility {
         }
     }
 
+    /** The real SBW base class covers ground, water and aerial vehicles alike. */
+    public static boolean isVehicle(Entity target) {
+        if (!target.isAlive() || target.isRemoved() || !INSTANCE.bridgeAvailable
+                || INSTANCE.vehicleClass == null || !INSTANCE.vehicleClass.isInstance(target)) return false;
+        try {
+            return !Boolean.TRUE.equals(INSTANCE.wreck.invoke(target));
+        } catch (ReflectiveOperationException | LinkageError error) {
+            INSTANCE.warn(error);
+            return false;
+        }
+    }
+
     /** Owners, teams, passengers and SBW's IFF predicate all veto a lock. */
     public static boolean isFriendly(Entity vehicle, UUID ownerUUID, Player owner, Entity target) {
         // An offline/unknown owner cannot supply trustworthy team and SBW IFF context.

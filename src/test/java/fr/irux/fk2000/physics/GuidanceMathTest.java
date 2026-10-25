@@ -89,4 +89,40 @@ class GuidanceMathTest {
     void stationarySweepIsSafeAndFinite() {
         assertEquals(3, distanceToSegment(new Vector(0, 3, 0), new Vector(0, 0, 0), new Vector(0, 0, 0)), EPS);
     }
+
+    @Test
+    void fourRearJetsHaveOppositeReactionAndNoAxialThrust() {
+        for (Vector forward : new Vector[] {UP, new Vector(0, 0, 1), new Vector(.3, .7, -.2)}) {
+            Vector axis = forward.normalizedOr(UP);
+            Vector correction = new Vector(.4, -.2, .8);
+            Vector lateral = correction.subtract(axis.scale(correction.dot(axis))).normalizedOr(UP);
+            ThrusterJet[] jets = reactionJets(axis, correction);
+            assertEquals(4, jets.length, "The rear ring must expose all four physical nozzles");
+            Vector reaction = new Vector(0, 0, 0);
+            int active = 0;
+            for (ThrusterJet jet : jets) {
+                assertEquals(1, jet.direction().length(), EPS);
+                assertEquals(0, jet.direction().dot(axis), EPS, "Steering jets must point radially away from the rear body");
+                assertTrue(jet.strength() >= 0 && jet.strength() <= 1 + EPS);
+                if (jet.strength() > EPS) {
+                    active++;
+                    assertTrue(jet.direction().dot(lateral) < 0, "Exhaust must leave the side opposite the desired correction");
+                }
+                reaction = reaction.add(jet.direction().scale(-jet.strength()));
+            }
+            assertTrue(active >= 1 && active <= 2, "Opposite steering nozzles must never fire together");
+            assertEquals(lateral.x(), reaction.x(), EPS);
+            assertEquals(lateral.y(), reaction.y(), EPS);
+            assertEquals(lateral.z(), reaction.z(), EPS);
+        }
+    }
+
+    @Test
+    void uncorrectedOrAxialFlightDoesNotWasteLateralGas() {
+        for (ThrusterJet jet : reactionJets(UP, new Vector(0, 0, 0))) assertEquals(0, jet.strength(), EPS);
+        for (ThrusterJet jet : reactionJets(UP, new Vector(0, 5, 0))) assertEquals(0, jet.strength(), EPS);
+        ThrusterJet[] downward = reactionJets(new Vector(0, 0, 1), UP);
+        assertTrue(java.util.Arrays.stream(downward).anyMatch(jet -> jet.strength() > .99 && jet.direction().y() < -.99),
+                "An upward steering correction must vent from the lower side of a horizontal missile");
+    }
 }

@@ -20,6 +20,7 @@ public final class MissileRenderer extends EntityRenderer<MissileEntity> {
         pose.mulPose(Axis.XP.rotationDegrees(-Mth.lerp(partialTick,missile.xRotO,missile.getXRot())));
         pose.scale(1,-1,-1);
         missileMesh.render(pose,buffers,light);
+        if (missile.getMotorActive()) RocketPlume.render(missile,partialTick,pose,buffers);
         pose.popPose();
         super.render(missile,yaw,partialTick,pose,buffers,light);
     }

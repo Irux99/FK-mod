@@ -86,11 +86,19 @@ public final class PrototypeVehicleRenderer extends EntityRenderer<Fk2000Entity>
         model.getChild("glass").visible = !(mc.options.getCameraType().isFirstPerson()
                 && (mc.getCameraEntity() == entity || mc.player != null && mc.player.getVehicle() == entity));
         float wheelAngle = -entity.getWheelRotation();
-        for (int i = 0; i < 8; i++) model.getChild("wheel" + i).xRot = wheelAngle;
+        for (int i = 0; i < 8; i++) { model.getChild("wheel" + i).xRot = wheelAngle; model.getChild("wheel" + i).visible = false; }
         radar.yRot = entity.isRadarEnabled() ? (float) ((entity.level().getGameTime() * .075 + partialTick * .075) % (Math.PI * 2)) : 0;
         launcher.xRot = entity.getLauncherProgress() * Mth.HALF_PI;
+        pose.pushPose();
+        VehicleVisuals.applyModelSuspension(pose,entity.getSuspensionCompression(partialTick));
         model.render(pose, buffers.getBuffer(RenderType.entityCutoutNoCull(TEXTURE)), packedLight, OverlayTexture.NO_OVERLAY);
         pose.popPose();
+        for (int i = 0; i < 8; i++) {
+            ModelPart wheel = model.getChild("wheel" + i); wheel.visible = true;
+            wheel.render(pose,buffers.getBuffer(RenderType.entityCutoutNoCull(TEXTURE)),packedLight,OverlayTexture.NO_OVERLAY);
+        }
+        pose.popPose();
+        VehicleVisuals.renderCaps(entity,partialTick,pose,buffers,packedLight);
         super.render(entity, entityYaw, partialTick, pose, buffers, packedLight);
     }
 

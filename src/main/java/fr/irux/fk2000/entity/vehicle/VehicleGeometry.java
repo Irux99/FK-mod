@@ -22,6 +22,19 @@ public final class VehicleGeometry {
                 Math.sin(yaw) * local.x + Math.cos(yaw) * local.z);
     }
 
+    /** Six tube mouths, including launcher articulation; returned positions already include SCALE. */
+    public static Vec3 tubeMuzzleLocal(int tube, float launcherProgress) {
+        int selected = Math.floorMod(tube, 6);
+        double angle = Math.max(0, Math.min(1, launcherProgress)) * Math.PI / 2;
+        double hingeY = 1.224;
+        double hingeZ = -2.67;
+        double relativeY = (selected < 3 ? 1.304 : 1.934) - hingeY;
+        double relativeZ = -.535 - hingeZ;
+        return new Vec3((selected % 3 - 1) * .33 * SCALE,
+                (hingeY + relativeY * Math.cos(angle) + relativeZ * Math.sin(angle)) * SCALE,
+                (hingeZ + relativeZ * Math.cos(angle) - relativeY * Math.sin(angle)) * SCALE);
+    }
+
     /** Vanilla collisions require an AABB: rotate the rectangular chassis, not a square footprint. */
     public static AABB bodyBounds(Vec3 position, float yawDegrees) {
         double yaw = Math.toRadians(yawDegrees);

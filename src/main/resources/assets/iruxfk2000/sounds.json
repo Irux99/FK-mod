@@ -7,5 +7,35 @@
         "volume": 1.0
       }
     ]
+  },
+  "missile_ignition": {
+    "subtitle": "subtitles.iruxfk2000.missile_ignition",
+    "sounds": [
+      {
+        "name": "iruxfk2000:missile_ignition",
+        "attenuation_distance": 160,
+        "volume": 1.0
+      }
+    ]
+  },
+  "missile_flight": {
+    "subtitle": "subtitles.iruxfk2000.missile_flight",
+    "sounds": [
+      {
+        "name": "iruxfk2000:missile_flight",
+        "attenuation_distance": 128,
+        "volume": 1.0
+      }
+    ]
+  },
+  "missile_explosion": {
+    "subtitle": "subtitles.iruxfk2000.missile_explosion",
+    "sounds": [
+      {
+        "name": "iruxfk2000:missile_explosion",
+        "attenuation_distance": 192,
+        "volume": 1.0
+      }
+    ]
   }
 }

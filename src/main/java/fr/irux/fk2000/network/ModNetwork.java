@@ -6,6 +6,11 @@ import fr.irux.fk2000.config.ModConfig;
 import fr.irux.fk2000.entity.vehicle.Fk2000Entity;
 import fr.irux.fk2000.item.RemoteControllerItem;
 import fr.irux.fk2000.radar.RadarContact;
+import fr.irux.fk2000.radar.TargetMode;
+import fr.irux.fk2000.radar.TargetCoordinates;
+import fr.irux.fk2000.entity.vehicle.TubeCapMode;
+import fr.irux.fk2000.entity.vehicle.AutoFireMode;
+import net.minecraft.world.phys.Vec3;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerPlayer;
@@ -33,10 +38,10 @@ import java.util.function.Supplier;
 @Mod.EventBusSubscriber(modid = IruxFk2000Mod.MOD_ID)
 public final class ModNetwork {
     private static final SimpleChannel CHANNEL = NetworkRegistry.newSimpleChannel(
-        new ResourceLocation(IruxFk2000Mod.MOD_ID, "control"), () -> "2", "2"::equals, "2"::equals);
+        new ResourceLocation(IruxFk2000Mod.MOD_ID, "control"), () -> "3", "3"::equals, "3"::equals);
     private static final Map<UUID, UUID> SESSIONS = new HashMap<>();
     private static final Map<UUID, Rate> RATES = new HashMap<>();
-    public enum Command { DRIVE, ENGINE, RADAR, AUTO_ACQUIRE, AUTO_FIRE, SELECT_TARGET, FIRE, RELOAD, CLOSE }
+    public enum Command { DRIVE, ENGINE, RADAR, AUTO_ACQUIRE, AUTO_FIRE, SELECT_TARGET, FIRE, RELOAD, CYCLE_CAP_MODE, CYCLE_FIRE_MODE, CLOSE }
     public static void register() {
         CHANNEL.registerMessage(0, ControlPacket.class, ControlPacket::encode, ControlPacket::decode,
             ControlPacket::handle, Optional.of(NetworkDirection.PLAY_TO_SERVER));
@@ -44,9 +49,20 @@ public final class ModNetwork {
             StatusPacket::handle, Optional.of(NetworkDirection.PLAY_TO_CLIENT));
         CHANNEL.registerMessage(2, OpenPacket.class, OpenPacket::encode, OpenPacket::decode,
             OpenPacket::handle, Optional.of(NetworkDirection.PLAY_TO_CLIENT));
+        CHANNEL.registerMessage(3, TargetModePacket.class, TargetModePacket::encode, TargetModePacket::decode,
+            TargetModePacket::handle, Optional.of(NetworkDirection.PLAY_TO_SERVER));
+        CHANNEL.registerMessage(4, TargetCoordinatesPacket.class, TargetCoordinatesPacket::encode, TargetCoordinatesPacket::decode,
+            TargetCoordinatesPacket::handle, Optional.of(NetworkDirection.PLAY_TO_SERVER));
+        CHANNEL.registerMessage(5, EngagementRangePacket.class, EngagementRangePacket::encode, EngagementRangePacket::decode,
+            EngagementRangePacket::handle, Optional.of(NetworkDirection.PLAY_TO_SERVER));
     }
     public static void sendCommand(Command action, float throttle, float steering, boolean brake, int targetId) {
         CHANNEL.sendToServer(new ControlPacket(action, throttle, steering, brake, targetId));
+    }
+    public static void sendTargetMode(TargetMode mode) { CHANNEL.sendToServer(new TargetModePacket(mode)); }
+    public static void sendEngagementRange(double range) { CHANNEL.sendToServer(new EngagementRangePacket(range)); }
+    public static void sendTargetCoordinates(double x, double y, double z) {
+        CHANNEL.sendToServer(new TargetCoordinatesPacket(new Vec3(x, y, z)));
     }
     public static boolean openRemote(ServerPlayer player, ItemStack stack) {
         UUID uuid = RemoteControllerItem.boundVehicle(stack);
@@ -61,7 +77,8 @@ public final class ModNetwork {
     }
     private static boolean usable(ServerPlayer player, Fk2000Entity vehicle) {
         return player.isAlive() && !player.isSpectator() && vehicle.isAlive() && vehicle.level() == player.level()
-            && vehicle.canControl(player) && player.distanceToSqr(vehicle) <= Math.pow(ModConfig.REMOTE_RANGE.get(), 2);
+            && vehicle.canControl(player) && (ModConfig.UNLIMITED_REMOTE_RANGE.get()
+                || player.distanceToSqr(vehicle) <= Math.pow(ModConfig.REMOTE_RANGE.get(), 2));
     }
     private static Fk2000Entity controlled(ServerPlayer player) {
         if (player.getVehicle() instanceof Fk2000Entity mounted && usable(player, mounted)) return mounted;
@@ -70,6 +87,8 @@ public final class ModNetwork {
         return RemoteControllerItem.boundTo(player.getMainHandItem(), vehicle)
             || RemoteControllerItem.boundTo(player.getOffhandItem(), vehicle) ? vehicle : null;
     }
+    /** Shared authorization for auxiliary radar snapshots; no entity ID supplied by the client grants control. */
+    public static Fk2000Entity authorizedVehicle(ServerPlayer player) { return controlled(player); }
     private static void close(ServerPlayer player) {
         UUID id = SESSIONS.remove(player.getUUID());
         if (id != null && player.serverLevel().getEntity(id) instanceof Fk2000Entity vehicle && vehicle.canControl(player)) vehicle.clearDriveInput();
@@ -100,7 +119,7 @@ public final class ModNetwork {
         List<RadarContact> contacts = v.getRadarContacts().stream().limit(32).toList();
         VehicleStatus status = new VehicleStatus(v.getId(), v.isEngineOn(), v.isRadarEnabled(), v.isAutoAcquire(), v.isAutoFire(),
             v.getMissileCount(), v.getHealth(), v.getMaxHealth(), v.getSpeed(), v.getLauncherProgress(), v.getLockedTargetId(),
-            v.getX(), v.getY(), v.getZ(), ModConfig.RADAR_RANGE.get(), contacts);
+            v.getX(), v.getY(), v.getZ(), v.getEngagementRange(), v.getTargetMode(), v.getTargetCoordinates(), v.getTubeCapMode(), v.getAutoFireMode(), v.getSelectedTargetIds().stream().limit(32).toList(), contacts);
         CHANNEL.send(PacketDistributor.PLAYER.with(() -> player), new StatusPacket(status));
     }
     private record ControlPacket(Command action, float throttle, float steering, boolean brake, int targetId) {
@@ -124,8 +143,57 @@ public final class ModNetwork {
                     case SELECT_TARGET -> vehicle.selectTarget(p.targetId);
                     case FIRE -> vehicle.requestLaunch();
                     case RELOAD -> vehicle.reload(player);
+                    case CYCLE_CAP_MODE -> vehicle.setTubeCapMode(vehicle.getTubeCapMode().next());
+                    case CYCLE_FIRE_MODE -> vehicle.setAutoFireMode(vehicle.getAutoFireMode().next());
                     default -> { }
                 }
+            });
+            context.setPacketHandled(true);
+        }
+    }
+    private record TargetModePacket(TargetMode mode) {
+        static void encode(TargetModePacket packet, FriendlyByteBuf buffer) { buffer.writeEnum(packet.mode); }
+        static TargetModePacket decode(FriendlyByteBuf buffer) { return new TargetModePacket(buffer.readEnum(TargetMode.class)); }
+        static void handle(TargetModePacket packet, Supplier<NetworkEvent.Context> supplier) {
+            NetworkEvent.Context context = supplier.get();
+            context.enqueueWork(() -> {
+                ServerPlayer player = context.getSender();
+                if (player == null || !allowCommand(player)) return;
+                Fk2000Entity vehicle = controlled(player);
+                if (vehicle != null) vehicle.setTargetMode(packet.mode);
+            });
+            context.setPacketHandled(true);
+        }
+    }
+    private record TargetCoordinatesPacket(Vec3 coordinates) {
+        static void encode(TargetCoordinatesPacket packet, FriendlyByteBuf buffer) {
+            buffer.writeDouble(packet.coordinates.x); buffer.writeDouble(packet.coordinates.y); buffer.writeDouble(packet.coordinates.z);
+        }
+        static TargetCoordinatesPacket decode(FriendlyByteBuf buffer) {
+            return new TargetCoordinatesPacket(new Vec3(buffer.readDouble(), buffer.readDouble(), buffer.readDouble()));
+        }
+        static void handle(TargetCoordinatesPacket packet, Supplier<NetworkEvent.Context> supplier) {
+            NetworkEvent.Context context = supplier.get();
+            context.enqueueWork(() -> {
+                ServerPlayer player = context.getSender();
+                if (player == null || !allowCommand(player)) return;
+                Fk2000Entity vehicle = controlled(player);
+                if (vehicle != null && TargetCoordinates.isValid(vehicle, packet.coordinates))
+                    vehicle.setTargetCoordinates(packet.coordinates);
+            });
+            context.setPacketHandled(true);
+        }
+    }
+    private record EngagementRangePacket(double range) {
+        static void encode(EngagementRangePacket packet, FriendlyByteBuf buffer) { buffer.writeDouble(packet.range); }
+        static EngagementRangePacket decode(FriendlyByteBuf buffer) { return new EngagementRangePacket(buffer.readDouble()); }
+        static void handle(EngagementRangePacket packet, Supplier<NetworkEvent.Context> supplier) {
+            NetworkEvent.Context context = supplier.get();
+            context.enqueueWork(() -> {
+                ServerPlayer player = context.getSender();
+                if (player == null || !Double.isFinite(packet.range) || !allowCommand(player)) return;
+                Fk2000Entity vehicle = controlled(player);
+                if (vehicle != null) vehicle.setEngagementRange(packet.range);
             });
             context.setPacketHandled(true);
         }
@@ -147,6 +215,13 @@ public final class ModNetwork {
             b.writeFloat(s.health()); b.writeFloat(s.maxHealth());
             b.writeFloat(s.speed()); b.writeFloat(s.launcher()); b.writeVarInt(s.targetId());
             b.writeDouble(s.x()); b.writeDouble(s.y()); b.writeDouble(s.z()); b.writeDouble(s.radarRange());
+            b.writeEnum(s.targetMode()); b.writeBoolean(s.targetCoordinates() != null);
+            if (s.targetCoordinates() != null) {
+                b.writeDouble(s.targetCoordinates().x); b.writeDouble(s.targetCoordinates().y); b.writeDouble(s.targetCoordinates().z);
+            }
+            b.writeEnum(s.tubeCapMode()); b.writeEnum(s.autoFireMode());
+            b.writeVarInt(s.selectedTargetIds().size());
+            for (int id : s.selectedTargetIds()) b.writeVarInt(id);
             b.writeVarInt(s.contacts().size());
             for (RadarContact contact : s.contacts()) {
                 b.writeVarInt(contact.entityId()); b.writeUUID(contact.uuid());
@@ -159,10 +234,18 @@ public final class ModNetwork {
             int missiles = b.readVarInt(); float health = b.readFloat(), maxHealth = b.readFloat();
             float speed = b.readFloat(), launcher = b.readFloat(); int target = b.readVarInt();
             double x = b.readDouble(), y = b.readDouble(), z = b.readDouble(), range = b.readDouble();
+            TargetMode mode = b.readEnum(TargetMode.class);
+            Vec3 coordinates = b.readBoolean() ? new Vec3(b.readDouble(), b.readDouble(), b.readDouble()) : null;
+            TubeCapMode capMode = b.readEnum(TubeCapMode.class);
+            AutoFireMode fireMode = b.readEnum(AutoFireMode.class);
+            int selectedCount = b.readVarInt();
+            if (selectedCount < 0 || selectedCount > 32) throw new IllegalArgumentException("Invalid selected target count");
+            List<Integer> selected = new ArrayList<>(selectedCount);
+            for (int i = 0; i < selectedCount; i++) selected.add(b.readVarInt());
             int size = b.readVarInt(); if (size < 0 || size > 32) throw new IllegalArgumentException("Invalid radar contact count");
             List<RadarContact> contacts = new ArrayList<>(size);
             for (int i = 0; i < size; i++) contacts.add(new RadarContact(b.readVarInt(), b.readUUID(), b.readUtf(128), b.readDouble(), b.readDouble(), b.readDouble(), b.readDouble()));
-            return new StatusPacket(new VehicleStatus(id, engine, radar, acquire, fire, missiles, health, maxHealth, speed, launcher, target, x, y, z, range, contacts));
+            return new StatusPacket(new VehicleStatus(id, engine, radar, acquire, fire, missiles, health, maxHealth, speed, launcher, target, x, y, z, range, mode, coordinates, capMode, fireMode, selected, contacts));
         }
         static void handle(StatusPacket p, Supplier<NetworkEvent.Context> supplier) {
             NetworkEvent.Context c = supplier.get();

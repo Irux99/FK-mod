@@ -64,6 +64,7 @@ public final class VehicleGameTests {
         helper.assertFalse(restored.isEngineOn(), "Reloading a saved vehicle must not restart its engine");
         helper.assertTrue(restored.getSpeed() == 0 && restored.getLockedTarget() == null,
                 "Reloading must clear transient movement and target locks");
+        vehicle.discard();
         helper.succeed();
     }
 
@@ -92,6 +93,7 @@ public final class VehicleGameTests {
         vehicle.reload(owner);
         helper.assertTrue(vehicle.getMissileCount() == 1 && countMissiles(owner) == 1,
                 "Repeated reload commands must respect cooldown and never duplicate ammunition");
+        vehicle.discard();
         helper.succeed();
     }
 
@@ -126,6 +128,7 @@ public final class VehicleGameTests {
             owner.interactOn(vehicle, InteractionHand.MAIN_HAND);
             helper.assertTrue(vehicle.getMissileCount() == 2 && ammunition.getCount() == 1,
                     "After the short cooldown, another physical missile must load successfully");
+            vehicle.discard();
             helper.succeed();
         });
     }
@@ -160,6 +163,7 @@ public final class VehicleGameTests {
         intruder.interactOn(vehicle, InteractionHand.MAIN_HAND);
         helper.assertTrue(RemoteControllerItem.boundVehicle(unauthorizedRemote) == null,
                 "Creative mode must not allow another player to bind the vehicle");
+        vehicle.discard();
         helper.succeed();
     }
 
@@ -202,6 +206,7 @@ public final class VehicleGameTests {
         restored.readAdditionalSaveData(saved);
         helper.assertTrue(Math.abs(restored.getHealth() - vehicle.getHealth()) < 0.01,
                 "Vehicle damage must persist through saving and loading");
+        vehicle.discard();
         helper.succeed();
     }
 
@@ -237,6 +242,7 @@ public final class VehicleGameTests {
                     "All-terrain step-up must not allow the long truck to pass through a cliff");
             helper.assertTrue(vehicle.getY() < originalY + 3,
                     "The truck must not teleport onto terrain taller than its allowed step");
+            vehicle.discard();
             helper.succeed();
         });
     }
@@ -277,6 +283,7 @@ public final class VehicleGameTests {
         helper.runAtTickTime(85, () -> {
             helper.assertTrue(Math.abs(vehicle.getSpeed()) < 0.001,
                     "Expired remote input must brake the vehicle to rest");
+            vehicle.discard();
             helper.succeed();
         });
     }
@@ -322,6 +329,7 @@ public final class VehicleGameTests {
             removePlayerFixture(helper, owner);
             helper.assertFalse(RadarSystem.canTrack(vehicle, enemy),
                     "An offline owner must stop engagement because team/IFF context is unavailable");
+            vehicle.discard();
             helper.succeed();
         });
     }
@@ -369,6 +377,7 @@ public final class VehicleGameTests {
                     "An empty automatic launcher must fold down after the salvo");
             helper.assertFalse(vehicle.requestLaunch(), "An empty launcher must reject additional fire requests");
             removePlayerFixture(helper, owner);
+            vehicle.discard();
             helper.succeed();
         });
     }

@@ -20,6 +20,8 @@ public final class ClientRegistration {
     public static void registerRenderers(EntityRenderersEvent.RegisterRenderers event) {
         event.registerEntityRenderer(ModContent.VEHICLE.get(), context -> ImportedMesh.isAvailable("truck") ? new VehicleRenderer(context) : new PrototypeVehicleRenderer(context));
         event.registerEntityRenderer(ModContent.MISSILE.get(), context -> ImportedMesh.isAvailable("missile") ? new MissileRenderer(context) : new PrototypeMissileRenderer(context));
+        event.registerEntityRenderer(ModContent.WRECK.get(), WreckRenderer::new);
+        event.registerEntityRenderer(ModContent.TUBE_CAP.get(), TubeCapRenderer::new);
     }
     @SubscribeEvent
     public static void registerKeys(RegisterKeyMappingsEvent event) { event.register(ClientHooks.TACTICAL); event.register(ClientHooks.FIRE);
@@ -43,8 +45,14 @@ public final class ClientRegistration {
                     Component.translatable((s == null ? vehicle.isRadarEnabled() : s.radar()) ? "options.on" : "options.off")), 15, 30, 0xffe0f4ea, false);
             int targetId = s == null ? -1 : s.targetId();
             var target = s == null ? null : s.contacts().stream().filter(c -> c.entityId() == targetId).findFirst().orElse(null);
-            graphics.drawString(font, target == null ? Component.translatable("screen.iruxfk2000.no_target")
-                    : Component.literal(target.name() + " / " + Math.round(target.distance()) + " m"), 15, 43, 0xffffbd55, false);
+            Component targetText = s != null && s.targetCoordinates() != null
+                    && s.targetMode() == fr.irux.fk2000.radar.TargetMode.COORDINATES
+                    ? Component.literal("XYZ " + Math.round(s.targetCoordinates().x) + " / "
+                    + Math.round(s.targetCoordinates().y) + " / " + Math.round(s.targetCoordinates().z))
+                    : target == null ? Component.translatable("screen.iruxfk2000.no_target")
+                    : Component.literal(target.name() + " / " + Math.round(target.distance()) + " m");
+            graphics.drawString(font, targetText
+                    , 15, 43, 0xffffbd55, false);
             graphics.drawString(font, Component.translatable("screen.iruxfk2000.camera_help", ClientHooks.TACTICAL.getTranslatedKeyMessage(),
                     ClientHooks.FIRE.getTranslatedKeyMessage(), ClientHooks.ENGINE.getTranslatedKeyMessage(), ClientHooks.RADAR.getTranslatedKeyMessage()),
                     15, 56, 0xff8da69b, false);

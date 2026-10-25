@@ -33,7 +33,7 @@ API communes vérifiées dans les références ci-dessus :
 
 Les noms d'enum `AIRPLANE`, `HELICOPTER` et `DRONE` existent dans toutes les références inspectées ; `AIRSHIP` existe dès les sources `.1`. Le code utilise les noms, jamais leur ordre numérique. Une API inconnue doit conduire à ignorer une cible ou à refuser l'engagement, avec un avertissement dans le journal.
 
-Les autres mods peuvent exposer une entité aérienne via l'interface `AerialTarget` ou le tag d'entités `iruxfk2000:aerial_targets`. Le tag déclare qu'une entité peut être ciblée ; il faut le réserver à des véhicules aériens compatibles. Les joueurs ne sont pas des cibles radar.
+Les autres mods peuvent exposer une entité aérienne via l'interface `AerialTarget` ou le tag d'entités `iruxfk2000:aerial_targets`. Le tag déclare qu'une entité peut être ciblée ; il faut le réserver à des véhicules aériens compatibles. Depuis la version 0.4, le mode aérien reste le réglage initial ; les modes « véhicules SBW » et « entités » élargissent explicitement la sélection. Le dernier inclut les joueurs hostiles, tandis que le propriétaire et ses alliés restent protégés par l'IFF.
 
 Depuis la version 0.3, l'addon utilise aussi la recette `superbwarfare:vehicle_assembling`, le menu et son paquet d'assemblage, la caisse `superbwarfare:container` et le pied-de-biche natifs. Un onglet FK filtre sa recette dans l'écran SBW ; celle-ci reste également dans la catégorie Défense. L'ogive utilise le type de dégâts `superbwarfare:projectile_explosion` lorsqu'il est enregistré, puis laisse SBW appliquer ses modificateurs. Le véhicule FK conserve ses PV et son blindage propres ; les outils de réparation et les munitions SBW ne sont pas intégrés.
 
@@ -49,7 +49,11 @@ Les métadonnées des JAR distribués ont été inspectées : `0.8.9-final` emba
 
 Télécharger uniquement depuis les canaux officiels : [Modrinth](https://modrinth.com/mod/superb-warfare), les liens du dépôt officiel, et les pages officielles des dépendances. Ne pas modifier les JAR.
 
-## Validation de la version 0.3
+## Validation de la version 0.4
+
+Les **46 GameTests** passent séparément avec SBW `0.8.9.2` et le JAR utilisateur `0.8.9-mc1.20.1-95d7cfe4e-all`. Les **39 tests** du noyau sans SBW passent aussi. Les nouveaux scénarios vérifient notamment les tickets de chunks, le tir distant, les modes de ciblage, l'allocation automatique, les carcasses, les bouchons et le vol sur plusieurs chunks. Les clients graphiques avec le JAR utilisateur ont été vérifiés sous Complementary Reimagined et Hysteria ; les autres distributions SBW conservent leur validation historique. Voir [VALIDATION-0.4.md](VALIDATION-0.4.md) pour les versions, preuves et limites. Le protocole réseau 3 exige le même JAR 0.4 sur le client et le serveur.
+
+## Validation historique de la version 0.3
 
 Les 24 GameTests 0.3 passent avec SBW `0.8.9.2` et avec le JAR utilisateur `0.8.9-mc1.20.1-95d7cfe4e-all`. Ils incluent les vrais dégâts contre un AH-6, le craft natif, la pose de caisse et le déploiement au pied-de-biche. Les 19 scénarios autonomes passent aussi sans SBW ; sa recette conditionnelle ne bloque pas le chargement. Voir [VALIDATION-0.3.md](VALIDATION-0.3.md) pour les preuves, l'essai graphique et les limites. Les lignes ci-dessous conservent les validations antérieures ; elles ne prétendent pas avoir relancé toute la suite 0.3 avec les deux autres distributions.
 
