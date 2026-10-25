@@ -5,6 +5,7 @@ import fr.irux.fk2000.entity.missile.MissileEntity;
 import fr.irux.fk2000.radar.RadarContact;
 import fr.irux.fk2000.radar.RadarSystem;
 import fr.irux.fk2000.registry.ModContent;
+import fr.irux.fk2000.registry.ModSounds;
 import net.minecraft.core.BlockPos;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.protocol.Packet;
@@ -24,6 +25,7 @@ import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.MoverType;
 import net.minecraft.world.entity.OwnableEntity;
 import net.minecraft.world.entity.PathfinderMob;
+import net.minecraft.world.entity.Pose;
 import net.minecraft.world.entity.ai.attributes.AttributeSupplier;
 import net.minecraft.world.entity.ai.attributes.Attributes;
 import net.minecraft.world.entity.player.Player;
@@ -76,12 +78,13 @@ public class Fk2000Entity extends PathfinderMob implements OwnableEntity {
     private int launchCooldown;
     private int reloadCooldown;
     private boolean preparing;
+    private boolean automaticPreparation;
 
     public Fk2000Entity(EntityType<? extends PathfinderMob> type, Level level) {
         super(type, level);
         setNoAi(true);
         setPersistenceRequired();
-        setMaxUpStep(1.0F);
+        setMaxUpStep(VehicleGeometry.MAX_STEP);
     }
 
     public static AttributeSupplier.Builder createAttributes() {
@@ -154,7 +157,13 @@ public class Fk2000Entity extends PathfinderMob implements OwnableEntity {
 
     public boolean isAutoFire() { return entityData.get(AUTO_FIRE); }
     public void setAutoFire(boolean active) {
-        if (!level().isClientSide) entityData.set(AUTO_FIRE, active);
+        if (level().isClientSide) return;
+        entityData.set(AUTO_FIRE, active);
+        if (!active && automaticPreparation) {
+            preparing = false;
+            automaticPreparation = false;
+            preparationTicks = 0;
+        }
     }
 
     public int getMissileCount() { return entityData.get(MISSILES); }
@@ -165,6 +174,38 @@ public class Fk2000Entity extends PathfinderMob implements OwnableEntity {
     public float getWheelRotation() { return entityData.get(WHEEL_ROLL); }
     public List<RadarContact> getRadarContacts() { return radarContacts; }
     public boolean isPreparingLaunch() { return preparing; }
+
+    public Vec3 getDriverSeatPosition(float partialTick) {
+        return VehicleGeometry.localToWorld(interpolatedPosition(partialTick),
+                Mth.rotLerp(partialTick, yRotO, getYRot()), VehicleGeometry.DRIVER_SEAT);
+    }
+
+    /** First-person and remote cameras use the same cab anchor without moving the player. */
+    public Vec3 getDriverEyePosition(float partialTick) {
+        return VehicleGeometry.localToWorld(interpolatedPosition(partialTick),
+                Mth.rotLerp(partialTick, yRotO, getYRot()), VehicleGeometry.DRIVER_EYE);
+    }
+
+    private Vec3 interpolatedPosition(float partialTick) {
+        return new Vec3(Mth.lerp(partialTick, xo, getX()), Mth.lerp(partialTick, yo, getY()),
+                Mth.lerp(partialTick, zo, getZ()));
+    }
+
+    @Override
+    protected AABB makeBoundingBox() { return VehicleGeometry.bodyBounds(position(), getYRot()); }
+
+    @Override
+    public void setYRot(float yaw) {
+        super.setYRot(yaw);
+        setBoundingBox(makeBoundingBox());
+    }
+
+    @Override
+    public AABB getBoundingBoxForCulling() {
+        // The elevated radar and raised launcher extend above the solid chassis.
+        AABB body = getBoundingBox();
+        return new AABB(body.minX, body.minY, body.minZ, body.maxX, body.minY + 8.0, body.maxZ);
+    }
 
     public void setDriveInput(float throttle, float steering, boolean brake) {
         if (level().isClientSide || !Float.isFinite(throttle) || !Float.isFinite(steering)) return;
@@ -206,16 +247,24 @@ public class Fk2000Entity extends PathfinderMob implements OwnableEntity {
         targetUUID = null;
         entityData.set(TARGET, -1);
         preparing = false;
+        automaticPreparation = false;
         preparationTicks = 0;
     }
 
     public boolean requestLaunch() {
+        return beginLaunch(false);
+    }
+
+    private boolean beginLaunch(boolean automatic) {
         if (level().isClientSide || !isRadarEnabled() || preparing || launchCooldown > 0
                 || getMissileCount() <= 0 || !RadarSystem.canTrack(this, getLockedTarget())) return false;
         // Cold launch needs a stable platform; driving commands automatically brake during preparation.
         if (Math.abs(getSpeed()) > 0.08F) return false;
         preparing = true;
-        preparationTicks = 0;
+        automaticPreparation = automatic;
+        // An already raised automatic launcher can fire without folding down
+        // and repeating the entire mechanical deployment for every missile.
+        preparationTicks = Math.round(getLauncherProgress() * ModConfig.PREPARATION_TICKS.get());
         clearDriveInput();
         return true;
     }
@@ -236,7 +285,7 @@ public class Fk2000Entity extends PathfinderMob implements OwnableEntity {
         }
         entityData.set(MISSILES, getMissileCount() + 1);
         reloadCooldown = ModConfig.RELOAD_TICKS.get();
-        level().playSound(null, blockPosition(), SoundEvents.IRON_TRAPDOOR_CLOSE, SoundSource.NEUTRAL, 0.8F, 0.7F);
+        level().playSound(null, blockPosition(), ModSounds.RELOAD.get(), SoundSource.NEUTRAL, 1.0F, 1.0F);
     }
 
     @Override
@@ -279,13 +328,19 @@ public class Fk2000Entity extends PathfinderMob implements OwnableEntity {
         speed = Mth.clamp(speed, -maxSpeed * 0.45, maxSpeed);
         if (isInWaterOrBubble()) speed *= 0.85;
         float rotation = (float) (steering * Math.min(3.0, Math.abs(speed) * 9.0) * Math.signum(speed));
-        setYRot(getYRot() + rotation);
+        float nextYaw = getYRot() + rotation;
+        AABB nextBounds = VehicleGeometry.bodyBounds(position(), nextYaw);
+        // Turning cannot sweep the long rear chassis through a cliff or a wall.
+        if (rotation != 0 && isLoadedFootprint(nextBounds)
+                && level().noCollision(this, nextBounds.deflate(1.0E-5))) {
+            setYRot(nextYaw);
+        }
         double yaw = Math.toRadians(getYRot());
         Vec3 oldMotion = getDeltaMovement();
         double vertical = isNoGravity() ? oldMotion.y : Math.max(-1.5, oldMotion.y - 0.08);
         if (onGround() && vertical < 0) vertical = -0.08;
         Vec3 motion = new Vec3(-Math.sin(yaw) * speed, vertical, Math.cos(yaw) * speed);
-        if (!isLoadedFootprint(getBoundingBox().move(motion))) {
+        if (!isLoadedFootprint(getBoundingBox().expandTowards(motion).inflate(0, VehicleGeometry.MAX_STEP, 0))) {
             // A remote command never creates tickets or pulls neighboring chunks into memory.
             // Check before vanilla collision queries, which may otherwise request terrain.
             speed = 0;
@@ -303,7 +358,7 @@ public class Fk2000Entity extends PathfinderMob implements OwnableEntity {
         if (verticalCollision) setDeltaMovement(getDeltaMovement().multiply(1, 0, 1));
         entityData.set(SPEED, (float) speed);
         double traveled = Math.sqrt((getX() - oldX) * (getX() - oldX) + (getZ() - oldZ) * (getZ() - oldZ));
-        float wheelAngle = entityData.get(WHEEL_ROLL) + (float) (Math.copySign(traveled, speed) / 0.44);
+        float wheelAngle = entityData.get(WHEEL_ROLL) + (float) (Math.copySign(traveled, speed) / VehicleGeometry.WHEEL_RADIUS);
         entityData.set(WHEEL_ROLL, (float) (wheelAngle % (2 * Math.PI)));
         hasImpulse = true;
     }
@@ -331,7 +386,7 @@ public class Fk2000Entity extends PathfinderMob implements OwnableEntity {
             }
         }
         // IFF requires an online owner for autonomous engagement; unknown team data never fires.
-        if (isAutoFire() && getOwnerUUID() != null && level().getPlayerByUUID(getOwnerUUID()) != null) requestLaunch();
+        if (isAutoFire() && getOwnerUUID() != null && level().getPlayerByUUID(getOwnerUUID()) != null) beginLaunch(true);
     }
 
     private void tickLauncher() {
@@ -341,15 +396,23 @@ public class Fk2000Entity extends PathfinderMob implements OwnableEntity {
             Entity target = getLockedTarget();
             if (!isRadarEnabled() || !RadarSystem.canTrack(this, target) || getMissileCount() <= 0) {
                 preparing = false;
+                automaticPreparation = false;
                 preparationTicks = 0;
             } else {
                 preparationTicks++;
                 entityData.set(LAUNCHER, Math.min(1F, preparationTicks / (float) duration));
                 if (preparationTicks >= duration) fireMissile(target);
             }
-        } else if (current > 0) {
+        } else if (current > 0 && !shouldKeepLauncherRaised()) {
             entityData.set(LAUNCHER, Math.max(0, current - 1F / duration));
         }
+    }
+
+    private boolean shouldKeepLauncherRaised() {
+        return isAutoFire() && isRadarEnabled() && getMissileCount() > 0
+                && Math.abs(getSpeed()) <= 0.08F && getOwnerUUID() != null
+                && level().getPlayerByUUID(getOwnerUUID()) != null
+                && RadarSystem.canTrack(this, getLockedTarget());
     }
 
     private void fireMissile(Entity target) {
@@ -357,19 +420,20 @@ public class Fk2000Entity extends PathfinderMob implements OwnableEntity {
         if (missile != null) {
             int tube = (ModConfig.MISSILE_CAPACITY.get() - getMissileCount()) % 6;
             double yaw = Math.toRadians(getYRot());
-            double lateral = (tube % 3 - 1) * 0.33;
-            double longitudinal = tube < 3 ? -2.75 : -3.38;
+            double lateral = (tube % 3 - 1) * 0.33 * VehicleGeometry.SCALE;
+            double longitudinal = (tube < 3 ? -2.75 : -3.38) * VehicleGeometry.SCALE;
             double x = getX() + Math.cos(yaw) * lateral - Math.sin(yaw) * longitudinal;
             double z = getZ() + Math.sin(yaw) * lateral + Math.cos(yaw) * longitudinal;
-            missile.moveTo(x, getY() + 3.36, z, getYRot(), -90);
+            missile.moveTo(x, getY() + 3.36 * VehicleGeometry.SCALE, z, getYRot(), -90);
             missile.launch(getOwnerUUID(), getUUID(), target);
             if (level().addFreshEntity(missile)) {
                 entityData.set(MISSILES, getMissileCount() - 1);
                 level().playSound(null, blockPosition(), SoundEvents.PISTON_EXTEND, SoundSource.HOSTILE, 1.0F, 0.6F);
-                launchCooldown = Math.max(durationForCooldown(), 20);
+                launchCooldown = isAutoFire() ? ModConfig.AUTO_FIRE_INTERVAL_TICKS.get() : Math.max(durationForCooldown(), 20);
             }
         }
         preparing = false;
+        automaticPreparation = false;
         preparationTicks = 0;
     }
 
@@ -381,6 +445,7 @@ public class Fk2000Entity extends PathfinderMob implements OwnableEntity {
         if (!canControl(player)) return InteractionResult.FAIL;
         ItemStack held = player.getItemInHand(hand);
         if (held.is(ModContent.MISSILE_ITEM.get())) {
+            if (!player.isShiftKeyDown()) return InteractionResult.PASS;
             if (!level().isClientSide) reload(player);
             return InteractionResult.sidedSuccess(level().isClientSide);
         }
@@ -405,7 +470,31 @@ public class Fk2000Entity extends PathfinderMob implements OwnableEntity {
     }
 
     @Override
-    public double getPassengersRidingOffset() { return 1.35; }
+    public double getPassengersRidingOffset() { return VehicleGeometry.DRIVER_SEAT.y; }
+
+    @Override
+    protected void positionRider(Entity passenger, Entity.MoveFunction movement) {
+        if (!hasPassenger(passenger)) return;
+        Vec3 seat = VehicleGeometry.localToWorld(position(), getYRot(), VehicleGeometry.DRIVER_SEAT);
+        movement.accept(passenger, seat.x, seat.y, seat.z);
+    }
+
+    @Override
+    public Vec3 getDismountLocationForPassenger(LivingEntity passenger) {
+        // Exit beside the front door rather than inside the long vehicle hitbox.
+        for (double side : new double[] {-1, 1}) {
+            Vec3 door = VehicleGeometry.localToWorld(position(), getYRot(),
+                    new Vec3(side * (VehicleGeometry.BODY_WIDTH * 0.5 + 0.85), 0, VehicleGeometry.DRIVER_SEAT.z));
+            for (int dy = 2; dy >= -3; dy--) {
+                Vec3 exit = new Vec3(door.x, getY() + dy, door.z);
+                BlockPos floor = BlockPos.containing(exit).below();
+                if (!level().hasChunkAt(floor)) continue;
+                if (level().getBlockState(floor).getCollisionShape(level(), floor).isEmpty()) continue;
+                if (level().noCollision(passenger, passenger.getDimensions(Pose.STANDING).makeBoundingBox(exit))) return exit;
+            }
+        }
+        return position().add(0, VehicleGeometry.BODY_HEIGHT + 0.1, 0);
+    }
 
     @Override
     public boolean isPushable() { return false; }
@@ -443,7 +532,8 @@ public class Fk2000Entity extends PathfinderMob implements OwnableEntity {
         entityData.set(AUTO_FIRE, tag.getBoolean("AutoFire"));
         entityData.set(MISSILES, Mth.clamp(tag.getInt("Missiles"), 0, ModConfig.MISSILE_CAPACITY.get()));
         reloadCooldown = Mth.clamp(tag.getInt("ReloadCooldown"), 0, ModConfig.RELOAD_TICKS.get());
-        launchCooldown = Mth.clamp(tag.getInt("LaunchCooldown"), 0, durationForCooldown());
+        launchCooldown = Mth.clamp(tag.getInt("LaunchCooldown"), 0,
+                Math.max(durationForCooldown(), ModConfig.AUTO_FIRE_INTERVAL_TICKS.get()));
         // Loading never resumes movement, partial launches, or a stale lock.
         clearDriveInput();
         setEngineOn(false);

@@ -37,5 +37,17 @@
   "key.iruxfk2000.engine": "Démarrer / arrêter le moteur FK-2000",
   "key.iruxfk2000.radar": "Activer / désactiver le radar FK-2000",
   "screen.iruxfk2000.ammo": "Missiles : %s",
-  "screen.iruxfk2000.range": "Portée : %s m"
+  "screen.iruxfk2000.range": "Portée : %s m",
+  "screen.iruxfk2000.health": "Coque : %s / %s PV",
+  "screen.iruxfk2000.health_critical": "DÉGÂTS CRITIQUES",
+  "screen.iruxfk2000.remote_cab": "FK-2000 / CABINE À DISTANCE",
+  "screen.iruxfk2000.driver_cab": "FK-2000 / POSTE DE CONDUITE",
+  "screen.iruxfk2000.assembly_tab": "FK-2000",
+  "screen.iruxfk2000.assembly_recipe": "Camion antiaérien FK-2000",
+  "message.iruxfk2000.crate_space": "Espace insuffisant pour déployer le FK-2000.",
+  "message.iruxfk2000.crate_owner": "Cette caisse appartient à un autre joueur.",
+  "tooltip.iruxfk2000.sbw_crate": "Assemblage : table SBW → onglet FK-2000 → caisse → pied-de-biche.",
+  "subtitles.iruxfk2000.vehicle_reload": "FK-2000 : missile rechargé",
+  "info.iruxfk2000.mod_id": "Irux FK-2000",
+  "info.iruxfk2000.fk2000": "Camion antiaérien tout terrain : radar, télécommande et missiles à lancement vertical. Accroupi + clic droit avec un missile pour recharger. Déployer la caisse au pied-de-biche SBW dans un espace dégagé."
 }

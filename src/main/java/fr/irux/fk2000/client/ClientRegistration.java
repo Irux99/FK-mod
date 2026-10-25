@@ -27,20 +27,35 @@ public final class ClientRegistration {
     @SubscribeEvent
     public static void registerOverlays(RegisterGuiOverlaysEvent event) {
         event.registerAboveAll("remote_camera", (gui, graphics, partialTick, width, height) -> {
+            if (Minecraft.getInstance().screen != null) return;
+            var vehicle = ClientHooks.hudVehicle();
+            if (vehicle == null) return;
             VehicleStatus s = ClientHooks.status();
-            if (!ClientHooks.isOnboard() || s == null) return;
-            graphics.fill(8, 8, Math.min(width - 8, 342), 70, 0xb00a191a);
+            if (s != null && s.vehicleId() != vehicle.getId()) s = null;
+            int right = Math.min(width - 8, 342);
+            graphics.fill(8, 8, right, 108, 0xc00a191a);
             var font = Minecraft.getInstance().font;
-            graphics.drawString(font, "FK-2000 / CAM", 15, 15, 0xff59e9b0, false);
+            graphics.drawString(font, Component.translatable(ClientHooks.isOnboard()
+                    ? "screen.iruxfk2000.remote_cab" : "screen.iruxfk2000.driver_cab"), 15, 15, 0xff59e9b0, false);
             graphics.drawString(font, Component.translatable("screen.iruxfk2000.camera_status",
-                    String.format(Locale.ROOT, "%.1f", Math.abs(s.speed()) * 72), s.missiles(),
-                    Component.translatable(s.radar() ? "options.on" : "options.off")), 15, 30, 0xffe0f4ea, false);
-            var target = s.contacts().stream().filter(c -> c.entityId() == s.targetId()).findFirst().orElse(null);
+                    String.format(Locale.ROOT, "%.1f", Math.abs(s == null ? vehicle.getSpeed() : s.speed()) * 72),
+                    s == null ? vehicle.getMissileCount() : s.missiles(),
+                    Component.translatable((s == null ? vehicle.isRadarEnabled() : s.radar()) ? "options.on" : "options.off")), 15, 30, 0xffe0f4ea, false);
+            int targetId = s == null ? -1 : s.targetId();
+            var target = s == null ? null : s.contacts().stream().filter(c -> c.entityId() == targetId).findFirst().orElse(null);
             graphics.drawString(font, target == null ? Component.translatable("screen.iruxfk2000.no_target")
                     : Component.literal(target.name() + " / " + Math.round(target.distance()) + " m"), 15, 43, 0xffffbd55, false);
             graphics.drawString(font, Component.translatable("screen.iruxfk2000.camera_help", ClientHooks.TACTICAL.getTranslatedKeyMessage(),
                     ClientHooks.FIRE.getTranslatedKeyMessage(), ClientHooks.ENGINE.getTranslatedKeyMessage(), ClientHooks.RADAR.getTranslatedKeyMessage()),
                     15, 56, 0xff8da69b, false);
+            VehicleHealthDisplay.draw(graphics, font, 15, 73, right - 30,
+                    s == null ? vehicle.getHealth() : s.health(), s == null ? vehicle.getMaxHealth() : s.maxHealth());
+            if (ClientHooks.recentDamage()) {
+                graphics.fill(0, 0, width, 3, 0xb0ff5544);
+                graphics.fill(0, height - 3, width, height, 0xb0ff5544);
+                graphics.fill(0, 0, 3, height, 0xb0ff5544);
+                graphics.fill(width - 3, 0, width, height, 0xb0ff5544);
+            }
         });
     }
 }

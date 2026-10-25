@@ -88,6 +88,7 @@ public final class TacticalScreen extends Screen {
         if (s == null || s.vehicleId() != vehicleId) {
             g.drawString(font, Component.translatable("screen.iruxfk2000.waiting"), radarX, radarY + radarSize + 8, 0xffeac878, false);
         } else {
+            VehicleHealthDisplay.draw(g, font, controlsX, 20, 188, s.health(), s.maxHealth());
             double range = Math.max(1, s.radarRange());
             RadarContact hover = null;
             for (RadarContact contact : s.contacts()) {

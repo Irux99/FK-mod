@@ -4,10 +4,11 @@ license="MIT (code); imported models: CGTrader Royalty Free License (no AI), see
 
 [[mods]]
 modId="iruxfk2000"
-version="0.2.0"
+version="0.3.0"
 displayName="Irux FK-2000"
 description='''Original FK-2000 vehicle, radar, remote control and phased cold-launch missiles.
-Prototype artwork. Superb Warfare integration is isolated through a runtime adapter.'''
+Articulated models, an armored all-terrain chassis and terrain-aware anti-air missiles.
+Superb Warfare integration is isolated through a runtime adapter.'''
 
 [[dependencies.iruxfk2000]]
 modId="forge"

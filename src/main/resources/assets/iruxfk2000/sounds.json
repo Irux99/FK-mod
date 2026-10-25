@@ -1,0 +1,11 @@
+{
+  "vehicle_reload": {
+    "subtitle": "subtitles.iruxfk2000.vehicle_reload",
+    "sounds": [
+      {
+        "name": "iruxfk2000:reload",
+        "volume": 1.0
+      }
+    ]
+  }
+}

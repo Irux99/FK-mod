@@ -37,5 +37,17 @@
   "key.iruxfk2000.engine": "Toggle FK-2000 engine",
   "key.iruxfk2000.radar": "Toggle FK-2000 radar",
   "screen.iruxfk2000.ammo": "Missiles: %s",
-  "screen.iruxfk2000.range": "Range: %s m"
+  "screen.iruxfk2000.range": "Range: %s m",
+  "screen.iruxfk2000.health": "Hull: %s / %s HP",
+  "screen.iruxfk2000.health_critical": "CRITICAL DAMAGE",
+  "screen.iruxfk2000.remote_cab": "FK-2000 / REMOTE CAB",
+  "screen.iruxfk2000.driver_cab": "FK-2000 / DRIVER CAB",
+  "screen.iruxfk2000.assembly_tab": "FK-2000",
+  "screen.iruxfk2000.assembly_recipe": "FK-2000 anti-air truck",
+  "message.iruxfk2000.crate_space": "Not enough room to deploy the FK-2000.",
+  "message.iruxfk2000.crate_owner": "This crate belongs to another player.",
+  "tooltip.iruxfk2000.sbw_crate": "Assembly: SBW table → FK-2000 tab → crate → crowbar.",
+  "subtitles.iruxfk2000.vehicle_reload": "FK-2000 missile reloaded",
+  "info.iruxfk2000.mod_id": "Irux FK-2000",
+  "info.iruxfk2000.fk2000": "All-terrain air-defense truck with radar, remote control and cold-launch missiles. Sneak and right-click with a missile to reload. Use an SBW crowbar to deploy its crate in a clear area."
 }

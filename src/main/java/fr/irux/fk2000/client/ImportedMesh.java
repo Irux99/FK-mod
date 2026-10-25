@@ -60,6 +60,10 @@ final class ImportedMesh {
     }
     void render(PoseStack pose, MultiBufferSource buffers, int light) { render(pose,buffers,light,0,0); }
     void render(PoseStack pose, MultiBufferSource buffers, int light, float wheelRotation, float launcherProgress) {
+        render(pose, buffers, light, wheelRotation, launcherProgress, false);
+    }
+    void render(PoseStack pose, MultiBufferSource buffers, int light, float wheelRotation, float launcherProgress,
+                boolean clearCabWindows) {
         VertexConsumer consumer = buffers.getBuffer(RenderType.entityCutout(texture));
         for (Part part : parts) {
             pose.pushPose();
@@ -67,14 +71,28 @@ final class ImportedMesh {
             if (part.animation.equals("wheel")) pose.mulPose(Axis.XP.rotation(-wheelRotation));
             if (part.animation.equals("launcher")) pose.mulPose(Axis.XP.rotation(launcherProgress*(float)Math.PI/2));
             var transform=pose.last();float[] v=part.vertices;
-            for(int triangle=0;triangle<v.length;triangle+=33) for(int corner=0;corner<4;corner++) {
+            for(int triangle=0;triangle<v.length;triangle+=33) {
+                // The supplied windshield is an opaque closed slab. Remove only its
+                // triangles for an interior camera; keep the body and exterior art.
+                if (clearCabWindows && isCabWindow(v, triangle)) continue;
+                for(int corner=0;corner<4;corner++) {
                 int i=triangle+(corner==0?0:corner==1?2:1)*11;
                 consumer.vertex(transform.pose(),v[i]-part.x,-(v[i+1]-part.y),v[i+2]-part.z)
                     .color(v[i+6],v[i+7],v[i+8],1f).uv(v[i+9],v[i+10])
                     .overlayCoords(OverlayTexture.NO_OVERLAY).uv2(light)
                     .normal(transform.normal(),v[i+3],-v[i+4],v[i+5]).endVertex();
+                }
             }
             pose.popPose();
         }
+    }
+
+    private static boolean isCabWindow(float[] vertices, int triangle) {
+        for (int corner = 0; corner < 3; corner++) {
+            int i = triangle + corner * 11;
+            if (Math.abs(vertices[i]) > 0.56F || vertices[i + 1] < 0.92F || vertices[i + 1] > 1.27F
+                    || vertices[i + 2] < 2.39F || vertices[i + 2] > 2.44F) return false;
+        }
+        return true;
     }
 }

@@ -1,0 +1,11 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "pattern": [" A ", "IGI", " R "],
+  "key": {
+    "A": {"item": "minecraft:amethyst_shard"},
+    "I": {"item": "minecraft:iron_ingot"},
+    "G": {"item": "minecraft:glass_pane"},
+    "R": {"item": "minecraft:redstone"}
+  },
+  "result": {"item": "iruxfk2000:remote_controller"}
+}

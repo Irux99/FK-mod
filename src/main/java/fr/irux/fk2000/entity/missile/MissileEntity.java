@@ -4,6 +4,7 @@ import fr.irux.fk2000.compat.SbwCompatibility;
 import fr.irux.fk2000.config.ModConfig;
 import fr.irux.fk2000.physics.GuidanceMath;
 import net.minecraft.core.BlockPos;
+import net.minecraft.core.registries.Registries;
 import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.protocol.Packet;
@@ -12,25 +13,34 @@ import net.minecraft.network.syncher.EntityDataAccessor;
 import net.minecraft.network.syncher.EntityDataSerializers;
 import net.minecraft.network.syncher.SynchedEntityData;
 import net.minecraft.server.level.ServerLevel;
+import net.minecraft.resources.ResourceKey;
+import net.minecraft.resources.ResourceLocation;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.sounds.SoundSource;
 import net.minecraft.util.Mth;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EntityType;
+import net.minecraft.world.damagesource.DamageSource;
+import net.minecraft.world.damagesource.DamageType;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.entity.projectile.ProjectileUtil;
 import net.minecraft.world.level.ClipContext;
 import net.minecraft.world.level.Level;
+import net.minecraft.world.level.levelgen.Heightmap;
 import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.EntityHitResult;
 import net.minecraft.world.phys.HitResult;
 import net.minecraft.world.phys.Vec3;
 import net.minecraftforge.network.NetworkHooks;
+import net.minecraftforge.event.level.ExplosionEvent;
+import net.minecraftforge.eventbus.api.SubscribeEvent;
+import net.minecraftforge.fml.common.Mod;
 
 import javax.annotation.Nullable;
 import java.util.UUID;
 
 /** Server-authoritative cold-launch missile. Clients only interpolate transforms and draw effects. */
+@Mod.EventBusSubscriber(modid = "iruxfk2000")
 public class MissileEntity extends Entity {
     public enum TerminationReason { ACTIVE, INVALID_SPAWN, LIFETIME, TARGET_LOST, UNLOADED_PATH, UNARMED_COLLISION, DETONATED }
 
@@ -53,6 +63,8 @@ public class MissileEntity extends Entity {
     private double interpolationX, interpolationY, interpolationZ;
     private float interpolationYaw, interpolationPitch;
     private boolean hasDetonated;
+    private Vec3 terrainWaypoint;
+    private int nextTerrainScan;
     private TerminationReason terminationReason = TerminationReason.ACTIVE;
 
     public MissileEntity(EntityType<? extends MissileEntity> type, Level level) {
@@ -118,8 +130,8 @@ public class MissileEntity extends Entity {
         if (isRemoved() || getFlightState() == FlightState.PREPARING) return;
         updateOrientation();
         moveWithCollision(target);
-        if (getMotorActive() && flightTicks % 8 == 0) {
-            level().playSound(null, getX(), getY(), getZ(), SoundEvents.FIRE_AMBIENT, SoundSource.HOSTILE, 0.8f, 1.4f);
+        if (getMotorActive() && flightTicks % 6 == 0) {
+            level().playSound(null, getX(), getY(), getZ(), SoundEvents.ELYTRA_FLYING, SoundSource.HOSTILE, 1.4f, .65f);
         }
     }
 
@@ -130,7 +142,7 @@ public class MissileEntity extends Entity {
                     setDeltaMovement(0, ModConfig.EJECTION_SPEED.get(), 0);
                     transitionTo(FlightState.EJECTING);
                     level().playSound(null, blockPosition(), SoundEvents.GENERIC_EXPLODE, SoundSource.HOSTILE, 0.7f, 1.7f);
-                    ((ServerLevel) level()).sendParticles(ParticleTypes.CLOUD, getX(), getY(), getZ(), 12, .22, .08, .22, .03);
+                    ((ServerLevel) level()).sendParticles(ParticleTypes.CLOUD, getX(), getY(), getZ(), 28, .45, .12, .45, .09);
                 }
             }
             case EJECTING -> {
@@ -158,14 +170,28 @@ public class MissileEntity extends Entity {
             transitionTo(FlightState.BOOSTING);
             syncCorrection(Vec3.ZERO);
             level().playSound(null, blockPosition(), SoundEvents.FIRECHARGE_USE, SoundSource.HOSTILE, 2f, .7f);
+            level().playSound(null, blockPosition(), SoundEvents.FIREWORK_ROCKET_LAUNCH, SoundSource.HOSTILE, 2.5f, .55f);
+            ((ServerLevel) level()).sendParticles(ParticleTypes.FLASH, getX(), getY(), getZ(), 1, 0, 0, 0, 0);
         }
     }
 
     private void guideUnderPower(@Nullable Entity target) {
-        if (target != null) nose = turn(nose, aimDirection(target), Math.toRadians(ModConfig.MISSILE_TURN_RATE.get()));
-        double speed = Math.min(ModConfig.MISSILE_MAX_SPEED.get(), getDeltaMovement().length() + ModConfig.MISSILE_ACCELERATION.get());
+        double turnRate = Math.toRadians(ModConfig.MISSILE_TURN_RATE.get());
+        Vec3 wanted = target == null ? nose : aimDirection(target);
+        if (target != null) nose = turn(nose, wanted, turnRate);
+        double currentSpeed = getDeltaMovement().length();
+        double speedLimit = ModConfig.MISSILE_MAX_SPEED.get();
+        if (target != null && getDeltaMovement().normalize().dot(wanted) < Math.cos(Math.toRadians(15))) {
+            // A 2.5-block/tick missile turning at five degrees has a ~29-block radius.
+            // Reduce terminal speed progressively so low/nearby targets do not cause an endless orbit.
+            double range = target.getBoundingBox().getCenter().distanceTo(position());
+            double pursuitFloor = Math.max(.3, target.getDeltaMovement().length() + .35);
+            speedLimit = Math.min(speedLimit, Math.max(pursuitFloor, range * Math.sin(turnRate) * .8));
+        }
+        double acceleration = ModConfig.MISSILE_ACCELERATION.get();
+        double speed = Mth.clamp(speedLimit, Math.max(.3, currentSpeed - acceleration * 2), currentSpeed + acceleration);
         // Accelerate along the engine axis while banking the actual trajectory at the same bounded rate.
-        Vec3 velocityDirection = turn(getDeltaMovement().normalize(), nose, Math.toRadians(ModConfig.MISSILE_TURN_RATE.get()));
+        Vec3 velocityDirection = turn(getDeltaMovement().normalize(), nose, turnRate);
         setDeltaMovement(velocityDirection.scale(speed));
         if (getFlightState() == FlightState.BOOSTING && stateTicks >= BOOST_TICKS) transitionTo(FlightState.GUIDING);
     }
@@ -174,7 +200,80 @@ public class MissileEntity extends Entity {
         Vec3 center = target.getBoundingBox().getCenter();
         GuidanceMath.Vector intercept = GuidanceMath.intercept(vector(position()), vector(center), vector(target.getDeltaMovement()),
                 Math.max(getDeltaMovement().length(), 0.6), 60);
-        return vec3(intercept).subtract(position()).normalize();
+        Vec3 predicted = vec3(intercept);
+        if (flightTicks >= nextTerrainScan) {
+            nextTerrainScan = flightTicks + 5;
+            terrainWaypoint = findTerrainWaypoint(predicted);
+        }
+        return (terrainWaypoint == null ? predicted : terrainWaypoint).subtract(position()).normalize();
+    }
+
+    /**
+     * Plan the climb during cold orientation, before a fast missile reaches the hillside.
+     * Heightmaps are queried only after a loaded-chunk check; there are no chunk tickets,
+     * remote entity searches or getChunk calls. Three columns cover a small flight corridor.
+     */
+    @Nullable
+    private Vec3 findTerrainWaypoint(Vec3 predicted) {
+        Vec3 horizontal = new Vec3(predicted.x - getX(), 0, predicted.z - getZ());
+        double distance = horizontal.length();
+        if (distance < 6) return null;
+        Vec3 direction = horizontal.scale(1 / distance);
+        Vec3 side = new Vec3(-direction.z, 0, direction.x);
+        double turnRadius = ModConfig.MISSILE_MAX_SPEED.get()
+                / Math.max(.01, Math.toRadians(ModConfig.MISSILE_TURN_RATE.get()));
+        double clearance = Math.max(8, Math.min(24, turnRadius * .5));
+        double requiredAltitude = Double.NEGATIVE_INFINITY;
+        double firstObstacle = distance;
+        double lastObstacle = 0;
+        boolean obstructed = false;
+        // A bounded scan prevents a very fast target's lead point making the work unbounded.
+        double scanDistance = Math.min(distance - 3, 512);
+        for (double along = 2; along <= scanDistance; along += 2) {
+            for (int lateral = -1; lateral <= 1; lateral++) {
+                Vec3 column = position().add(direction.scale(along)).add(side.scale(lateral * 1.5));
+                BlockPos sample = BlockPos.containing(column);
+                if (!level().hasChunkAt(sample)) return null;
+                double directAltitude = Mth.lerp(along / distance, getY(), predicted.y);
+                double localClearance = Math.min(clearance, Math.max(2, (distance - along) * .25));
+                int top = surfaceNearFlightLine(sample, directAltitude, localClearance);
+                if (top + localClearance > directAltitude) {
+                    obstructed = true;
+                    firstObstacle = Math.min(firstObstacle, along);
+                    lastObstacle = Math.max(lastObstacle, along);
+                    requiredAltitude = Math.max(requiredAltitude, top + localClearance);
+                }
+            }
+        }
+        if (!obstructed) return null;
+        double altitude = Math.min(level().getMaxBuildHeight() - 3, requiredAltitude);
+        if (altitude <= getY() + 1) {
+            // Stay level until beyond the ridge. A high missile still needs this guard:
+            // aiming down at a low target can otherwise send it back through the mountain.
+            return position().add(direction.scale(Math.min(distance, lastObstacle + Math.max(6, turnRadius * .5))))
+                    .multiply(1, 0, 1).add(0, Math.max(getY(), altitude), 0);
+        }
+        // Steep climb first: a waypoint on the far side would still aim through a close cliff.
+        return position().add(direction.scale(Math.min(12, Math.max(2, firstObstacle * .35))))
+                .multiply(1, 0, 1).add(0, altitude, 0);
+    }
+
+    /** A far overhead cave roof is not a mountain blocking the actual flight corridor. */
+    private int surfaceNearFlightLine(BlockPos column, double lineAltitude, double clearance) {
+        int heightmapTop = level().getHeight(Heightmap.Types.MOTION_BLOCKING_NO_LEAVES, column.getX(), column.getZ());
+        if (heightmapTop <= lineAltitude - clearance) return heightmapTop;
+        int minimum = Math.max(level().getMinBuildHeight(), Mth.floor(lineAltitude - clearance));
+        int maximum = Math.min(level().getMaxBuildHeight() - 1, Mth.floor(lineAltitude));
+        BlockPos.MutableBlockPos probe = new BlockPos.MutableBlockPos(column.getX(), maximum, column.getZ());
+        for (int y = maximum; y >= minimum; y--) {
+            probe.setY(y);
+            if (level().getBlockState(probe).getCollisionShape(level(), probe).isEmpty()) continue;
+            // Find the top of the connected obstruction, not an unrelated roof above open air.
+            while (probe.getY() < level().getMaxBuildHeight() - 1
+                    && !level().getBlockState(probe).getCollisionShape(level(), probe).isEmpty()) probe.move(0, 1, 0);
+            return probe.getY();
+        }
+        return level().getMinBuildHeight() - 1;
     }
 
     private void updateOrientation() {
@@ -249,10 +348,47 @@ public class MissileEntity extends Entity {
         terminationReason = TerminationReason.DETONATED;
         transitionTo(FlightState.DETONATED);
         Entity owner = ownerId == null ? null : ((ServerLevel) level()).getEntity(ownerId);
-        level().explode(owner == null ? this : owner, getX(), getY(), getZ(),
-                ModConfig.EXPLOSION_POWER.get().floatValue(), ModConfig.BLOCK_DAMAGE.get()
-                        ? Level.ExplosionInteraction.TNT : Level.ExplosionInteraction.NONE);
+        applyWarheadDamage(owner);
+        // Keep the actual explosion for sound, particles, events and optional terrain damage.
+        // Its entity list is cleared below: calibrated damage is applied exactly once above.
+        double blastExtent = ModConfig.EXPLOSION_POWER.get() * 2 + 2;
+        if (isPathLoaded(position().add(-blastExtent, 0, -blastExtent), position().add(blastExtent, 0, blastExtent))) {
+            level().explode(this, damageSources().explosion(this, owner), null, getX(), getY(), getZ(),
+                    ModConfig.EXPLOSION_POWER.get().floatValue(), false, ModConfig.BLOCK_DAMAGE.get()
+                            ? Level.ExplosionInteraction.TNT : Level.ExplosionInteraction.NONE);
+        } else {
+            level().playSound(null, getX(), getY(), getZ(), SoundEvents.GENERIC_EXPLODE, SoundSource.HOSTILE, 4f, .8f);
+        }
+        ServerLevel server = (ServerLevel) level();
+        server.sendParticles(ParticleTypes.FLASH, getX(), getY(), getZ(), 1, 0, 0, 0, 0);
+        server.sendParticles(ParticleTypes.LARGE_SMOKE, getX(), getY(), getZ(), 32, 1.2, 1.2, 1.2, .08);
         discard();
+    }
+
+    private void applyWarheadDamage(@Nullable Entity owner) {
+        double radius = Math.max(4, ModConfig.EXPLOSION_POWER.get() * 1.5);
+        ResourceKey<DamageType> sbwExplosion = ResourceKey.create(Registries.DAMAGE_TYPE,
+                new ResourceLocation("superbwarfare", "projectile_explosion"));
+        DamageSource source = level().registryAccess().registryOrThrow(Registries.DAMAGE_TYPE).getHolder(sbwExplosion)
+                .<DamageSource>map(holder -> new DamageSource(holder, this, owner))
+                .orElseGet(() -> damageSources().explosion(this, owner));
+        for (Entity entity : level().getEntities(this, getBoundingBox().inflate(radius), this::canHit)) {
+            AABB box = entity.getBoundingBox();
+            Vec3 closest = new Vec3(Mth.clamp(getX(), box.minX, box.maxX),
+                    Mth.clamp(getY(), box.minY, box.maxY), Mth.clamp(getZ(), box.minZ, box.maxZ));
+            double distance = closest.distanceTo(position());
+            if (distance >= radius || !isPathLoaded(position(), entity.getBoundingBox().getCenter())) continue;
+            HitResult cover = level().clip(new ClipContext(position(), closest, ClipContext.Block.COLLIDER, ClipContext.Fluid.NONE, this));
+            if (cover.getType() != HitResult.Type.MISS && cover.getLocation().distanceTo(closest) > .25) continue;
+            double falloff = 1 - Math.max(0, distance - ModConfig.PROXIMITY_FUSE.get())
+                    / Math.max(.1, radius - ModConfig.PROXIMITY_FUSE.get());
+            entity.hurt(source, (float) (ModConfig.MISSILE_DAMAGE.get() * falloff));
+        }
+    }
+
+    @SubscribeEvent
+    public static void avoidDuplicateExplosionDamage(ExplosionEvent.Detonate event) {
+        if (event.getExplosion().getDirectSourceEntity() instanceof MissileEntity) event.getAffectedEntities().clear();
     }
 
     private void expire(TerminationReason reason) {
@@ -276,9 +412,15 @@ public class MissileEntity extends Entity {
         Vec3 facing = getLookAngle();
         if (getMotorActive()) {
             Vec3 exhaust = position().subtract(facing.scale(.7));
-            level().addParticle(ParticleTypes.FLAME, exhaust.x, exhaust.y, exhaust.z, -facing.x * .15, -facing.y * .15, -facing.z * .15);
-            if (tickCount % 2 == 0) level().addParticle(ParticleTypes.CAMPFIRE_COSY_SMOKE, exhaust.x, exhaust.y, exhaust.z,
-                    -facing.x * .04, -facing.y * .04, -facing.z * .04);
+            Vec3 previous = exhaust.subtract(getDeltaMovement());
+            int trailSteps = Math.max(2, Math.min(8, (int) Math.ceil(getDeltaMovement().length() * 3)));
+            for (int i = 0; i < trailSteps; i++) {
+                Vec3 point = previous.lerp(exhaust, (i + 1.) / trailSteps);
+                level().addParticle(ParticleTypes.FLAME, point.x, point.y, point.z,
+                        -facing.x * .18, -facing.y * .18, -facing.z * .18);
+                if (i % 2 == 0) level().addParticle(ParticleTypes.CAMPFIRE_COSY_SMOKE, point.x, point.y, point.z,
+                        -facing.x * .025, -facing.y * .025, -facing.z * .025);
+            }
         } else if (getFlightState() == FlightState.ORIENTING) {
             Vec3 correction = getCorrection();
             if (correction.lengthSqr() < 1.0e-8) return;

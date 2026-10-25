@@ -3,6 +3,8 @@ package fr.irux.fk2000.client;
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.math.Axis;
 import fr.irux.fk2000.entity.vehicle.Fk2000Entity;
+import fr.irux.fk2000.entity.vehicle.VehicleGeometry;
+import net.minecraft.client.Minecraft;
 import net.minecraft.client.model.geom.ModelPart;
 import net.minecraft.client.model.geom.PartPose;
 import net.minecraft.client.model.geom.builders.CubeListBuilder;
@@ -26,16 +28,22 @@ public final class PrototypeVehicleRenderer extends EntityRenderer<Fk2000Entity>
 
     public PrototypeVehicleRenderer(EntityRendererProvider.Context context) {
         super(context);
-        shadowRadius = 2.2f;
+        shadowRadius = 3.8f;
         MeshDefinition mesh = new MeshDefinition();
         PartDefinition root = mesh.getRoot();
         root.addOrReplaceChild("chassis", CubeListBuilder.create().texOffs(0, 0)
                 .addBox(-21, -17, -44, 42, 10, 88)
-                .texOffs(0, 0).addBox(-19, -29, 20, 38, 18, 23)
-                .texOffs(80, 80).addBox(-16, -27, 42, 32, 8, 1)
-                .texOffs(80, 80).addBox(-20, -27, 22, 1, 8, 17)
-                .texOffs(80, 80).addBox(19, -27, 22, 1, 8, 17)
                 .texOffs(0, 0).addBox(-22, -10, 44, 44, 4, 3), PartPose.ZERO);
+        // Hollow cab: the pilot sits between the floor, roof and pillars.
+        root.addOrReplaceChild("cab", CubeListBuilder.create().texOffs(0, 0)
+                .addBox(-19, -11, 20, 38, 2, 23)
+                .addBox(-19, -25, 20, 38, 2, 23)
+                .addBox(-19, -23, 20, 2, 12, 23)
+                .addBox(17, -23, 20, 2, 12, 23)
+                .addBox(-17, -23, 20, 34, 12, 2)
+                .addBox(-17, -15, 41, 34, 4, 2), PartPose.ZERO);
+        root.addOrReplaceChild("glass", CubeListBuilder.create().texOffs(80, 80)
+                .addBox(-17, -23, 42, 34, 8, 1), PartPose.ZERO);
         int[] wheelZ = {-30, -10, 13, 32};
         for (int axle = 0; axle < wheelZ.length; axle++) {
             for (int side = 0; side < 2; side++) {
@@ -73,7 +81,10 @@ public final class PrototypeVehicleRenderer extends EntityRenderer<Fk2000Entity>
         pose.pushPose();
         float yaw = Mth.rotLerp(partialTick, entity.yRotO, entity.getYRot());
         pose.mulPose(Axis.YP.rotationDegrees(180 - yaw));
-        pose.scale(1, -1, -1);
+        pose.scale(VehicleGeometry.SCALE, -VehicleGeometry.SCALE, -VehicleGeometry.SCALE);
+        Minecraft mc = Minecraft.getInstance();
+        model.getChild("glass").visible = !(mc.options.getCameraType().isFirstPerson()
+                && (mc.getCameraEntity() == entity || mc.player != null && mc.player.getVehicle() == entity));
         float wheelAngle = -entity.getWheelRotation();
         for (int i = 0; i < 8; i++) model.getChild("wheel" + i).xRot = wheelAngle;
         radar.yRot = entity.isRadarEnabled() ? (float) ((entity.level().getGameTime() * .075 + partialTick * .075) % (Math.PI * 2)) : 0;

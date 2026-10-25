@@ -3,6 +3,8 @@ package fr.irux.fk2000.client;
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.math.Axis;
 import fr.irux.fk2000.entity.vehicle.Fk2000Entity;
+import fr.irux.fk2000.entity.vehicle.VehicleGeometry;
+import net.minecraft.client.Minecraft;
 import net.minecraft.client.model.geom.ModelPart;
 import net.minecraft.client.model.geom.PartPose;
 import net.minecraft.client.model.geom.builders.CubeListBuilder;
@@ -24,7 +26,7 @@ public final class VehicleRenderer extends EntityRenderer<Fk2000Entity> {
     private final ModelPart radar;
     public VehicleRenderer(EntityRendererProvider.Context context) {
         super(context);
-        shadowRadius=2.2f;
+        shadowRadius=3.8f;
         truck=new ImportedMesh("truck",new ResourceLocation("iruxfk2000","textures/entity/imported-truck.png"));
         MeshDefinition mesh=new MeshDefinition();
         mesh.getRoot().addOrReplaceChild("mast",CubeListBuilder.create().texOffs(0,0)
@@ -40,8 +42,11 @@ public final class VehicleRenderer extends EntityRenderer<Fk2000Entity> {
     @Override public void render(Fk2000Entity entity,float entityYaw,float partialTick,PoseStack pose,MultiBufferSource buffers,int light) {
         pose.pushPose();
         pose.mulPose(Axis.YP.rotationDegrees(180-Mth.rotLerp(partialTick,entity.yRotO,entity.getYRot())));
-        pose.scale(1,-1,-1);
-        truck.render(pose,buffers,light,entity.getWheelRotation(),entity.getLauncherProgress());
+        pose.scale(VehicleGeometry.SCALE,-VehicleGeometry.SCALE,-VehicleGeometry.SCALE);
+        Minecraft mc = Minecraft.getInstance();
+        boolean cabView = mc.options.getCameraType().isFirstPerson()
+                && (mc.getCameraEntity() == entity || mc.player != null && mc.player.getVehicle() == entity);
+        truck.render(pose,buffers,light,entity.getWheelRotation(),entity.getLauncherProgress(),cabView);
         radar.yRot=entity.isRadarEnabled()?(float)(((entity.level().getGameTime()+partialTick)*.075)%(Math.PI*2)):0;
         radarAssembly.render(pose,buffers.getBuffer(RenderType.entityCutoutNoCull(RADAR_TEXTURE)),light,OverlayTexture.NO_OVERLAY);
         pose.popPose();

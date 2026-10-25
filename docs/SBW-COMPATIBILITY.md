@@ -35,7 +35,7 @@ Les noms d'enum `AIRPLANE`, `HELICOPTER` et `DRONE` existent dans toutes les ré
 
 Les autres mods peuvent exposer une entité aérienne via l'interface `AerialTarget` ou le tag d'entités `iruxfk2000:aerial_targets`. Le tag déclare qu'une entité peut être ciblée ; il faut le réserver à des véhicules aériens compatibles. Les joueurs ne sont pas des cibles radar.
 
-Ce pont de ciblage n'établit aucune intégration avec la réparation, les munitions, le menu de véhicules, les blindages ou les systèmes de dégâts propres à SBW. Ces capacités demandent des travaux et tests distincts.
+Depuis la version 0.3, l'addon utilise aussi la recette `superbwarfare:vehicle_assembling`, le menu et son paquet d'assemblage, la caisse `superbwarfare:container` et le pied-de-biche natifs. Un onglet FK filtre sa recette dans l'écran SBW ; celle-ci reste également dans la catégorie Défense. L'ogive utilise le type de dégâts `superbwarfare:projectile_explosion` lorsqu'il est enregistré, puis laisse SBW appliquer ses modificateurs. Le véhicule FK conserve ses PV et son blindage propres ; les outils de réparation et les munitions SBW ne sont pas intégrés.
 
 ## Dépendances en jeu
 
@@ -49,7 +49,11 @@ Les métadonnées des JAR distribués ont été inspectées : `0.8.9-final` emba
 
 Télécharger uniquement depuis les canaux officiels : [Modrinth](https://modrinth.com/mod/superb-warfare), les liens du dépôt officiel, et les pages officielles des dépendances. Ne pas modifier les JAR.
 
-## Matrice des distributions demandées
+## Validation de la version 0.3
+
+Les 24 GameTests 0.3 passent avec SBW `0.8.9.2` et avec le JAR utilisateur `0.8.9-mc1.20.1-95d7cfe4e-all`. Ils incluent les vrais dégâts contre un AH-6, le craft natif, la pose de caisse et le déploiement au pied-de-biche. Les 19 scénarios autonomes passent aussi sans SBW ; sa recette conditionnelle ne bloque pas le chargement. Voir [VALIDATION-0.3.md](VALIDATION-0.3.md) pour les preuves, l'essai graphique et les limites. Les lignes ci-dessous conservent les validations antérieures ; elles ne prétendent pas avoir relancé toute la suite 0.3 avec les deux autres distributions.
+
+## Matrice historique des distributions demandées
 
 | Distribution SBW officielle | Sources et API binaire | Build et serveur de tests dédié | GameTests requis | Client graphique réel | Deux clients réseau |
 | --- | --- | --- | --- | --- | --- |

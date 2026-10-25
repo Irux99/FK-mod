@@ -1,0 +1,17 @@
+{
+  "conditions": [{"type": "forge:mod_loaded", "modid": "superbwarfare"}],
+  "type": "superbwarfare:vehicle_assembling",
+  "category": "defense",
+  "inputs": [
+    "192 minecraft:iron_ingot",
+    "64 minecraft:copper_ingot",
+    "48 minecraft:redstone",
+    "24 minecraft:black_wool",
+    "16 minecraft:glass_pane",
+    "8 minecraft:piston",
+    "8 minecraft:diamond",
+    "8 iruxfk2000:missile",
+    "1 iruxfk2000:remote_controller"
+  ],
+  "result": {"entity": "iruxfk2000:fk2000"}
+}

@@ -33,7 +33,7 @@ import java.util.function.Supplier;
 @Mod.EventBusSubscriber(modid = IruxFk2000Mod.MOD_ID)
 public final class ModNetwork {
     private static final SimpleChannel CHANNEL = NetworkRegistry.newSimpleChannel(
-        new ResourceLocation(IruxFk2000Mod.MOD_ID, "control"), () -> "1", "1"::equals, "1"::equals);
+        new ResourceLocation(IruxFk2000Mod.MOD_ID, "control"), () -> "2", "2"::equals, "2"::equals);
     private static final Map<UUID, UUID> SESSIONS = new HashMap<>();
     private static final Map<UUID, Rate> RATES = new HashMap<>();
     public enum Command { DRIVE, ENGINE, RADAR, AUTO_ACQUIRE, AUTO_FIRE, SELECT_TARGET, FIRE, RELOAD, CLOSE }
@@ -99,7 +99,7 @@ public final class ModNetwork {
     private static void sendStatus(ServerPlayer player, Fk2000Entity v) {
         List<RadarContact> contacts = v.getRadarContacts().stream().limit(32).toList();
         VehicleStatus status = new VehicleStatus(v.getId(), v.isEngineOn(), v.isRadarEnabled(), v.isAutoAcquire(), v.isAutoFire(),
-            v.getMissileCount(), v.getSpeed(), v.getLauncherProgress(), v.getLockedTargetId(),
+            v.getMissileCount(), v.getHealth(), v.getMaxHealth(), v.getSpeed(), v.getLauncherProgress(), v.getLockedTargetId(),
             v.getX(), v.getY(), v.getZ(), ModConfig.RADAR_RANGE.get(), contacts);
         CHANNEL.send(PacketDistributor.PLAYER.with(() -> player), new StatusPacket(status));
     }
@@ -144,6 +144,7 @@ public final class ModNetwork {
             VehicleStatus s = p.status;
             b.writeVarInt(s.vehicleId()); b.writeBoolean(s.engine()); b.writeBoolean(s.radar());
             b.writeBoolean(s.autoAcquire()); b.writeBoolean(s.autoFire()); b.writeVarInt(s.missiles());
+            b.writeFloat(s.health()); b.writeFloat(s.maxHealth());
             b.writeFloat(s.speed()); b.writeFloat(s.launcher()); b.writeVarInt(s.targetId());
             b.writeDouble(s.x()); b.writeDouble(s.y()); b.writeDouble(s.z()); b.writeDouble(s.radarRange());
             b.writeVarInt(s.contacts().size());
@@ -155,12 +156,13 @@ public final class ModNetwork {
         }
         static StatusPacket decode(FriendlyByteBuf b) {
             int id = b.readVarInt(); boolean engine = b.readBoolean(), radar = b.readBoolean(), acquire = b.readBoolean(), fire = b.readBoolean();
-            int missiles = b.readVarInt(); float speed = b.readFloat(), launcher = b.readFloat(); int target = b.readVarInt();
+            int missiles = b.readVarInt(); float health = b.readFloat(), maxHealth = b.readFloat();
+            float speed = b.readFloat(), launcher = b.readFloat(); int target = b.readVarInt();
             double x = b.readDouble(), y = b.readDouble(), z = b.readDouble(), range = b.readDouble();
             int size = b.readVarInt(); if (size < 0 || size > 32) throw new IllegalArgumentException("Invalid radar contact count");
             List<RadarContact> contacts = new ArrayList<>(size);
             for (int i = 0; i < size; i++) contacts.add(new RadarContact(b.readVarInt(), b.readUUID(), b.readUtf(128), b.readDouble(), b.readDouble(), b.readDouble(), b.readDouble()));
-            return new StatusPacket(new VehicleStatus(id, engine, radar, acquire, fire, missiles, speed, launcher, target, x, y, z, range, contacts));
+            return new StatusPacket(new VehicleStatus(id, engine, radar, acquire, fire, missiles, health, maxHealth, speed, launcher, target, x, y, z, range, contacts));
         }
         static void handle(StatusPacket p, Supplier<NetworkEvent.Context> supplier) {
             NetworkEvent.Context c = supplier.get();

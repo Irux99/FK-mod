@@ -3,6 +3,7 @@ package fr.irux.fk2000.gametest;
 import fr.irux.fk2000.compat.AerialTarget;
 import fr.irux.fk2000.config.ModConfig;
 import fr.irux.fk2000.entity.vehicle.Fk2000Entity;
+import fr.irux.fk2000.entity.vehicle.VehicleGeometry;
 import fr.irux.fk2000.item.RemoteControllerItem;
 import fr.irux.fk2000.radar.RadarSystem;
 import fr.irux.fk2000.registry.ModContent;
@@ -94,6 +95,41 @@ public final class VehicleGameTests {
         helper.succeed();
     }
 
+    @GameTest(template = "empty", timeoutTicks = 80)
+    public static void crouchedMissileInteractionReloadsQuickly(GameTestHelper helper) {
+        Fk2000Entity vehicle = helper.spawn(ModContent.VEHICLE.get(), new Vec3(6, 2, 6));
+        Player owner = helper.makeMockSurvivalPlayer();
+        owner.moveTo(vehicle.position());
+        owner.getAbilities().instabuild = false;
+        vehicle.setOwnerUUID(owner.getUUID());
+        CompoundTag saved = new CompoundTag();
+        vehicle.addAdditionalSaveData(saved);
+        saved.putInt("Missiles", 0);
+        vehicle.readAdditionalSaveData(saved);
+        ItemStack ammunition = new ItemStack(ModContent.MISSILE_ITEM.get(), 3);
+        owner.setItemInHand(InteractionHand.MAIN_HAND, ammunition);
+        owner.setShiftKeyDown(false);
+        owner.interactOn(vehicle, InteractionHand.MAIN_HAND);
+        helper.assertTrue(vehicle.getMissileCount() == 0 && ammunition.getCount() == 3,
+                "A normal click must not accidentally reload or consume a missile");
+        owner.setShiftKeyDown(true);
+        helper.assertTrue(owner.interactOn(vehicle, InteractionHand.MAIN_HAND).consumesAction(),
+                "Crouch-right-click with a missile must perform the physical reload interaction");
+        helper.assertTrue(vehicle.getMissileCount() == 1 && ammunition.getCount() == 2,
+                "The crouched interaction must load and consume exactly one missile");
+        owner.interactOn(vehicle, InteractionHand.MAIN_HAND);
+        helper.assertTrue(vehicle.getMissileCount() == 1 && ammunition.getCount() == 2,
+                "Rapid repeated clicks must not bypass the reload animation cooldown");
+        helper.assertTrue(ModConfig.RELOAD_TICKS.get() < 40,
+                "The new reload must complete faster than the former three-second cooldown");
+        helper.runAtTickTime(ModConfig.RELOAD_TICKS.get() + 2, () -> {
+            owner.interactOn(vehicle, InteractionHand.MAIN_HAND);
+            helper.assertTrue(vehicle.getMissileCount() == 2 && ammunition.getCount() == 1,
+                    "After the short cooldown, another physical missile must load successfully");
+            helper.succeed();
+        });
+    }
+
     @GameTest(template = "empty", timeoutTicks = 30)
     public static void creativeRemotePairingSurvivesStackCopy(GameTestHelper helper) {
         Fk2000Entity vehicle = helper.spawn(ModContent.VEHICLE.get(), new Vec3(6, 2, 6));
@@ -127,9 +163,87 @@ public final class VehicleGameTests {
         helper.succeed();
     }
 
+    @GameTest(template = "empty", timeoutTicks = 30)
+    public static void enlargedChassisCabSeatAndDamagePersist(GameTestHelper helper) {
+        Fk2000Entity vehicle = helper.spawn(ModContent.VEHICLE.get(), new Vec3(16, 2, 12));
+        Player owner = helper.makeMockSurvivalPlayer();
+        vehicle.setOwnerUUID(owner.getUUID());
+        vehicle.setYRot(0);
+        helper.assertTrue(Math.abs(vehicle.getBoundingBox().getZsize() - VehicleGeometry.BODY_LENGTH) < 0.01,
+                "The enlarged model must have a twelve-block chassis hitbox, not its former square hitbox");
+        helper.assertTrue(Math.abs(vehicle.getBoundingBox().getXsize() - VehicleGeometry.BODY_WIDTH) < 0.01,
+                "The narrow side of the enlarged chassis must follow the real body width");
+        owner.moveTo(vehicle.position());
+        helper.assertTrue(owner.startRiding(vehicle), "The driver must be able to enter their cab");
+        vehicle.positionRider(owner);
+        Vec3 seat = VehicleGeometry.localToWorld(vehicle.position(), vehicle.getYRot(), VehicleGeometry.DRIVER_SEAT);
+        helper.assertTrue(owner.position().distanceTo(seat) < 0.01,
+                "The mounted driver must be at the front cab seat rather than above the chassis centre");
+        helper.assertTrue(owner.getZ() > vehicle.getZ() + 4 && owner.getY() < vehicle.getY() + 1.0,
+                "The driver must be inside the low front cabin");
+        vehicle.setYRot(90);
+        vehicle.positionRider(owner);
+        helper.assertTrue(Math.abs(vehicle.getBoundingBox().getXsize() - VehicleGeometry.BODY_LENGTH) < 0.01,
+                "Turning must rotate the chassis collision footprint immediately");
+        helper.assertTrue(owner.getX() < vehicle.getX() - 4,
+                "The driver's seat must rotate together with the cab");
+        owner.stopRiding();
+        float originalHealth = vehicle.getHealth();
+        helper.assertTrue(originalHealth == vehicle.getMaxHealth() && originalHealth >= 240,
+                "A newly deployed vehicle must start with its full armored health pool");
+        helper.assertTrue(vehicle.hurt(helper.getLevel().damageSources().generic(), 30),
+                "Real server damage must be accepted by the truck");
+        helper.assertTrue(vehicle.getHealth() > 0 && vehicle.getHealth() < originalHealth,
+                "Damage must reduce actual vehicle health while leaving the truck alive");
+        CompoundTag saved = new CompoundTag();
+        vehicle.addAdditionalSaveData(saved);
+        Fk2000Entity restored = ModContent.VEHICLE.get().create(helper.getLevel());
+        helper.assertTrue(restored != null, "A saved damaged truck must be constructible");
+        restored.readAdditionalSaveData(saved);
+        helper.assertTrue(Math.abs(restored.getHealth() - vehicle.getHealth()) < 0.01,
+                "Vehicle damage must persist through saving and loading");
+        helper.succeed();
+    }
+
+    @GameTest(template = "empty", timeoutTicks = 140)
+    public static void allTerrainDriveClimbsStepsAndStopsAtCliff(GameTestHelper helper) {
+        Fk2000Entity vehicle = helper.spawn(ModContent.VEHICLE.get(), new Vec3(16, 2, 8));
+        Player owner = helper.makeMockSurvivalPlayer();
+        vehicle.setOwnerUUID(owner.getUUID());
+        vehicle.setRadarEnabled(false);
+        vehicle.setYRot(0);
+        vehicle.setEngineOn(true);
+        // A two-block terrace represents steep Minecraft mountain steps.
+        for (int x = 12; x <= 20; x++) {
+            for (int z = 15; z <= 30; z++) {
+                helper.setBlock(x, 2, z, Blocks.STONE);
+                helper.setBlock(x, 3, z, Blocks.STONE);
+            }
+            // A five-block cliff above the terrace must remain an obstacle.
+            for (int y = 4; y <= 8; y++) helper.setBlock(x, y, 25, Blocks.STONE);
+        }
+        double originalY = vehicle.getY();
+        double originalZ = vehicle.getZ();
+        helper.onEachTick(() -> vehicle.setDriveInput(1, 0, false));
+        helper.runAtTickTime(65, () -> {
+            helper.assertTrue(vehicle.getY() >= originalY + 1.95,
+                    "The physical truck must climb a two-block mountain terrace: " + vehicle.position());
+            helper.assertTrue(vehicle.getZ() > originalZ + 2,
+                    "The truck must continue driving after climbing instead of merely moving upward");
+        });
+        helper.runAtTickTime(110, () -> {
+            double wallZ = helper.absolutePos(new BlockPos(16, 4, 25)).getZ();
+            helper.assertTrue(vehicle.getBoundingBox().maxZ <= wallZ + 0.05,
+                    "All-terrain step-up must not allow the long truck to pass through a cliff");
+            helper.assertTrue(vehicle.getY() < originalY + 3,
+                    "The truck must not teleport onto terrain taller than its allowed step");
+            helper.succeed();
+        });
+    }
+
     @GameTest(template = "empty", timeoutTicks = 110)
     public static void driveCollidesAndExpiresWithoutInput(GameTestHelper helper) {
-        Fk2000Entity vehicle = helper.spawn(ModContent.VEHICLE.get(), new Vec3(6, 2, 6));
+        Fk2000Entity vehicle = helper.spawn(ModContent.VEHICLE.get(), new Vec3(6, 2, 8));
         Player owner = helper.makeMockSurvivalPlayer();
         vehicle.setOwnerUUID(owner.getUUID());
         vehicle.setRadarEnabled(false);
@@ -137,7 +251,7 @@ public final class VehicleGameTests {
         vehicle.setEngineOn(true);
         double initialZ = vehicle.getZ();
         for (int x = 3; x <= 9; x++) {
-            for (int y = 1; y <= 4; y++) helper.setBlock(x, y, 10, Blocks.STONE);
+            for (int y = 1; y <= 6; y++) helper.setBlock(x, y, 18, Blocks.STONE);
         }
         helper.onEachTick(() -> {
             if (helper.getTick() <= 45) vehicle.setDriveInput(1, 0, false);
@@ -150,7 +264,7 @@ public final class VehicleGameTests {
             helper.assertTrue(vehicle.getZ() > initialZ + 0.1, "Acceleration must move the entity through the world");
         });
         helper.runAtTickTime(45, () -> {
-            double wallZ = helper.absolutePos(new BlockPos(6, 1, 10)).getZ();
+            double wallZ = helper.absolutePos(new BlockPos(6, 1, 18)).getZ();
             helper.assertTrue(vehicle.getBoundingBox().maxZ <= wallZ + 0.05,
                     "The chassis must collide with solid terrain instead of crossing the wall: " + driveDiagnostic(vehicle, initialZ, wallZ));
             helper.assertTrue(vehicle.getZ() > initialZ + 0.5,
@@ -208,6 +322,53 @@ public final class VehicleGameTests {
             removePlayerFixture(helper, owner);
             helper.assertFalse(RadarSystem.canTrack(vehicle, enemy),
                     "An offline owner must stop engagement because team/IFF context is unavailable");
+            helper.succeed();
+        });
+    }
+
+    @GameTest(template = "empty", timeoutTicks = 240)
+    public static void automaticSalvoKeepsLauncherRaisedAndConsumesEachMissile(GameTestHelper helper) {
+        Fk2000Entity vehicle = helper.spawn(ModContent.VEHICLE.get(), new Vec3(6, 2, 6));
+        ServerPlayer owner = onlinePlayerFixture(helper);
+        vehicle.setOwnerUUID(owner.getUUID());
+        CompoundTag saved = new CompoundTag();
+        vehicle.addAdditionalSaveData(saved);
+        saved.putInt("Missiles", 2);
+        vehicle.readAdditionalSaveData(saved);
+        vehicle.setRadarEnabled(true);
+        vehicle.setAutoAcquire(false);
+        vehicle.setAutoFire(false);
+        RadarFixture enemy = spawnRadarFixture(helper, new Vec3(18, 18, 18), null);
+        long[] shots = {-1, -1};
+        helper.runAtTickTime(12, () -> {
+            vehicle.selectTarget(enemy.getId());
+            helper.assertTrue(vehicle.getLockedTarget() == enemy, "A hostile contact must be locked before the salvo");
+            vehicle.setAutoFire(true);
+        });
+        helper.onEachTick(() -> {
+            if (vehicle.getMissileCount() == 1) {
+                if (shots[0] < 0) shots[0] = helper.getTick();
+                helper.assertTrue(vehicle.getLauncherProgress() >= 0.999F,
+                        "The automatic launcher must remain upright between missiles");
+            } else if (vehicle.getMissileCount() == 0 && shots[1] < 0) {
+                shots[1] = helper.getTick();
+                helper.assertTrue(shots[0] >= 0,
+                        "A salvo must consume individual missiles rather than skip an ammunition state");
+                long interval = shots[1] - shots[0];
+                helper.assertTrue(interval >= ModConfig.AUTO_FIRE_INTERVAL_TICKS.get() - 1
+                                && interval <= ModConfig.AUTO_FIRE_INTERVAL_TICKS.get() + 2,
+                        "The second automatic missile must use the short raised-launcher cadence: " + interval);
+            }
+        });
+        long finalTick = 12L + ModConfig.PREPARATION_TICKS.get() * 2L
+                + ModConfig.AUTO_FIRE_INTERVAL_TICKS.get() + 12;
+        helper.runAtTickTime(finalTick, () -> {
+            helper.assertTrue(shots[0] >= 0 && shots[1] >= 0 && vehicle.getMissileCount() == 0,
+                    "The automatic engagement must fire exactly the two loaded missiles");
+            helper.assertTrue(vehicle.getLauncherProgress() <= 0.001F,
+                    "An empty automatic launcher must fold down after the salvo");
+            helper.assertFalse(vehicle.requestLaunch(), "An empty launcher must reject additional fire requests");
+            removePlayerFixture(helper, owner);
             helper.succeed();
         });
     }

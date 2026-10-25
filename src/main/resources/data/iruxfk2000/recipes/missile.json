@@ -1,0 +1,11 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "pattern": [" I ", "IGI", "CRC"],
+  "key": {
+    "I": {"item": "minecraft:iron_ingot"},
+    "G": {"item": "minecraft:gunpowder"},
+    "C": {"item": "minecraft:copper_ingot"},
+    "R": {"item": "minecraft:redstone"}
+  },
+  "result": {"item": "iruxfk2000:missile"}
+}

@@ -5,7 +5,7 @@ plugins {
 }
 
 group = 'fr.irux.fk2000'
-version = '0.2.0'
+version = '0.3.0'
 base { archivesName = 'iruxfk2000' }
 java.toolchain.languageVersion = JavaLanguageVersion.of(17)
 
@@ -36,6 +36,7 @@ def selectedRunDirectory = providers.gradleProperty('runDirectory').getOrElse('r
 
 minecraft {
     mappings channel: 'official', version: '1.20.1'
+    accessTransformer = file('src/main/resources/META-INF/accesstransformer.cfg')
     copyIdeResources = true
     runs {
         configureEach {

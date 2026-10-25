@@ -135,6 +135,8 @@ public final class MissileGameTests {
         EnumSet<FlightState> observed = EnumSet.noneOf(FlightState.class);
         helper.onEachTick(() -> {
             observed.add(missile.getFlightState());
+            helper.assertTrue(helper.getTick() < 198 || missile.isRemoved(),
+                    "Stationary intercept stalled: " + diagnostic(missile) + ", target=" + target.position() + ", velocity=" + missile.getDeltaMovement());
             if (!missile.isRemoved()) return;
             helper.assertTrue(missile.getFlightState() == FlightState.DETONATED,
                     "Guided missile expired before intercepting its stationary airborne target: " + diagnostic(missile));
@@ -163,6 +165,8 @@ public final class MissileGameTests {
         double[] maximumSpeed = {0};
         helper.onEachTick(() -> {
             observed.add(missile.getFlightState());
+            helper.assertTrue(helper.getTick() < 198 || missile.isRemoved(),
+                    "Moving intercept stalled: " + diagnostic(missile) + ", target=" + target.position() + ", velocity=" + missile.getDeltaMovement());
             travelled[0] += target.position().distanceTo(previousPosition[0]);
             previousPosition[0] = target.position();
             maximumSpeed[0] = Math.max(maximumSpeed[0], target.getDeltaMovement().length());
@@ -182,6 +186,106 @@ public final class MissileGameTests {
                     "The target must actually move during the guided interception: " + details);
             helper.assertTrue(!target.isAlive() || target.getHealth() < initialHealth,
                     "A moving target must receive real server-side explosion damage: " + details);
+            target.discard();
+            VehicleGameTests.removePlayerFixture(helper, owner);
+            helper.succeed();
+        });
+    }
+
+    @GameTest(template = "empty", timeoutTicks = 240)
+    public static void guidanceClimbsOverMountainBeforeIntercept(GameTestHelper helper) {
+        // The ridge is taller than the direct path and the complete cold-ejection arc.
+        // It spans the arena's width, so reaching the target requires climbing above it.
+        for (int x = 14; x <= 17; x++) {
+            for (int y = 2; y <= 44; y++) {
+                for (int z = 1; z <= 30; z++) helper.setBlock(new BlockPos(x, y, z), Blocks.STONE);
+            }
+        }
+        Pig target = helper.spawnWithNoFreeWill(EntityType.PIG, new Vec3(26.5, 30, 7.5));
+        target.setNoGravity(true);
+        float initialHealth = target.getHealth();
+        ServerPlayer owner = VehicleGameTests.onlinePlayerFixture(helper);
+        MissileEntity missile = missile(helper, new Vec3(4.5, 3, 7.5), target, owner);
+        double ridgeTop = helper.absolutePos(new BlockPos(14, 45, 7)).getY();
+        Vec3 launchPosition = missile.position();
+        Vec3 corridor = target.position().subtract(launchPosition).multiply(1, 0, 1).normalize();
+        boolean[] crossedAbove = {false};
+        double[] peakAltitude = {missile.getY()};
+        helper.onEachTick(() -> {
+            double progress = missile.position().subtract(launchPosition).dot(corridor);
+            peakAltitude[0] = Math.max(peakAltitude[0], missile.getY());
+            if (progress >= 9.5 && progress < 13.5 && missile.getY() > ridgeTop + 1) crossedAbove[0] = true;
+            helper.assertTrue(helper.getTick() < 238 || missile.isRemoved(),
+                    "Mountain intercept stalled: " + diagnostic(missile) + ", target=" + target.position()
+                            + ", peakY=" + peakAltitude[0] + ", ridgeTop=" + ridgeTop + ", progress=" + progress);
+            if (!missile.isRemoved()) return;
+            helper.assertTrue(missile.getTerminationReason() == MissileEntity.TerminationReason.DETONATED,
+                    "Missile must reach the target beyond the mountain: " + diagnostic(missile));
+            helper.assertTrue(crossedAbove[0], "Missile must physically cross above the mountain instead of striking or bypassing it: " + diagnostic(missile));
+            helper.assertTrue(!target.isAlive() || target.getHealth() < initialHealth,
+                    "The target beyond the intact mountain must receive server-side damage");
+            helper.assertBlockPresent(Blocks.STONE, new BlockPos(14, 44, 7));
+            target.discard();
+            VehicleGameTests.removePlayerFixture(helper, owner);
+            helper.succeed();
+        });
+    }
+
+    @GameTest(template = "empty", timeoutTicks = 220)
+    public static void terminalGuidanceInterceptsLowAltitudeTarget(GameTestHelper helper) {
+        Pig target = helper.spawnWithNoFreeWill(EntityType.PIG, new Vec3(26.5, 10, 7.5));
+        target.setNoGravity(true);
+        float initialHealth = target.getHealth();
+        ServerPlayer owner = VehicleGameTests.onlinePlayerFixture(helper);
+        MissileEntity missile = missile(helper, new Vec3(4.5, 3, 7.5), target, owner);
+        helper.onEachTick(() -> {
+            helper.assertTrue(helper.getTick() < 218 || missile.isRemoved(),
+                    "Low target intercept stalled: " + diagnostic(missile) + ", target=" + target.position()
+                            + ", velocity=" + missile.getDeltaMovement());
+            if (!missile.isRemoved()) return;
+            helper.assertTrue(missile.getTerminationReason() == MissileEntity.TerminationReason.DETONATED,
+                    "Guidance must reach a nearby low aircraft instead of orbiting it: " + diagnostic(missile));
+            helper.assertTrue(!target.isAlive() || target.getHealth() < initialHealth,
+                    "A target ten blocks above flat ground must receive real warhead damage");
+            target.discard();
+            VehicleGameTests.removePlayerFixture(helper, owner);
+            helper.succeed();
+        });
+    }
+
+    @GameTest(template = "empty", timeoutTicks = 240)
+    public static void terminalGuidanceClosesOnFastManeuveringTarget(GameTestHelper helper) {
+        assertFlightCorridorClear(helper);
+        // A physical ~0.72-block/tick circular course stays inside the loaded fixture.
+        // It exposes terminal-speed caps which can intercept slow mobs but never catch aircraft.
+        Pig target = helper.spawnWithNoFreeWill(EntityType.PIG, new Vec3(25, 75, 16));
+        target.setNoGravity(true);
+        float initialHealth = target.getHealth();
+        ServerPlayer owner = VehicleGameTests.onlinePlayerFixture(helper);
+        MissileEntity missile = missile(helper, new Vec3(4.5, 3, 4.5), target, owner);
+        Vec3[] previous = {target.position()};
+        double[] travelled = {0};
+        int[] fastTicks = {0};
+        helper.onEachTick(() -> {
+            double travelledThisTick = target.position().distanceTo(previous[0]);
+            travelled[0] += travelledThisTick;
+            if (travelledThisTick > .65) fastTicks[0]++;
+            previous[0] = target.position();
+            double angle = (helper.getTick() + 1) * .08;
+            Vec3 nextPoint = helper.absoluteVec(new Vec3(16 + Math.cos(angle) * 9, 75, 16 + Math.sin(angle) * 9));
+            Vec3 input = nextPoint.subtract(target.position());
+            if (input.length() > .8) input = input.normalize().scale(.8);
+            if (target.isAlive()) target.setDeltaMovement(input);
+            String details = diagnostic(missile) + ", target=" + target.position() + ", travelled=" + travelled[0]
+                    + ", fastTicks=" + fastTicks[0] + ", missileVelocity=" + missile.getDeltaMovement();
+            helper.assertTrue(helper.getTick() < 238 || missile.isRemoved(), "Fast-aircraft intercept stalled: " + details);
+            if (!missile.isRemoved()) return;
+            helper.assertTrue(missile.getTerminationReason() == MissileEntity.TerminationReason.DETONATED,
+                    "A missile must close on a fast maneuvering target: " + details);
+            helper.assertTrue(travelled[0] > 25 && fastTicks[0] >= 20,
+                    "The target must really move at aircraft speed before impact: " + details);
+            helper.assertTrue(!target.isAlive() || target.getHealth() < initialHealth,
+                    "The fast maneuvering target must receive real server damage: " + details);
             target.discard();
             VehicleGameTests.removePlayerFixture(helper, owner);
             helper.succeed();

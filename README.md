@@ -2,9 +2,11 @@
 
 Addon Minecraft Java **1.20.1**, **Forge 47.4.10**, **JDK 17**, mod ID `iruxfk2000`. Le mod ajoute un véhicule antiaérien original avec conduite locale et à distance, radar tactique et missiles à lancement vertical à froid.
 
-**Version 0.2.0 : nouveaux modèles importés.** Le camion fourni utilise ses huit roues et son lanceur à six tubes, avec une texture camouflage 2048 × 2048. Le missile utilise le modèle et la texture fournis. Les archives OBJ/FBX d'origine et les exports 3D réutilisables ne sont pas publiés dans ce dépôt ; ces ressources restent sous licence CGTrader, séparée de la licence MIT du code. Le JAR du jeu contient les ressources nécessaires à son rendu. Une compilation des sources sans ces ressources affiche les modèles de remplacement originaux.
+**Version 0.3.0 : camion agrandi, conduite tout terrain et missiles renforcés.** Le camion mesure désormais environ douze blocs de long, avec un poste de conduite à l'avant, une jauge de coque et des collisions adaptées. Le guidage anticipe le relief. La table d'assemblage SBW propose un onglet FK, sa caisse orange et le déploiement au pied-de-biche. Le lanceur automatique reste levé entre les tirs et le rechargement rapide possède un son mécanique original.
 
-Les sources des modèles, leurs licences signalées et les commandes de conversion sont indiquées dans [IMPORTED-ASSETS.md](docs/IMPORTED-ASSETS.md). Le bilan de cette mise à jour est dans [VALIDATION-0.2.md](docs/VALIDATION-0.2.md). Les anciens documents de validation 0.1 restent conservés pour l'historique.
+Le camion fourni utilise ses huit roues et son lanceur à six tubes, avec une texture camouflage 2048 × 2048. Le missile utilise le modèle et la texture fournis. Les archives OBJ/FBX d'origine et les exports 3D réutilisables ne sont pas publiés dans ce dépôt ; ces ressources restent sous licence CGTrader, séparée de la licence MIT du code. Le JAR du jeu contient les ressources nécessaires à son rendu. Une compilation des sources sans ces ressources affiche les modèles de remplacement originaux.
+
+Les sources des modèles, leurs licences signalées et les commandes de conversion sont indiquées dans [IMPORTED-ASSETS.md](docs/IMPORTED-ASSETS.md). Le bilan de cette mise à jour est dans [VALIDATION-0.3.md](docs/VALIDATION-0.3.md). Les anciens documents de validation restent conservés pour l'historique.
 
 ## Préparer le projet
 
@@ -72,7 +74,10 @@ Créer un monde de test en créatif et obtenir les objets `iruxfk2000` depuis l'
 - Avec la télécommande en main, maintenir Accroupir et interagir avec son véhicule pour l'associer. L'association et les commandes sont validées côté serveur.
 - Faire un clic droit avec la télécommande associée pour ouvrir l'interface tactique.
 - Sélectionner un contact radar, puis demander le tir manuel : le lanceur doit terminer sa préparation avant l'éjection.
-- Pour recharger, rester à moins de huit blocs du véhicule, disposer de l'objet missile et utiliser le bouton de rechargement ; le délai et la capacité se règlent dans la configuration.
+- Pour recharger, s'accroupir et faire un clic droit sur le camion avec un missile en main, ou utiliser le bouton de rechargement à moins de huit blocs. Le délai par défaut est de 0,8 seconde par missile, avec un son mécanique original.
+- En tir automatique, les tubes restent levés pendant l'engagement. Après la préparation initiale, le délai entre tirs est de 1,5 seconde par défaut ; le lanceur se rabaisse quand il n'y a plus de cible valide, de munitions ou lorsque le mode automatique est désactivé.
+
+Dans la **Vehicle Assembling Table** de SBW, ouvrir l'onglet **FK** (la recette figure aussi dans Défense). Réunir 192 lingots de fer, 64 de cuivre, 48 redstones, 24 laines noires, 16 vitres, 8 pistons, 8 diamants, 8 missiles FK et une télécommande. Assembler la caisse orange marquée FK-2000, la poser dans un espace dégagé puis l'ouvrir avec le pied-de-biche SBW. Le camion contient alors ses missiles et appartient au joueur qui ouvre la caisse. Les recettes du missile et de la télécommande utilisent la table de fabrication Minecraft.
 
 Commandes client :
 
@@ -116,14 +121,15 @@ Les options sont définies par la configuration Forge serveur `iruxfk2000-server
 | Vitesse véhicule / accélération / freinage | 0,45 bloc/tick ; 0,012 et 0,035 bloc/tick². |
 | Portée télécommande / radar | 192 / 160 blocs, sans chargement forcé. |
 | Acquisition automatique / tir automatique | Activée / désactivé. |
-| Capacité / préparation / rechargement individuel | 8 missiles ; 40 / 60 ticks. |
+| Capacité / préparation / rechargement individuel | 8 missiles ; 40 / 16 ticks. |
+| Intervalle de rafale automatique | 30 ticks après la préparation initiale. |
 | Éjection / orientation | 1,2 bloc/tick vertical ; 20 ticks. |
 | Accélération / vitesse missile / rotation maximale | 0,08 bloc/tick² ; 2,5 blocs/tick ; 5°/tick. |
 | Durée de vol / fusée de proximité | 240 ticks / 2 blocs. |
-| Puissance explosion / dégâts aux blocs | 3 / désactivés. |
+| Dégâts de l'ogive / puissance explosion / dégâts aux blocs | 160 avant blindage ; 4 / désactivés. |
 | Intensité des propulseurs latéraux | 2 particules, ajustable de 0 à 8. |
 
- Ne pas modifier le code pour régler les portées, vitesses, durées, munitions ou dégâts. Ne pas activer la destruction de blocs sur un monde important avant validation sur une copie.
+Ne pas modifier le code pour régler les portées, vitesses, durées, munitions ou dégâts. La nouvelle clé `vehicle.quickReloadTicks` remplace `reloadTicks` ; `vehicle.autoFireIntervalTicks` et `missile.warheadDamage` sont ajoutées aux mondes existants. Les autres valeurs déjà configurées restent conservées. Ne pas activer la destruction de blocs sur un monde important avant validation sur une copie.
 
 ## Validation
 
@@ -140,6 +146,6 @@ Les scénarios serveur validés couvrent une conduite réelle avec collision et 
 
 Les essais graphiques ont vérifié l'association, la télémétrie, la conduite distante, la sélection d'un AH-6 de SBW, le lancement avec consommation d'une munition, la caméra et le retour au joueur. Ils utilisent un client et son serveur intégré. Une session à deux clients réels, les reconnexions sur serveur public et la charge avec de nombreux véhicules ne sont pas encore validées. La matrice serveur SBW `0.8.9-final`, `0.8.9.1-hotfix` et `0.8.9.2` est suivie séparément dans le document de compatibilité.
 
-Limites de cette version : sons Minecraft existants, collision vanilla carrée de trois blocs malgré le porte-à-faux visuel du châssis, et absence de recettes de fabrication en survie. Les objets sont disponibles dans l'onglet créatif ou par commande. Le radar et l'IFF intègrent SBW, mais les systèmes propres à SBW de réparation, de blindage et de munitions ne sont pas réutilisés par le véhicule autonome.
+Le châssis utilise une boîte de collision rectangulaire englobante qui suit son orientation ; les angles occupent davantage de place pendant les virages diagonaux. Le franchissement accepte des marches de deux blocs et demande une pente praticable. Le guidage vérifie le terrain chargé, avec une marge de montée ; une paroi trop proche, un plafond ou une cible hors des chunks chargés peuvent empêcher l'interception. Le véhicule autonome conserve sa santé et son blindage propres ; les outils de réparation SBW ne sont pas intégrés.
 
 Les modèles importés et les anciens modèles de remplacement ont des licences distinctes ; voir IMPORTED-ASSETS.md. Aucune ressource propriétaire de SBW n'est copiée. Le code et les ressources originaux de l'addon sont sous licence MIT ; les modèles et textures importés de CGTrader ne sont pas sous licence MIT ; `META-INF/LICENSE` est inclus dans le JAR construit. Cette licence ne remplace pas celles des dépendances séparées ni celle des scripts et du JAR Gradle Wrapper, dont les en-têtes et notices officiels sont conservés.

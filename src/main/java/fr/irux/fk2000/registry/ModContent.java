@@ -3,6 +3,7 @@ package fr.irux.fk2000.registry;
 import fr.irux.fk2000.IruxFk2000Mod;
 import fr.irux.fk2000.entity.missile.MissileEntity;
 import fr.irux.fk2000.entity.vehicle.Fk2000Entity;
+import fr.irux.fk2000.entity.vehicle.VehicleGeometry;
 import fr.irux.fk2000.item.RemoteControllerItem;
 import fr.irux.fk2000.item.VehicleDeploymentItem;
 import net.minecraft.core.registries.Registries;
@@ -23,7 +24,7 @@ public final class ModContent {
     private static final DeferredRegister<Item> ITEMS = DeferredRegister.create(ForgeRegistries.ITEMS, IruxFk2000Mod.MOD_ID);
     private static final DeferredRegister<CreativeModeTab> TABS = DeferredRegister.create(Registries.CREATIVE_MODE_TAB, IruxFk2000Mod.MOD_ID);
     public static final RegistryObject<EntityType<Fk2000Entity>> VEHICLE = ENTITIES.register("fk2000", () ->
-        EntityType.Builder.of(Fk2000Entity::new, MobCategory.MISC).sized(3.0F, 2.9F).clientTrackingRange(16).updateInterval(1).build("iruxfk2000:fk2000"));
+        EntityType.Builder.of(Fk2000Entity::new, MobCategory.MISC).sized(VehicleGeometry.BODY_WIDTH, VehicleGeometry.BODY_HEIGHT).clientTrackingRange(16).updateInterval(1).build("iruxfk2000:fk2000"));
     public static final RegistryObject<EntityType<MissileEntity>> MISSILE = ENTITIES.register("missile", () ->
         EntityType.Builder.<MissileEntity>of(MissileEntity::new, MobCategory.MISC).sized(.3F, 1.4F).clientTrackingRange(16).updateInterval(1).fireImmune().build("iruxfk2000:missile"));
     public static final RegistryObject<Item> DEPLOYMENT = ITEMS.register("fk2000_deployment", () -> new VehicleDeploymentItem(new Item.Properties().stacksTo(1)));
