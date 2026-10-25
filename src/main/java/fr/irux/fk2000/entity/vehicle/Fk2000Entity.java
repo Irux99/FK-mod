@@ -355,13 +355,13 @@ public class Fk2000Entity extends PathfinderMob implements OwnableEntity {
     private void fireMissile(Entity target) {
         MissileEntity missile = ModContent.MISSILE.get().create(level());
         if (missile != null) {
-            int tube = (ModConfig.MISSILE_CAPACITY.get() - getMissileCount()) % 4;
+            int tube = (ModConfig.MISSILE_CAPACITY.get() - getMissileCount()) % 6;
             double yaw = Math.toRadians(getYRot());
-            double lateral = (tube < 2 ? -0.64 : 0.64);
-            double longitudinal = -0.5 + (tube % 2 == 0 ? -0.48 : 0.48);
+            double lateral = (tube % 3 - 1) * 0.33;
+            double longitudinal = tube < 3 ? -2.75 : -3.38;
             double x = getX() + Math.cos(yaw) * lateral - Math.sin(yaw) * longitudinal;
             double z = getZ() + Math.sin(yaw) * lateral + Math.cos(yaw) * longitudinal;
-            missile.moveTo(x, getY() + 3.2, z, getYRot(), -90);
+            missile.moveTo(x, getY() + 3.36, z, getYRot(), -90);
             missile.launch(getOwnerUUID(), getUUID(), target);
             if (level().addFreshEntity(missile)) {
                 entityData.set(MISSILES, getMissileCount() - 1);

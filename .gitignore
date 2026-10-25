@@ -8,3 +8,11 @@ out/
 .project
 .settings/
 libs/*.jar
+
+# Generated from separately licensed user models; not reusable public source assets.
+/src/main/resources/assets/iruxfk2000/mesh/*.json
+/src/main/resources/assets/iruxfk2000/textures/entity/imported-truck.png
+/src/main/resources/assets/iruxfk2000/textures/entity/imported-missile.png
+
+__pycache__/
+*.pyc

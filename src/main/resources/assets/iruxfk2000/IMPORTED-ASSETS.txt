@@ -1,0 +1,17 @@
+Imported visual resources — Irux FK-2000 0.2.0
+
+Truck: user-supplied Truck.fbx / Truck.obj
+Source: https://www.cgtrader.com/items/6470222/download-page
+Missile: user-supplied rocket.obj and 10038.jpg
+Source: https://www.cgtrader.com/free-3d-models/military/rocketry/missile-1
+
+Licence reported by the supplying user for both models:
+Royalty Free License (no AI).
+These imported/derived assets are NOT covered by the project code MIT licence.
+Copyright remains with the original authors identified on the source listings.
+Original source archives are not redistributed in this project.
+Models are converted and simplified using deterministic Blender tools; no AI
+training or generative-image service is used. Truck paint is baked procedurally.
+The complete licence terms could not be retrieved because the listings returned
+an automated-access challenge. Public redistribution of reusable source assets
+must remain blocked until the full permissions have been established.

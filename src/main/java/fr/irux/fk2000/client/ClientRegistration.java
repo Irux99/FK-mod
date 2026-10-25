@@ -18,8 +18,8 @@ public final class ClientRegistration {
     private ClientRegistration() {}
     @SubscribeEvent
     public static void registerRenderers(EntityRenderersEvent.RegisterRenderers event) {
-        event.registerEntityRenderer(ModContent.VEHICLE.get(), VehicleRenderer::new);
-        event.registerEntityRenderer(ModContent.MISSILE.get(), MissileRenderer::new);
+        event.registerEntityRenderer(ModContent.VEHICLE.get(), context -> ImportedMesh.isAvailable("truck") ? new VehicleRenderer(context) : new PrototypeVehicleRenderer(context));
+        event.registerEntityRenderer(ModContent.MISSILE.get(), context -> ImportedMesh.isAvailable("missile") ? new MissileRenderer(context) : new PrototypeMissileRenderer(context));
     }
     @SubscribeEvent
     public static void registerKeys(RegisterKeyMappingsEvent event) { event.register(ClientHooks.TACTICAL); event.register(ClientHooks.FIRE);

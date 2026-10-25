@@ -1,0 +1,446 @@
+To honour the JVM settings for this build a single-use Daemon process will be forked. For more on this, please refer to https://docs.gradle.org/8.8/userguide/gradle_daemon.html#sec:disabling_the_daemon in the Gradle documentation.
+Daemon will be stopped at the end of the build 
+> Task :compileJava UP-TO-DATE
+> Task :processResources UP-TO-DATE
+> Task :classes UP-TO-DATE
+> Task :jar
+> Task :downloadMcpConfig
+> Task :extractSrg UP-TO-DATE
+> Task :createMcpToSrg UP-TO-DATE
+> Task :reobfJar
+> Task :jarJar SKIPPED
+> Task :reobfJarJar SKIPPED
+> Task :assemble
+> Task :compileTestJava UP-TO-DATE
+> Task :processTestResources NO-SOURCE
+> Task :testClasses UP-TO-DATE
+> Task :test
+> Task :check
+> Task :build
+> Task :createSrgToMcp UP-TO-DATE
+> Task :downloadMCMeta UP-TO-DATE
+> Task :downloadAssets UP-TO-DATE
+> Task :extractNatives UP-TO-DATE
+> Task :makeSrcDirs
+> Task :prepareRuns
+> Task :prepareRunGameTestServer
+> Task :prepareRunGameTestServerCompile UP-TO-DATE
+
+> Task :runGameTestServer
+2026-10-25 11:06:47,934 main WARN Advanced terminal features are not available in this environment
+[11:06:48] [main/INFO] [cp.mo.mo.Launcher/MODLAUNCHER]: ModLauncher running: args [--launchTarget, forgegametestserveruserdev, --gameDir, ., --fml.forgeVersion, 47.4.10, --fml.mcVersion, 1.20.1, --fml.forgeGroup, net.minecraftforge, --fml.mcpVersion, 20230612.114412]
+[11:06:48] [main/INFO] [cp.mo.mo.Launcher/MODLAUNCHER]: ModLauncher 10.0.9+10.0.9+main.dcd20f30 starting: java version 17.0.17 by Eclipse Adoptium; OS Linux arch amd64 version 6.18.55
+[11:06:48] [main/WARN] [ne.mi.fm.lo.FMLConfig/CORE]: Configuration file /workspace/FK-mod/run/visual-0.2-0.8.9.1-hotfix/config/fml.toml is not correct. Correcting
+[11:06:48] [main/INFO] [ne.mi.fm.lo.FMLConfig/CORE]: Incorrect key [earlyWindowSkipGLVersions] was corrected from null to []
+[11:06:48] [main/INFO] [ne.mi.fm.lo.FMLConfig/CORE]: Incorrect key [earlyWindowLogHelpMessage] was corrected from null to true
+[11:06:48] [main/INFO] [ne.mi.fm.lo.FMLConfig/CORE]: Incorrect key [earlyWindowSquir] was corrected from null to false
+[11:06:48] [main/INFO] [ne.mi.fm.lo.FMLConfig/CORE]: Incorrect key [earlyWindowShowCPU] was corrected from null to false
+[11:06:48] [main/INFO] [ne.mi.fm.lo.ImmediateWindowHandler/]: ImmediateWindowProvider not loading because launch target is forgegametestserveruserdev
+[11:06:48] [main/INFO] [mixin/]: SpongePowered MIXIN Subsystem Version=0.8.5 Source=union:/workspace/.gradle/caches/modules-2/files-2.1/org.spongepowered/mixin/0.8.5/9d1c0c3a304ae6697ecd477218fa61b850bf57fc/mixin-0.8.5.jar%23116!/ Service=ModLauncher Env=SERVER
+[11:06:48] [main/WARN] [ne.mi.fm.lo.mo.ModFileParser/LOADING]: Mod file /workspace/.gradle/caches/modules-2/files-2.1/net.minecraftforge/javafmllanguage/1.20.1-47.4.10/ccc533c7dd67e0983217197d7549c8b49e7ab453/javafmllanguage-1.20.1-47.4.10.jar is missing mods.toml file
+[11:06:48] [main/WARN] [ne.mi.fm.lo.mo.ModFileParser/LOADING]: Mod file /workspace/.gradle/caches/modules-2/files-2.1/net.minecraftforge/lowcodelanguage/1.20.1-47.4.10/e9a2879fe3612ea34b9728ec2633304a1e67d480/lowcodelanguage-1.20.1-47.4.10.jar is missing mods.toml file
+[11:06:48] [main/WARN] [ne.mi.fm.lo.mo.ModFileParser/LOADING]: Mod file /workspace/.gradle/caches/modules-2/files-2.1/net.minecraftforge/mclanguage/1.20.1-47.4.10/ec5cefbbc65c67302b8fac317010faab85fa14b9/mclanguage-1.20.1-47.4.10.jar is missing mods.toml file
+[11:06:48] [main/WARN] [ne.mi.fm.lo.mo.ModFileParser/LOADING]: Mod file /workspace/.gradle/caches/modules-2/files-2.1/net.minecraftforge/fmlcore/1.20.1-47.4.10/94dae566be650566ea9115a1414ab76bfcf5a804/fmlcore-1.20.1-47.4.10.jar is missing mods.toml file
+[11:06:48] [main/INFO] [ne.mi.fm.lo.mo.JarInJarDependencyLocator/]: Found 14 dependencies adding them to mods collection
+[11:06:50] [main/INFO] [mixin/]: Compatibility level set to JAVA_17
+[11:06:50] [main/INFO] [cp.mo.mo.LaunchServiceHandler/MODLAUNCHER]: Launching target 'forgegametestserveruserdev' with arguments [--gameDir, .]
+[11:06:50] [main/INFO] [mixin/]: Remapping refMap geckolib.refmap.json using /workspace/FK-mod/build/createSrgToMcp/output.srg
+[11:06:50] [main/INFO] [mixin/]: Remapping refMap mixins.superbwarfare.refmap.json using /workspace/FK-mod/build/createSrgToMcp/output.srg
+[11:06:50] [main/INFO] [mixin/]: Remapping refMap curios.refmap.json using /workspace/FK-mod/build/createSrgToMcp/output.srg
+[11:06:50] [main/INFO] [mixin/]: Remapping refMap backend-flywheel.refmap.json using /workspace/FK-mod/build/createSrgToMcp/output.srg
+[11:06:50] [main/INFO] [mixin/]: Remapping refMap flywheel.refmap.json using /workspace/FK-mod/build/createSrgToMcp/output.srg
+[11:06:50] [main/INFO] [mixin/]: Remapping refMap ponder.refmap.json using /workspace/FK-mod/build/createSrgToMcp/output.srg
+[11:06:50] [main/INFO] [mixin/]: Remapping refMap ponder.refmap.json using /workspace/FK-mod/build/createSrgToMcp/output.srg
+[11:06:50] [main/INFO] [mixin/]: Remapping refMap simplebedrockmodel.refmap.json using /workspace/FK-mod/build/createSrgToMcp/output.srg
+[11:06:51] [main/INFO] [MixinExtras|Service/]: Initializing MixinExtras via com.llamalad7.mixinextras.service.MixinExtrasServiceImpl(version=0.3.6).
+[11:06:54] [modloading-worker-0/INFO] [ne.mi.co.ForgeMod/FORGEMOD]: Forge mod loading, version 47.4.10, for MC 1.20.1 with MCP 20230612.114412
+[11:06:54] [modloading-worker-0/INFO] [ne.mi.co.MinecraftForge/FORGE]: MinecraftForge v47.4.10 Initialized
+[11:06:54] [modloading-worker-0/INFO] [th.ko.te.KotlinForForge/]: Kotlin For Forge Enabled!
+[11:06:55] [main/WARN] [ne.mi.co.ForgeConfigSpec/CORE]: Configuration file /workspace/FK-mod/run/visual-0.2-0.8.9.1-hotfix/config/curios-common.toml is not correct. Correcting
+[11:06:55] [main/WARN] [ne.mi.co.ForgeConfigSpec/CORE]: Incorrect key slots was corrected from null to its default, []. 
+[11:06:55] [main/WARN] [ne.mi.co.ForgeConfigSpec/CORE]: Configuration file /workspace/FK-mod/run/visual-0.2-0.8.9.1-hotfix/config/superbwarfare-common.toml is not correct. Correcting
+[11:06:55] [main/WARN] [ne.mi.co.ForgeConfigSpec/CORE]: Incorrect key gameplay was corrected from null to its default, SimpleCommentedConfig:{}. 
+[11:06:55] [main/WARN] [ne.mi.co.ForgeConfigSpec/CORE]: Incorrect key gameplay.respawn_reload was corrected from null to its default, true. 
+[11:06:55] [main/WARN] [ne.mi.co.ForgeConfigSpec/CORE]: Incorrect key gameplay.global_indication was corrected from null to its default, true. 
+[11:06:55] [main/WARN] [ne.mi.co.ForgeConfigSpec/CORE]: Incorrect key gameplay.respawn_auto_armor was corrected from null to its default, true. 
+[11:06:55] [Forge Version Check/INFO] [ne.mi.fm.VersionChecker/]: [forge] Starting version check at https://files.minecraftforge.net/net/minecraftforge/forge/promotions_slim.json
+[11:06:56] [modloading-worker-0/INFO] [co.at.su.Mod/]: Now Loading...
+* This Mod used to be made by MCreator *
+  _____  ______  __          __ 
+ / ____| |  __ \ \ \        / / 
+| (___   | |__) | \ \  /\  / /  
+ \___ \  |  __ (   \ \/  \/ /   
+ ____) | | |__) |   \  /\  /    
+|_____/  |_____/     \/  \/
+* Superb Warfare - Version: 0.8.9.1 *
+[11:06:56] [Forge Version Check/INFO] [ne.mi.fm.VersionChecker/]: [forge] Found status: OUTDATED Current: 47.4.10 Target: 47.4.28
+[11:06:56] [main/ERROR] [minecraft/Settings]: Failed to load properties from file: server.properties
+java.nio.file.NoSuchFileException: server.properties
+	at sun.nio.fs.UnixException.translateToIOException(UnixException.java:92) ~[?:?] {}
+	at sun.nio.fs.UnixException.rethrowAsIOException(UnixException.java:106) ~[?:?] {}
+	at sun.nio.fs.UnixException.rethrowAsIOException(UnixException.java:111) ~[?:?] {}
+	at sun.nio.fs.UnixFileSystemProvider.newByteChannel(UnixFileSystemProvider.java:218) ~[?:?] {}
+	at java.nio.file.Files.newByteChannel(Files.java:380) ~[?:?] {}
+	at java.nio.file.Files.newByteChannel(Files.java:432) ~[?:?] {}
+	at java.nio.file.spi.FileSystemProvider.newInputStream(FileSystemProvider.java:422) ~[?:?] {}
+	at java.nio.file.Files.newInputStream(Files.java:160) ~[?:?] {}
+	at net.minecraft.server.dedicated.Settings.loadFromFile(Settings.java:36) ~[forge-1.20.1-47.4.10_mapped_official_1.20.1.jar:?] {re:classloading}
+	at net.minecraft.server.dedicated.DedicatedServerProperties.fromFile(DedicatedServerProperties.java:137) ~[forge-1.20.1-47.4.10_mapped_official_1.20.1.jar:?] {re:classloading}
+	at net.minecraft.server.dedicated.DedicatedServerSettings.<init>(DedicatedServerSettings.java:12) ~[forge-1.20.1-47.4.10_mapped_official_1.20.1.jar:?] {re:classloading}
+	at net.minecraft.server.Main.main(Main.java:126) ~[forge-1.20.1-47.4.10_mapped_official_1.20.1.jar:?] {re:classloading}
+	at net.minecraftforge.gametest.GameTestMain.main(GameTestMain.java:16) ~[forge-1.20.1-47.4.10_mapped_official_1.20.1.jar:?] {re:classloading}
+	at jdk.internal.reflect.NativeMethodAccessorImpl.invoke0(Native Method) ~[?:?] {}
+	at jdk.internal.reflect.NativeMethodAccessorImpl.invoke(NativeMethodAccessorImpl.java:77) ~[?:?] {}
+	at jdk.internal.reflect.DelegatingMethodAccessorImpl.invoke(DelegatingMethodAccessorImpl.java:43) ~[?:?] {}
+	at java.lang.reflect.Method.invoke(Method.java:569) ~[?:?] {}
+	at net.minecraftforge.fml.loading.targets.ForgeGametestUserdevLaunchHandler.devService(ForgeGametestUserdevLaunchHandler.java:16) ~[fmlloader-1.20.1-47.4.10.jar:?] {}
+	at net.minecraftforge.fml.loading.targets.CommonDevLaunchHandler.lambda$makeService$7(CommonDevLaunchHandler.java:135) ~[fmlloader-1.20.1-47.4.10.jar:?] {}
+	at cpw.mods.modlauncher.LaunchServiceHandlerDecorator.launch(LaunchServiceHandlerDecorator.java:30) ~[modlauncher-10.0.9.jar:?] {}
+	at cpw.mods.modlauncher.LaunchServiceHandler.launch(LaunchServiceHandler.java:53) ~[modlauncher-10.0.9.jar:?] {}
+	at cpw.mods.modlauncher.LaunchServiceHandler.launch(LaunchServiceHandler.java:71) ~[modlauncher-10.0.9.jar:?] {}
+	at cpw.mods.modlauncher.Launcher.run(Launcher.java:108) ~[modlauncher-10.0.9.jar:?] {}
+	at cpw.mods.modlauncher.Launcher.main(Launcher.java:78) ~[modlauncher-10.0.9.jar:?] {}
+	at cpw.mods.modlauncher.BootstrapLaunchConsumer.accept(BootstrapLaunchConsumer.java:26) ~[modlauncher-10.0.9.jar:?] {}
+	at cpw.mods.modlauncher.BootstrapLaunchConsumer.accept(BootstrapLaunchConsumer.java:23) ~[modlauncher-10.0.9.jar:?] {}
+	at cpw.mods.bootstraplauncher.BootstrapLauncher.main(BootstrapLauncher.java:141) ~[bootstraplauncher-1.1.2.jar:?] {}
+[11:06:56] [main/INFO] [mojang/YggdrasilAuthenticationService]: Environment: authHost='https://authserver.mojang.com', accountsHost='https://api.mojang.com', sessionHost='https://sessionserver.mojang.com', servicesHost='https://api.minecraftservices.com', name='PROD'
+[11:06:56] [main/WARN] [minecraft/VanillaPackResourcesBuilder]: Assets URL 'union:/workspace/.gradle/caches/forge_gradle/minecraft_user_repo/net/minecraftforge/forge/1.20.1-47.4.10_mapped_official_1.20.1/forge-1.20.1-47.4.10_mapped_official_1.20.1.jar%23181!/assets/.mcassetsroot' uses unexpected schema
+[11:06:56] [main/WARN] [minecraft/VanillaPackResourcesBuilder]: Assets URL 'union:/workspace/.gradle/caches/forge_gradle/minecraft_user_repo/net/minecraftforge/forge/1.20.1-47.4.10_mapped_official_1.20.1/forge-1.20.1-47.4.10_mapped_official_1.20.1.jar%23181!/data/.mcassetsroot' uses unexpected schema
+[11:06:56] [main/INFO] [minecraft/MinecraftServer]: Found new data pack superbwarfare:resourcepacks/sbw_legacy, loading it automatically
+[11:06:57] [Worker-Main-3/ERROR] [ne.mi.co.ForgeHooks/]: Couldn't parse element loot_tables:superbwarfare:grant_manual
+com.google.gson.JsonSyntaxException: Expected name to be an item, was unknown string 'patchouli:guide_book'
+	at net.minecraft.util.GsonHelper.lambda$convertToItem$0(GsonHelper.java:145) ~[forge-1.20.1-47.4.10_mapped_official_1.20.1.jar%23181!/:?] {re:classloading}
+	at java.util.Optional.orElseThrow(Optional.java:403) ~[?:?] {}
+	at net.minecraft.util.GsonHelper.convertToItem(GsonHelper.java:145) ~[forge-1.20.1-47.4.10_mapped_official_1.20.1.jar%23181!/:?] {re:classloading}
+	at net.minecraft.util.GsonHelper.getAsItem(GsonHelper.java:153) ~[forge-1.20.1-47.4.10_mapped_official_1.20.1.jar%23181!/:?] {re:classloading}
+	at net.minecraft.world.level.storage.loot.entries.LootItem$Serializer.deserialize(LootItem.java:55) ~[forge-1.20.1-47.4.10_mapped_official_1.20.1.jar%23181!/:?] {re:classloading}
+	at net.minecraft.world.level.storage.loot.entries.LootItem$Serializer.deserialize(LootItem.java:40) ~[forge-1.20.1-47.4.10_mapped_official_1.20.1.jar%23181!/:?] {re:classloading}
+	at net.minecraft.world.level.storage.loot.entries.LootPoolSingletonContainer$Serializer.deserializeCustom(LootPoolSingletonContainer.java:151) ~[forge-1.20.1-47.4.10_mapped_official_1.20.1.jar%23181!/:?] {re:classloading}
+	at net.minecraft.world.level.storage.loot.entries.LootPoolSingletonContainer$Serializer.deserializeCustom(LootPoolSingletonContainer.java:129) ~[forge-1.20.1-47.4.10_mapped_official_1.20.1.jar%23181!/:?] {re:classloading}
+	at net.minecraft.world.level.storage.loot.entries.LootPoolEntryContainer$Serializer.deserialize(LootPoolEntryContainer.java:86) ~[forge-1.20.1-47.4.10_mapped_official_1.20.1.jar%23181!/:?] {re:classloading}
+	at net.minecraft.world.level.storage.loot.entries.LootPoolEntryContainer$Serializer.deserialize(LootPoolEntryContainer.java:74) ~[forge-1.20.1-47.4.10_mapped_official_1.20.1.jar%23181!/:?] {re:classloading}
+	at net.minecraft.world.level.storage.loot.GsonAdapterFactory$JsonAdapter.deserialize(GsonAdapterFactory.java:102) ~[forge-1.20.1-47.4.10_mapped_official_1.20.1.jar%23181!/:?] {re:classloading}
+	at com.google.gson.internal.bind.TreeTypeAdapter.read(TreeTypeAdapter.java:76) ~[gson-2.10.jar%23118!/:?] {}
+	at com.google.gson.internal.bind.TypeAdapterRuntimeTypeWrapper.read(TypeAdapterRuntimeTypeWrapper.java:40) ~[gson-2.10.jar%23118!/:?] {}
+	at com.google.gson.internal.bind.ArrayTypeAdapter.read(ArrayTypeAdapter.java:72) ~[gson-2.10.jar%23118!/:?] {}
+	at com.google.gson.Gson.fromJson(Gson.java:1214) ~[gson-2.10.jar%23118!/:?] {}
+	at com.google.gson.Gson.fromJson(Gson.java:1319) ~[gson-2.10.jar%23118!/:?] {}
+	at com.google.gson.Gson.fromJson(Gson.java:1290) ~[gson-2.10.jar%23118!/:?] {}
+	at com.google.gson.internal.bind.TreeTypeAdapter$GsonContextImpl.deserialize(TreeTypeAdapter.java:179) ~[gson-2.10.jar%23118!/:?] {}
+	at net.minecraft.util.GsonHelper.convertToObject(GsonHelper.java:463) ~[forge-1.20.1-47.4.10_mapped_official_1.20.1.jar%23181!/:?] {re:classloading}
+	at net.minecraft.util.GsonHelper.getAsObject(GsonHelper.java:471) ~[forge-1.20.1-47.4.10_mapped_official_1.20.1.jar%23181!/:?] {re:classloading}
+	at net.minecraft.world.level.storage.loot.LootPool$Serializer.deserialize(LootPool.java:192) ~[forge-1.20.1-47.4.10_mapped_official_1.20.1.jar%23181!/:?] {re:classloading}
+	at net.minecraft.world.level.storage.loot.LootPool$Serializer.deserialize(LootPool.java:189) ~[forge-1.20.1-47.4.10_mapped_official_1.20.1.jar%23181!/:?] {re:classloading}
+	at com.google.gson.internal.bind.TreeTypeAdapter.read(TreeTypeAdapter.java:76) ~[gson-2.10.jar%23118!/:?] {}
+	at com.google.gson.internal.bind.TypeAdapterRuntimeTypeWrapper.read(TypeAdapterRuntimeTypeWrapper.java:40) ~[gson-2.10.jar%23118!/:?] {}
+	at com.google.gson.internal.bind.ArrayTypeAdapter.read(ArrayTypeAdapter.java:72) ~[gson-2.10.jar%23118!/:?] {}
+	at com.google.gson.Gson.fromJson(Gson.java:1214) ~[gson-2.10.jar%23118!/:?] {}
+	at com.google.gson.Gson.fromJson(Gson.java:1319) ~[gson-2.10.jar%23118!/:?] {}
+	at com.google.gson.Gson.fromJson(Gson.java:1290) ~[gson-2.10.jar%23118!/:?] {}
+	at com.google.gson.internal.bind.TreeTypeAdapter$GsonContextImpl.deserialize(TreeTypeAdapter.java:179) ~[gson-2.10.jar%23118!/:?] {}
+	at net.minecraft.util.GsonHelper.convertToObject(GsonHelper.java:463) ~[forge-1.20.1-47.4.10_mapped_official_1.20.1.jar%23181!/:?] {re:classloading}
+	at net.minecraft.util.GsonHelper.getAsObject(GsonHelper.java:481) ~[forge-1.20.1-47.4.10_mapped_official_1.20.1.jar%23181!/:?] {re:classloading}
+	at net.minecraft.world.level.storage.loot.LootTable$Serializer.deserialize(LootTable.java:294) ~[forge-1.20.1-47.4.10_mapped_official_1.20.1.jar%23181!/:?] {re:classloading}
+	at net.minecraft.world.level.storage.loot.LootTable$Serializer.deserialize(LootTable.java:291) ~[forge-1.20.1-47.4.10_mapped_official_1.20.1.jar%23181!/:?] {re:classloading}
+	at com.google.gson.internal.bind.TreeTypeAdapter.read(TreeTypeAdapter.java:76) ~[gson-2.10.jar%23118!/:?] {}
+	at com.google.gson.Gson.fromJson(Gson.java:1214) ~[gson-2.10.jar%23118!/:?] {}
+	at com.google.gson.Gson.fromJson(Gson.java:1319) ~[gson-2.10.jar%23118!/:?] {}
+	at com.google.gson.Gson.fromJson(Gson.java:1261) ~[gson-2.10.jar%23118!/:?] {}
+	at net.minecraftforge.common.ForgeHooks.loadLootTable(ForgeHooks.java:872) ~[forge-1.20.1-47.4.10_mapped_official_1.20.1.jar%23180%23187!/:?] {re:classloading}
+	at net.minecraftforge.common.ForgeHooks.lambda$getLootTableDeserializer$3(ForgeHooks.java:849) ~[forge-1.20.1-47.4.10_mapped_official_1.20.1.jar%23180%23187!/:?] {re:classloading}
+	at net.minecraft.world.level.storage.loot.LootDataType.deserialize(LootDataType.java:45) ~[forge-1.20.1-47.4.10_mapped_official_1.20.1.jar%23181!/:?] {re:classloading}
+	at net.minecraft.world.level.storage.loot.LootDataManager.lambda$scheduleElementParse$4(LootDataManager.java:56) ~[forge-1.20.1-47.4.10_mapped_official_1.20.1.jar%23181!/:?] {re:classloading}
+	at java.util.HashMap.forEach(HashMap.java:1421) ~[?:?] {}
+	at net.minecraft.world.level.storage.loot.LootDataManager.lambda$scheduleElementParse$5(LootDataManager.java:55) ~[forge-1.20.1-47.4.10_mapped_official_1.20.1.jar%23181!/:?] {re:classloading}
+	at java.util.concurrent.CompletableFuture$AsyncRun.run(CompletableFuture.java:1804) ~[?:?] {}
+	at java.util.concurrent.CompletableFuture$AsyncRun.exec(CompletableFuture.java:1796) ~[?:?] {}
+	at java.util.concurrent.ForkJoinTask.doExec(ForkJoinTask.java:373) ~[?:?] {}
+	at java.util.concurrent.ForkJoinPool$WorkQueue.topLevelExec(ForkJoinPool.java:1182) ~[?:?] {}
+	at java.util.concurrent.ForkJoinPool.scan(ForkJoinPool.java:1655) ~[?:?] {}
+	at java.util.concurrent.ForkJoinPool.runWorker(ForkJoinPool.java:1622) ~[?:?] {}
+	at java.util.concurrent.ForkJoinWorkerThread.run(ForkJoinWorkerThread.java:165) ~[?:?] {}
+[11:06:58] [main/INFO] [minecraft/RecipeManager]: Loaded 9 recipes
+[11:06:58] [main/INFO] [minecraft/AdvancementList]: Loaded 1787 advancements
+[11:06:58] [main/INFO] [to.th.cu.Curios/]: Loaded 13 curio slots
+[11:06:58] [main/INFO] [to.th.cu.Curios/]: Loaded 1 curio entities
+[11:06:58] [main/INFO] [ne.mi.ga.ForgeGameTestHooks/]: Enabled Gametest Namespaces: [iruxfk2000_sbw, iruxfk2000]
+[11:06:58] [Server thread/WARN] [ne.mi.co.ForgeConfigSpec/CORE]: Configuration file ./world/serverconfig/iruxfk2000-server.toml is not correct. Correcting
+[11:06:58] [Server thread/WARN] [ne.mi.co.ForgeConfigSpec/CORE]: Incorrect key vehicle was corrected from null to its default, SimpleCommentedConfig:{}. 
+[11:06:58] [Server thread/WARN] [ne.mi.co.ForgeConfigSpec/CORE]: Incorrect key vehicle.maxSpeed was corrected from null to its default, 0.45. 
+[11:06:58] [Server thread/WARN] [ne.mi.co.ForgeConfigSpec/CORE]: Incorrect key vehicle.acceleration was corrected from null to its default, 0.012. 
+[11:06:58] [Server thread/WARN] [ne.mi.co.ForgeConfigSpec/CORE]: Incorrect key vehicle.braking was corrected from null to its default, 0.035. 
+[11:06:58] [Server thread/WARN] [ne.mi.co.ForgeConfigSpec/CORE]: Incorrect key vehicle.remoteRange was corrected from null to its default, 192.0. 
+[11:06:58] [Server thread/WARN] [ne.mi.co.ForgeConfigSpec/CORE]: Incorrect key vehicle.missileCapacity was corrected from null to its default, 8. 
+[11:06:58] [Server thread/WARN] [ne.mi.co.ForgeConfigSpec/CORE]: Incorrect key vehicle.preparationTicks was corrected from null to its default, 40. 
+[11:06:58] [Server thread/WARN] [ne.mi.co.ForgeConfigSpec/CORE]: Incorrect key vehicle.reloadTicks was corrected from null to its default, 60. 
+[11:06:58] [Server thread/WARN] [ne.mi.co.ForgeConfigSpec/CORE]: Incorrect key radar was corrected from null to its default, SimpleCommentedConfig:{}. 
+[11:06:58] [Server thread/WARN] [ne.mi.co.ForgeConfigSpec/CORE]: Incorrect key radar.range was corrected from null to its default, 160.0. 
+[11:06:58] [Server thread/WARN] [ne.mi.co.ForgeConfigSpec/CORE]: Incorrect key radar.autoAcquire was corrected from null to its default, true. 
+[11:06:58] [Server thread/WARN] [ne.mi.co.ForgeConfigSpec/CORE]: Incorrect key radar.autoFire was corrected from null to its default, false. 
+[11:06:58] [Server thread/WARN] [ne.mi.co.ForgeConfigSpec/CORE]: Incorrect key missile was corrected from null to its default, SimpleCommentedConfig:{}. 
+[11:06:58] [Server thread/WARN] [ne.mi.co.ForgeConfigSpec/CORE]: Incorrect key missile.ejectionSpeed was corrected from null to its default, 1.2. 
+[11:06:58] [Server thread/WARN] [ne.mi.co.ForgeConfigSpec/CORE]: Incorrect key missile.orientationTicks was corrected from null to its default, 20. 
+[11:06:58] [Server thread/WARN] [ne.mi.co.ForgeConfigSpec/CORE]: Incorrect key missile.thrusterParticles was corrected from null to its default, 2. 
+[11:06:58] [Server thread/WARN] [ne.mi.co.ForgeConfigSpec/CORE]: Incorrect key missile.acceleration was corrected from null to its default, 0.08. 
+[11:06:58] [Server thread/WARN] [ne.mi.co.ForgeConfigSpec/CORE]: Incorrect key missile.maxSpeed was corrected from null to its default, 2.5. 
+[11:06:58] [Server thread/WARN] [ne.mi.co.ForgeConfigSpec/CORE]: Incorrect key missile.turnDegreesPerTick was corrected from null to its default, 5.0. 
+[11:06:58] [Server thread/WARN] [ne.mi.co.ForgeConfigSpec/CORE]: Incorrect key missile.lifetimeTicks was corrected from null to its default, 240. 
+[11:06:58] [Server thread/WARN] [ne.mi.co.ForgeConfigSpec/CORE]: Incorrect key missile.explosionPower was corrected from null to its default, 3.0. 
+[11:06:58] [Server thread/WARN] [ne.mi.co.ForgeConfigSpec/CORE]: Incorrect key missile.proximityFuse was corrected from null to its default, 2.0. 
+[11:06:58] [Server thread/WARN] [ne.mi.co.ForgeConfigSpec/CORE]: Incorrect key missile.blockDamage was corrected from null to its default, false. 
+[11:06:58] [Server thread/WARN] [ne.mi.co.ForgeConfigSpec/CORE]: Configuration file ./world/serverconfig/forge-server.toml is not correct. Correcting
+[11:06:58] [Server thread/WARN] [ne.mi.co.ForgeConfigSpec/CORE]: Incorrect key server was corrected from null to its default, SimpleCommentedConfig:{}. 
+[11:06:58] [Server thread/WARN] [ne.mi.co.ForgeConfigSpec/CORE]: Incorrect key server.removeErroringBlockEntities was corrected from null to its default, false. 
+[11:06:58] [Server thread/WARN] [ne.mi.co.ForgeConfigSpec/CORE]: Incorrect key server.removeErroringEntities was corrected from null to its default, false. 
+[11:06:58] [Server thread/WARN] [ne.mi.co.ForgeConfigSpec/CORE]: Incorrect key server.fullBoundingBoxLadders was corrected from null to its default, false. 
+[11:06:58] [Server thread/WARN] [ne.mi.co.ForgeConfigSpec/CORE]: Incorrect key server.zombieBaseSummonChance was corrected from null to its default, 0.1. 
+[11:06:58] [Server thread/WARN] [ne.mi.co.ForgeConfigSpec/CORE]: Incorrect key server.zombieBabyChance was corrected from null to its default, 0.05. 
+[11:06:58] [Server thread/WARN] [ne.mi.co.ForgeConfigSpec/CORE]: Incorrect key server.permissionHandler was corrected from null to its default, forge:default_handler. 
+[11:06:58] [Server thread/WARN] [ne.mi.co.ForgeConfigSpec/CORE]: Incorrect key server.advertiseDedicatedServerToLan was corrected from null to its default, true. 
+[11:06:58] [Server thread/WARN] [ne.mi.co.ForgeConfigSpec/CORE]: Incorrect key server.useItemWithDurationZero was corrected from null to its default, false. 
+[11:06:58] [Server thread/WARN] [ne.mi.co.ForgeConfigSpec/CORE]: Configuration file ./world/serverconfig/curios-server.toml is not correct. Correcting
+[11:06:58] [Server thread/WARN] [ne.mi.co.ForgeConfigSpec/CORE]: Incorrect key keepCurios was corrected from null to its default, DEFAULT. 
+[11:06:58] [Server thread/WARN] [ne.mi.co.ForgeConfigSpec/CORE]: Incorrect key menu was corrected from null to its default, SimpleCommentedConfig:{}. 
+[11:06:58] [Server thread/WARN] [ne.mi.co.ForgeConfigSpec/CORE]: Incorrect key menu.enableLegacyMenu was corrected from null to its default, false. 
+[11:06:58] [Server thread/WARN] [ne.mi.co.ForgeConfigSpec/CORE]: Incorrect key menu.experimental was corrected from null to its default, SimpleCommentedConfig:{}. 
+[11:06:58] [Server thread/WARN] [ne.mi.co.ForgeConfigSpec/CORE]: Incorrect key menu.experimental.minimumColumns was corrected from null to its default, 1. 
+[11:06:58] [Server thread/WARN] [ne.mi.co.ForgeConfigSpec/CORE]: Incorrect key menu.experimental.maxSlotsPerPage was corrected from null to its default, 48. 
+[11:06:58] [Server thread/WARN] [ne.mi.co.ForgeConfigSpec/CORE]: Configuration file ./world/serverconfig/superbwarfare-server.toml is not correct. Correcting
+[11:06:58] [Server thread/WARN] [ne.mi.co.ForgeConfigSpec/CORE]: Incorrect key spawn was corrected from null to its default, SimpleCommentedConfig:{}. 
+[11:06:58] [Server thread/WARN] [ne.mi.co.ForgeConfigSpec/CORE]: Incorrect key spawn.spawn_senpai was corrected from null to its default, false. 
+[11:06:58] [Server thread/WARN] [ne.mi.co.ForgeConfigSpec/CORE]: Incorrect key spawn.spawn_steel_coil was corrected from null to its default, false. 
+[11:06:58] [Server thread/WARN] [ne.mi.co.ForgeConfigSpec/CORE]: Incorrect key spawn.spawn_mob_with_guns was corrected from null to its default, false. 
+[11:06:58] [Server thread/WARN] [ne.mi.co.ForgeConfigSpec/CORE]: Incorrect key projectile was corrected from null to its default, SimpleCommentedConfig:{}. 
+[11:06:58] [Server thread/WARN] [ne.mi.co.ForgeConfigSpec/CORE]: Incorrect key projectile.allow_projectile_destroy_blocks was corrected from null to its default, false. 
+[11:06:58] [Server thread/WARN] [ne.mi.co.ForgeConfigSpec/CORE]: Incorrect key projectile.projectile_chunk_loading was corrected from null to its default, true. 
+[11:06:58] [Server thread/WARN] [ne.mi.co.ForgeConfigSpec/CORE]: Incorrect key projectile.max_projectile_chunks_force_loaded was corrected from null to its default, 256. 
+[11:06:58] [Server thread/WARN] [ne.mi.co.ForgeConfigSpec/CORE]: Incorrect key projectile.max_projectile_chunks_loaded_each_tick was corrected from null to its default, 32. 
+[11:06:58] [Server thread/WARN] [ne.mi.co.ForgeConfigSpec/CORE]: Incorrect key projectile.projectile_chunk_age was corrected from null to its default, 20. 
+[11:06:58] [Server thread/WARN] [ne.mi.co.ForgeConfigSpec/CORE]: Incorrect key explosion was corrected from null to its default, SimpleCommentedConfig:{}. 
+[11:06:58] [Server thread/WARN] [ne.mi.co.ForgeConfigSpec/CORE]: Incorrect key explosion.explosion_penetration_ratio was corrected from null to its default, 15. 
+[11:06:58] [Server thread/WARN] [ne.mi.co.ForgeConfigSpec/CORE]: Incorrect key explosion.explosion_destroy was corrected from null to its default, true. 
+[11:06:58] [Server thread/WARN] [ne.mi.co.ForgeConfigSpec/CORE]: Incorrect key explosion.extra_explosion_effect was corrected from null to its default, true. 
+[11:06:58] [Server thread/WARN] [ne.mi.co.ForgeConfigSpec/CORE]: Incorrect key explosion.friendly_mines was corrected from null to its default, true. 
+[11:06:58] [Server thread/WARN] [ne.mi.co.ForgeConfigSpec/CORE]: Incorrect key explosion.RGO Grenade was corrected from null to its default, SimpleCommentedConfig:{}. 
+[11:06:58] [Server thread/WARN] [ne.mi.co.ForgeConfigSpec/CORE]: Incorrect key explosion.RGO Grenade.rgo_grenade_explosion_damage was corrected from null to its default, 90. 
+[11:06:58] [Server thread/WARN] [ne.mi.co.ForgeConfigSpec/CORE]: Incorrect key explosion.RGO Grenade.rgo_grenade_explosion_radius was corrected from null to its default, 5. 
+[11:06:58] [Server thread/WARN] [ne.mi.co.ForgeConfigSpec/CORE]: Incorrect key explosion.M67 Grenade was corrected from null to its default, SimpleCommentedConfig:{}. 
+[11:06:58] [Server thread/WARN] [ne.mi.co.ForgeConfigSpec/CORE]: Incorrect key explosion.M67 Grenade.m67_grenade_explosion_damage was corrected from null to its default, 120. 
+[11:06:58] [Server thread/WARN] [ne.mi.co.ForgeConfigSpec/CORE]: Incorrect key explosion.M67 Grenade.m67_grenade_explosion_radius was corrected from null to its default, 6. 
+[11:06:58] [Server thread/WARN] [ne.mi.co.ForgeConfigSpec/CORE]: Incorrect key explosion.C4 was corrected from null to its default, SimpleCommentedConfig:{}. 
+[11:06:58] [Server thread/WARN] [ne.mi.co.ForgeConfigSpec/CORE]: Incorrect key explosion.C4.c4_explosion_countdown was corrected from null to its default, 514. 
+[11:06:58] [Server thread/WARN] [ne.mi.co.ForgeConfigSpec/CORE]: Incorrect key explosion.C4.c4_explosion_damage was corrected from null to its default, 300. 
+[11:06:58] [Server thread/WARN] [ne.mi.co.ForgeConfigSpec/CORE]: Incorrect key explosion.C4.c4_explosion_radius was corrected from null to its default, 10. 
+[11:06:58] [Server thread/WARN] [ne.mi.co.ForgeConfigSpec/CORE]: Incorrect key explosion.Claymore was corrected from null to its default, SimpleCommentedConfig:{}. 
+[11:06:58] [Server thread/WARN] [ne.mi.co.ForgeConfigSpec/CORE]: Incorrect key explosion.Claymore.claymore_explosion_damage was corrected from null to its default, 140. 
+[11:06:58] [Server thread/WARN] [ne.mi.co.ForgeConfigSpec/CORE]: Incorrect key explosion.Claymore.claymore_explosion_radius was corrected from null to its default, 4. 
+[11:06:58] [Server thread/WARN] [ne.mi.co.ForgeConfigSpec/CORE]: Incorrect key explosion.Blu 43 was corrected from null to its default, SimpleCommentedConfig:{}. 
+[11:06:58] [Server thread/WARN] [ne.mi.co.ForgeConfigSpec/CORE]: Incorrect key explosion.Blu 43.blu_43_explosion_damage was corrected from null to its default, 10. 
+[11:06:58] [Server thread/WARN] [ne.mi.co.ForgeConfigSpec/CORE]: Incorrect key explosion.Blu 43.blu_43_explosion_radius was corrected from null to its default, 2. 
+[11:06:58] [Server thread/WARN] [ne.mi.co.ForgeConfigSpec/CORE]: Incorrect key explosion.EDD was corrected from null to its default, SimpleCommentedConfig:{}. 
+[11:06:58] [Server thread/WARN] [ne.mi.co.ForgeConfigSpec/CORE]: Incorrect key explosion.EDD.edd_explosion_damage was corrected from null to its default, 60. 
+[11:06:58] [Server thread/WARN] [ne.mi.co.ForgeConfigSpec/CORE]: Incorrect key explosion.EDD.edd_explosion_radius was corrected from null to its default, 3. 
+[11:06:58] [Server thread/WARN] [ne.mi.co.ForgeConfigSpec/CORE]: Incorrect key explosion.EDD.edd_trace_range was corrected from null to its default, 2. 
+[11:06:58] [Server thread/WARN] [ne.mi.co.ForgeConfigSpec/CORE]: Incorrect key explosion.Tm 62 was corrected from null to its default, SimpleCommentedConfig:{}. 
+[11:06:58] [Server thread/WARN] [ne.mi.co.ForgeConfigSpec/CORE]: Incorrect key explosion.Tm 62.tm_62_explosion_damage was corrected from null to its default, 450. 
+[11:06:58] [Server thread/WARN] [ne.mi.co.ForgeConfigSpec/CORE]: Incorrect key explosion.Tm 62.tm_62_explosion_radius was corrected from null to its default, 13. 
+[11:06:58] [Server thread/WARN] [ne.mi.co.ForgeConfigSpec/CORE]: Incorrect key explosion.Lunge Mine was corrected from null to its default, SimpleCommentedConfig:{}. 
+[11:06:58] [Server thread/WARN] [ne.mi.co.ForgeConfigSpec/CORE]: Incorrect key explosion.Lunge Mine.lunge_mine_explosion_damage was corrected from null to its default, 60. 
+[11:06:58] [Server thread/WARN] [ne.mi.co.ForgeConfigSpec/CORE]: Incorrect key explosion.Lunge Mine.lunge_mine_attack_damage was corrected from null to its default, 600. 
+[11:06:58] [Server thread/WARN] [ne.mi.co.ForgeConfigSpec/CORE]: Incorrect key explosion.Lunge Mine.lunge_mine_explosion_radius was corrected from null to its default, 4. 
+[11:06:58] [Server thread/WARN] [ne.mi.co.ForgeConfigSpec/CORE]: Incorrect key explosion.Ptkm 1r was corrected from null to its default, SimpleCommentedConfig:{}. 
+[11:06:58] [Server thread/WARN] [ne.mi.co.ForgeConfigSpec/CORE]: Incorrect key explosion.Ptkm 1r.ptkm_1r_explosion_damage was corrected from null to its default, 100. 
+[11:06:58] [Server thread/WARN] [ne.mi.co.ForgeConfigSpec/CORE]: Incorrect key explosion.Ptkm 1r.ptkm_1r_explosion_radius was corrected from null to its default, 6. 
+[11:06:58] [Server thread/WARN] [ne.mi.co.ForgeConfigSpec/CORE]: Incorrect key explosion.Ptkm 1r.ptkm_1r_projectile_hit_damage was corrected from null to its default, 500. 
+[11:06:58] [Server thread/WARN] [ne.mi.co.ForgeConfigSpec/CORE]: Incorrect key explosion.Ptkm 1r.ptkm_1r_projectile_explosion_damage was corrected from null to its default, 80. 
+[11:06:58] [Server thread/WARN] [ne.mi.co.ForgeConfigSpec/CORE]: Incorrect key explosion.Ptkm 1r.ptkm_1r_projectile_explosion_radius was corrected from null to its default, 7. 
+[11:06:58] [Server thread/WARN] [ne.mi.co.ForgeConfigSpec/CORE]: Incorrect key vehicle was corrected from null to its default, SimpleCommentedConfig:{}. 
+[11:06:58] [Server thread/WARN] [ne.mi.co.ForgeConfigSpec/CORE]: Incorrect key vehicle.collision was corrected from null to its default, SimpleCommentedConfig:{}. 
+[11:06:58] [Server thread/WARN] [ne.mi.co.ForgeConfigSpec/CORE]: Incorrect key vehicle.collision.collision_destroy_soft_blocks was corrected from null to its default, false. 
+[11:06:58] [Server thread/WARN] [ne.mi.co.ForgeConfigSpec/CORE]: Incorrect key vehicle.collision.collision_destroy_normal_blocks was corrected from null to its default, false. 
+[11:06:58] [Server thread/WARN] [ne.mi.co.ForgeConfigSpec/CORE]: Incorrect key vehicle.collision.collision_destroy_hard_blocks was corrected from null to its default, false. 
+[11:06:58] [Server thread/WARN] [ne.mi.co.ForgeConfigSpec/CORE]: Incorrect key vehicle.collision.collision_destroy_blocks_beastly was corrected from null to its default, false. 
+[11:06:58] [Server thread/WARN] [ne.mi.co.ForgeConfigSpec/CORE]: Incorrect key vehicle.collision.collision_entity_whitelist was corrected from null to its default, []. 
+[11:06:58] [Server thread/WARN] [ne.mi.co.ForgeConfigSpec/CORE]: Incorrect key vehicle.vehicle_item_pickup was corrected from null to its default, true. 
+[11:06:58] [Server thread/WARN] [ne.mi.co.ForgeConfigSpec/CORE]: Incorrect key vehicle.vehicle_chunk_loading was corrected from null to its default, true. 
+[11:06:58] [Server thread/WARN] [ne.mi.co.ForgeConfigSpec/CORE]: Incorrect key vehicle.same_team_enter_vehicle was corrected from null to its default, true. 
+[11:06:58] [Server thread/WARN] [ne.mi.co.ForgeConfigSpec/CORE]: Incorrect key vehicle.collect_drops_by_crashing was corrected from null to its default, true. 
+[11:06:58] [Server thread/WARN] [ne.mi.co.ForgeConfigSpec/CORE]: Incorrect key vehicle.vehicle_info_display_distance was corrected from null to its default, 196. 
+[11:06:58] [Server thread/WARN] [ne.mi.co.ForgeConfigSpec/CORE]: Incorrect key vehicle.self_explosion_damage was corrected from null to its default, 114514. 
+[11:06:58] [Server thread/WARN] [ne.mi.co.ForgeConfigSpec/CORE]: Incorrect key vehicle.self_explosion_count was corrected from null to its default, 5. 
+[11:06:58] [Server thread/WARN] [ne.mi.co.ForgeConfigSpec/CORE]: Incorrect key vehicle.air_crash_explosion_damage was corrected from null to its default, 114514. 
+[11:06:58] [Server thread/WARN] [ne.mi.co.ForgeConfigSpec/CORE]: Incorrect key vehicle.air_crash_explosion_count was corrected from null to its default, 5. 
+[11:06:58] [Server thread/WARN] [ne.mi.co.ForgeConfigSpec/CORE]: Incorrect key vehicle.turret_wreckage_loot_rate was corrected from null to its default, 0.3. 
+[11:06:58] [Server thread/WARN] [ne.mi.co.ForgeConfigSpec/CORE]: Incorrect key vehicle.scan_white_list was corrected from null to its default, [ywzj_vehicle:*]. 
+[11:06:58] [Server thread/WARN] [ne.mi.co.ForgeConfigSpec/CORE]: Incorrect key vehicle.towing was corrected from null to its default, SimpleCommentedConfig:{}. 
+[11:06:58] [Server thread/WARN] [ne.mi.co.ForgeConfigSpec/CORE]: Incorrect key vehicle.towing.tow_max_distance was corrected from null to its default, 16. 
+[11:06:58] [Server thread/WARN] [ne.mi.co.ForgeConfigSpec/CORE]: Incorrect key vehicle.towing.tow_pull_distance was corrected from null to its default, 10. 
+[11:06:58] [Server thread/WARN] [ne.mi.co.ForgeConfigSpec/CORE]: Incorrect key vehicle.towing.tow_break_distance was corrected from null to its default, 0. 
+[11:06:58] [Server thread/WARN] [ne.mi.co.ForgeConfigSpec/CORE]: Incorrect key vehicle.towing.tow_black_list was corrected from null to its default, [minecraft:experience_orb, minecraft:primed_tnt, minecraft:ender_pearl, minecraft:interaction, minecraft:marker, minecraft:end_crystal, minecraft:evoker_fangs, minecraft:eye_of_ender, minecraft:falling_block, mts:builder_rendering, evilcraft:vengeance_spirit, touhou_little_maid:power_point, create:carriage_contraption, create:stationary_contraption, create:gantry_contraption, create:super_glue, zombiekit:flares]. 
+[11:06:58] [Server thread/WARN] [ne.mi.co.ForgeConfigSpec/CORE]: Incorrect key vehicle.towing.tow_bar_extra_length was corrected from null to its default, 2. 
+[11:06:58] [Server thread/WARN] [ne.mi.co.ForgeConfigSpec/CORE]: Incorrect key vehicle.repair was corrected from null to its default, SimpleCommentedConfig:{}. 
+[11:06:58] [Server thread/WARN] [ne.mi.co.ForgeConfigSpec/CORE]: Incorrect key vehicle.repair.repair_cooldown was corrected from null to its default, 200. 
+[11:06:58] [Server thread/WARN] [ne.mi.co.ForgeConfigSpec/CORE]: Incorrect key vehicle.repair.repair_amount was corrected from null to its default, 0.05. 
+[11:06:58] [Server thread/WARN] [ne.mi.co.ForgeConfigSpec/CORE]: Incorrect key vehicle.passenger_y_offset was corrected from null to its default, [touhou_little_maid:maid, 0.75]. 
+[11:06:58] [Server thread/WARN] [ne.mi.co.ForgeConfigSpec/CORE]: Incorrect key misc was corrected from null to its default, SimpleCommentedConfig:{}. 
+[11:06:58] [Server thread/WARN] [ne.mi.co.ForgeConfigSpec/CORE]: Incorrect key misc.send_kill_feedback was corrected from null to its default, true. 
+[11:06:58] [Server thread/WARN] [ne.mi.co.ForgeConfigSpec/CORE]: Incorrect key misc.force_damage_mode was corrected from null to its default, false. 
+[11:06:58] [Server thread/WARN] [ne.mi.co.ForgeConfigSpec/CORE]: Incorrect key misc.drop_ammo_box was corrected from null to its default, false. 
+[11:06:58] [Server thread/WARN] [ne.mi.co.ForgeConfigSpec/CORE]: Incorrect key misc.default_armor_level was corrected from null to its default, 1. 
+[11:06:58] [Server thread/WARN] [ne.mi.co.ForgeConfigSpec/CORE]: Incorrect key misc.military_armor_level was corrected from null to its default, 2. 
+[11:06:58] [Server thread/WARN] [ne.mi.co.ForgeConfigSpec/CORE]: Incorrect key misc.heavy_military_armor_level was corrected from null to its default, 3. 
+[11:06:58] [Server thread/WARN] [ne.mi.co.ForgeConfigSpec/CORE]: Incorrect key misc.armor_point_per_level was corrected from null to its default, 15. 
+[11:06:58] [Server thread/WARN] [ne.mi.co.ForgeConfigSpec/CORE]: Incorrect key misc.charging_station_max_energy was corrected from null to its default, 4000000. 
+[11:06:58] [Server thread/WARN] [ne.mi.co.ForgeConfigSpec/CORE]: Incorrect key misc.charging_station_generate_speed was corrected from null to its default, 128. 
+[11:06:58] [Server thread/WARN] [ne.mi.co.ForgeConfigSpec/CORE]: Incorrect key misc.charging_station_transfer_speed was corrected from null to its default, 100000. 
+[11:06:58] [Server thread/WARN] [ne.mi.co.ForgeConfigSpec/CORE]: Incorrect key misc.charging_station_charge_radius was corrected from null to its default, 8. 
+[11:06:58] [Server thread/WARN] [ne.mi.co.ForgeConfigSpec/CORE]: Incorrect key misc.charging_station_default_fuel_time was corrected from null to its default, 1600. 
+[11:06:58] [Server thread/WARN] [ne.mi.co.ForgeConfigSpec/CORE]: Incorrect key misc.artillery_indicator_list_size was corrected from null to its default, 32. 
+[11:06:58] [Server thread/WARN] [ne.mi.co.ForgeConfigSpec/CORE]: Incorrect key misc.mine_hitbox_invisible was corrected from null to its default, false. 
+[11:06:58] [Server thread/WARN] [ne.mi.co.ForgeConfigSpec/CORE]: Incorrect key misc.blueprint_research_table_max_fuel was corrected from null to its default, 8. 
+[11:06:58] [Server thread/WARN] [ne.mi.co.ForgeConfigSpec/CORE]: Incorrect key misc.steel_coil_awake_percentage was corrected from null to its default, 0.99. 
+[11:06:58] [Server thread/WARN] [ne.mi.co.ForgeConfigSpec/CORE]: Incorrect key misc.medical kit was corrected from null to its default, SimpleCommentedConfig:{}. 
+[11:06:58] [Server thread/WARN] [ne.mi.co.ForgeConfigSpec/CORE]: Incorrect key misc.medical kit.throw_medical_kit was corrected from null to its default, true. 
+[11:06:58] [Server thread/WARN] [ne.mi.co.ForgeConfigSpec/CORE]: Incorrect key misc.medical kit.medical_kit_heal_amount was corrected from null to its default, 5. 
+[11:06:58] [Server thread/WARN] [ne.mi.co.ForgeConfigSpec/CORE]: Incorrect key misc.medical kit.medical_kit_heal_percentage was corrected from null to its default, 0.25. 
+[11:06:58] [Server thread/WARN] [ne.mi.co.ForgeConfigSpec/CORE]: Incorrect key misc.medical kit.medical_kit_entity_heal_amount was corrected from null to its default, 5. 
+[11:06:58] [Server thread/WARN] [ne.mi.co.ForgeConfigSpec/CORE]: Incorrect key misc.medical kit.medical_kit_entity_heal_percentage was corrected from null to its default, 0.25. 
+[11:06:58] [Server thread/WARN] [ne.mi.co.ForgeConfigSpec/CORE]: Incorrect key misc.hide_combat_hud was corrected from null to its default, false. 
+[11:06:58] [Server thread/WARN] [ne.mi.co.ForgeConfigSpec/CORE]: Incorrect key misc.smoke_hide_target was corrected from null to its default, false. 
+[11:06:58] [Server thread/WARN] [ne.mi.co.ForgeConfigSpec/CORE]: Incorrect key ammo was corrected from null to its default, SimpleCommentedConfig:{}. 
+[11:06:58] [Server thread/WARN] [ne.mi.co.ForgeConfigSpec/CORE]: Incorrect key ammo.handgun_ammo_limit was corrected from null to its default, 2147483647. 
+[11:06:58] [Server thread/WARN] [ne.mi.co.ForgeConfigSpec/CORE]: Incorrect key ammo.rifle_ammo_limit was corrected from null to its default, 2147483647. 
+[11:06:58] [Server thread/WARN] [ne.mi.co.ForgeConfigSpec/CORE]: Incorrect key ammo.shotgun_ammo_limit was corrected from null to its default, 2147483647. 
+[11:06:58] [Server thread/WARN] [ne.mi.co.ForgeConfigSpec/CORE]: Incorrect key ammo.sniper_ammo_limit was corrected from null to its default, 2147483647. 
+[11:06:58] [Server thread/WARN] [ne.mi.co.ForgeConfigSpec/CORE]: Incorrect key ammo.heavy_ammo_limit was corrected from null to its default, 2147483647. 
+[11:06:58] [Server thread/WARN] [ne.mi.co.ForgeConfigSpec/CORE]: Incorrect key ammo.handgun_ammo_box_limit was corrected from null to its default, 2147483647. 
+[11:06:58] [Server thread/WARN] [ne.mi.co.ForgeConfigSpec/CORE]: Incorrect key ammo.rifle_ammo_box_limit was corrected from null to its default, 2147483647. 
+[11:06:58] [Server thread/WARN] [ne.mi.co.ForgeConfigSpec/CORE]: Incorrect key ammo.shotgun_ammo_box_limit was corrected from null to its default, 2147483647. 
+[11:06:58] [Server thread/WARN] [ne.mi.co.ForgeConfigSpec/CORE]: Incorrect key ammo.sniper_ammo_box_limit was corrected from null to its default, 2147483647. 
+[11:06:58] [Server thread/WARN] [ne.mi.co.ForgeConfigSpec/CORE]: Incorrect key ammo.heavy_ammo_box_limit was corrected from null to its default, 2147483647. 
+[11:06:58] [Server thread/WARN] [ne.mi.co.ForgeConfigSpec/CORE]: Incorrect key map was corrected from null to its default, SimpleCommentedConfig:{}. 
+[11:06:58] [Server thread/WARN] [ne.mi.co.ForgeConfigSpec/CORE]: Incorrect key map.enable_tactical_map was corrected from null to its default, false. 
+[11:06:58] [Server thread/WARN] [ne.mi.co.ForgeConfigSpec/CORE]: Incorrect key sync was corrected from null to its default, SimpleCommentedConfig:{}. 
+[11:06:58] [Server thread/WARN] [ne.mi.co.ForgeConfigSpec/CORE]: Incorrect key sync.sync_entity_over_range was corrected from null to its default, true. 
+[11:06:58] [Server thread/WARN] [ne.mi.co.ForgeConfigSpec/CORE]: Incorrect key sync.sync_entity_interval was corrected from null to its default, 1. 
+[11:06:58] [Server thread/WARN] [ne.mi.co.ForgeConfigSpec/CORE]: Incorrect key sync.client_sync_expire_time was corrected from null to its default, 1000. 
+[11:06:58] [Server thread/WARN] [ne.mi.co.ForgeConfigSpec/CORE]: Incorrect key sync.server_sync_expire_time was corrected from null to its default, 10000. 
+[11:06:58] [Server thread/WARN] [ne.mi.co.ForgeConfigSpec/CORE]: Incorrect key sync.server_sync_clean_interval was corrected from null to its default, 200. 
+[11:06:58] [Server thread/WARN] [ne.mi.co.ForgeConfigSpec/CORE]: Incorrect key sync.enable_render_synced_entities was corrected from null to its default, false. 
+[11:06:58] [Server thread/WARN] [ne.mi.co.ForgeConfigSpec/CORE]: Incorrect key sync.max_render_distance was corrected from null to its default, 2048. 
+[11:06:58] [Server thread/WARN] [ne.mi.co.ForgeConfigSpec/CORE]: Incorrect key sync.min_render_height was corrected from null to its default, 256. 
+[11:07:01] [Yggdrasil Key Fetcher/ERROR] [mojang/YggdrasilServicesKeyInfo]: Failed to request yggdrasil public key
+com.mojang.authlib.exceptions.AuthenticationUnavailableException: Cannot contact authentication server
+	at com.mojang.authlib.yggdrasil.YggdrasilAuthenticationService.makeRequest(YggdrasilAuthenticationService.java:119) ~[authlib-4.0.43.jar%23121!/:?] {}
+	at com.mojang.authlib.yggdrasil.YggdrasilAuthenticationService.makeRequest(YggdrasilAuthenticationService.java:91) ~[authlib-4.0.43.jar%23121!/:?] {}
+	at com.mojang.authlib.yggdrasil.YggdrasilServicesKeyInfo.fetch(YggdrasilServicesKeyInfo.java:94) ~[authlib-4.0.43.jar%23121!/:?] {}
+	at com.mojang.authlib.yggdrasil.YggdrasilServicesKeyInfo.lambda$get$1(YggdrasilServicesKeyInfo.java:81) ~[authlib-4.0.43.jar%23121!/:?] {}
+	at java.util.concurrent.Executors$RunnableAdapter.call(Executors.java:539) ~[?:?] {}
+	at java.util.concurrent.FutureTask.runAndReset(FutureTask.java:305) ~[?:?] {}
+	at java.util.concurrent.ScheduledThreadPoolExecutor$ScheduledFutureTask.run(ScheduledThreadPoolExecutor.java:305) ~[?:?] {}
+	at java.util.concurrent.ThreadPoolExecutor.runWorker(ThreadPoolExecutor.java:1136) ~[?:?] {}
+	at java.util.concurrent.ThreadPoolExecutor$Worker.run(ThreadPoolExecutor.java:635) ~[?:?] {}
+	at java.lang.Thread.run(Thread.java:840) ~[?:?] {}
+Caused by: java.net.ConnectException: Connection refused
+	at sun.nio.ch.Net.pollConnect(Native Method) ~[?:?] {}
+	at sun.nio.ch.Net.pollConnectNow(Net.java:672) ~[?:?] {}
+	at sun.nio.ch.NioSocketImpl.timedFinishConnect(NioSocketImpl.java:554) ~[?:?] {}
+	at sun.nio.ch.NioSocketImpl.connect(NioSocketImpl.java:602) ~[?:?] {}
+	at java.net.SocksSocketImpl.connect(SocksSocketImpl.java:327) ~[?:?] {}
+	at java.net.Socket.connect(Socket.java:633) ~[?:?] {}
+	at sun.security.ssl.SSLSocketImpl.connect(SSLSocketImpl.java:304) ~[?:?] {}
+	at sun.net.NetworkClient.doConnect(NetworkClient.java:178) ~[?:?] {}
+	at sun.net.www.http.HttpClient.openServer(HttpClient.java:533) ~[?:?] {}
+	at sun.net.www.http.HttpClient.openServer(HttpClient.java:638) ~[?:?] {}
+	at sun.net.www.protocol.https.HttpsClient.<init>(HttpsClient.java:266) ~[?:?] {}
+	at sun.net.www.protocol.https.HttpsClient.New(HttpsClient.java:380) ~[?:?] {}
+	at sun.net.www.protocol.https.AbstractDelegateHttpsURLConnection.getNewHttpClient(AbstractDelegateHttpsURLConnection.java:193) ~[?:?] {}
+	at sun.net.www.protocol.http.HttpURLConnection.plainConnect0(HttpURLConnection.java:1307) ~[?:?] {}
+	at sun.net.www.protocol.http.HttpURLConnection.plainConnect(HttpURLConnection.java:1148) ~[?:?] {}
+	at sun.net.www.protocol.https.AbstractDelegateHttpsURLConnection.connect(AbstractDelegateHttpsURLConnection.java:179) ~[?:?] {}
+	at sun.net.www.protocol.http.HttpURLConnection.getInputStream0(HttpURLConnection.java:1717) ~[?:?] {}
+	at sun.net.www.protocol.http.HttpURLConnection.getInputStream(HttpURLConnection.java:1641) ~[?:?] {}
+	at sun.net.www.protocol.https.HttpsURLConnectionImpl.getInputStream(HttpsURLConnectionImpl.java:224) ~[?:?] {}
+	at com.mojang.authlib.HttpAuthenticationService.performGetRequest(HttpAuthenticationService.java:140) ~[authlib-4.0.43.jar%23121!/:?] {}
+	at com.mojang.authlib.yggdrasil.YggdrasilAuthenticationService.makeRequest(YggdrasilAuthenticationService.java:96) ~[authlib-4.0.43.jar%23121!/:?] {}
+	... 9 more
+[11:07:02] [Server thread/INFO] [minecraft/MinecraftServer]: Preparing start region for dimension minecraft:overworld
+[11:07:03] [Worker-Main-3/INFO] [minecraft/LoggerChunkProgressListener]: Preparing spawn area: 0%
+[11:07:03] [Worker-Main-1/INFO] [minecraft/LoggerChunkProgressListener]: Preparing spawn area: 0%
+[11:07:03] [Worker-Main-2/INFO] [minecraft/LoggerChunkProgressListener]: Preparing spawn area: 0%
+[11:07:04] [Worker-Main-1/INFO] [minecraft/LoggerChunkProgressListener]: Preparing spawn area: 0%
+[11:07:04] [Worker-Main-4/INFO] [minecraft/LoggerChunkProgressListener]: Preparing spawn area: 1%
+[11:07:05] [Worker-Main-4/INFO] [minecraft/LoggerChunkProgressListener]: Preparing spawn area: 1%
+[11:07:05] [Worker-Main-1/INFO] [minecraft/LoggerChunkProgressListener]: Preparing spawn area: 3%
+[11:07:06] [Worker-Main-1/INFO] [minecraft/LoggerChunkProgressListener]: Preparing spawn area: 3%
+[11:07:06] [Worker-Main-3/INFO] [minecraft/LoggerChunkProgressListener]: Preparing spawn area: 4%
+[11:07:07] [Worker-Main-2/INFO] [minecraft/LoggerChunkProgressListener]: Preparing spawn area: 6%
+[11:07:07] [Worker-Main-3/INFO] [minecraft/LoggerChunkProgressListener]: Preparing spawn area: 7%
+[11:07:08] [Worker-Main-2/INFO] [minecraft/LoggerChunkProgressListener]: Preparing spawn area: 9%
+[11:07:08] [Worker-Main-4/INFO] [minecraft/LoggerChunkProgressListener]: Preparing spawn area: 10%
+[11:07:09] [Worker-Main-3/INFO] [minecraft/LoggerChunkProgressListener]: Preparing spawn area: 12%
+[11:07:09] [Worker-Main-4/INFO] [minecraft/LoggerChunkProgressListener]: Preparing spawn area: 15%
+[11:07:10] [Worker-Main-1/INFO] [minecraft/LoggerChunkProgressListener]: Preparing spawn area: 16%
+[11:07:10] [Worker-Main-4/INFO] [minecraft/LoggerChunkProgressListener]: Preparing spawn area: 18%
+[11:07:11] [Worker-Main-2/INFO] [minecraft/LoggerChunkProgressListener]: Preparing spawn area: 22%
+[11:07:11] [Worker-Main-1/INFO] [minecraft/LoggerChunkProgressListener]: Preparing spawn area: 23%
+[11:07:12] [Worker-Main-2/INFO] [minecraft/LoggerChunkProgressListener]: Preparing spawn area: 26%
+[11:07:12] [Worker-Main-1/INFO] [minecraft/LoggerChunkProgressListener]: Preparing spawn area: 29%
+[11:07:13] [Worker-Main-3/INFO] [minecraft/LoggerChunkProgressListener]: Preparing spawn area: 31%
+[11:07:13] [Worker-Main-3/INFO] [minecraft/LoggerChunkProgressListener]: Preparing spawn area: 34%
+[11:07:14] [Worker-Main-3/INFO] [minecraft/LoggerChunkProgressListener]: Preparing spawn area: 37%
+[11:07:14] [Worker-Main-3/INFO] [minecraft/LoggerChunkProgressListener]: Preparing spawn area: 42%
+[11:07:15] [Worker-Main-1/INFO] [minecraft/LoggerChunkProgressListener]: Preparing spawn area: 44%
+[11:07:15] [Worker-Main-4/INFO] [minecraft/LoggerChunkProgressListener]: Preparing spawn area: 47%
+[11:07:16] [Worker-Main-1/INFO] [minecraft/LoggerChunkProgressListener]: Preparing spawn area: 51%
+[11:07:16] [Worker-Main-1/INFO] [minecraft/LoggerChunkProgressListener]: Preparing spawn area: 54%
+[11:07:17] [Worker-Main-4/INFO] [minecraft/LoggerChunkProgressListener]: Preparing spawn area: 58%
+[11:07:17] [Worker-Main-1/INFO] [minecraft/LoggerChunkProgressListener]: Preparing spawn area: 62%
+[11:07:18] [Worker-Main-1/INFO] [minecraft/LoggerChunkProgressListener]: Preparing spawn area: 67%
+[11:07:18] [Worker-Main-1/INFO] [minecraft/LoggerChunkProgressListener]: Preparing spawn area: 69%
+[11:07:19] [Worker-Main-2/INFO] [minecraft/LoggerChunkProgressListener]: Preparing spawn area: 73%
+[11:07:19] [Worker-Main-2/INFO] [minecraft/LoggerChunkProgressListener]: Preparing spawn area: 78%
+[11:07:20] [Worker-Main-2/INFO] [minecraft/LoggerChunkProgressListener]: Preparing spawn area: 82%
+[11:07:20] [Worker-Main-2/INFO] [minecraft/LoggerChunkProgressListener]: Preparing spawn area: 85%
+[11:07:21] [Worker-Main-4/INFO] [minecraft/LoggerChunkProgressListener]: Preparing spawn area: 89%
+[11:07:21] [Worker-Main-2/INFO] [minecraft/LoggerChunkProgressListener]: Preparing spawn area: 93%
+[11:07:22] [Worker-Main-3/INFO] [minecraft/LoggerChunkProgressListener]: Preparing spawn area: 98%
+[11:07:22] [Server thread/INFO] [minecraft/LoggerChunkProgressListener]: Time elapsed: 19612 ms
+[11:07:22] [Server thread/INFO] [minecraft/GameTestServer]: Started game test server
+[11:07:22] [Server thread/INFO] [ne.mi.se.pe.PermissionAPI/]: Successfully initialized permission handler forge:default_handler
+[11:07:29] [Server thread/INFO] [minecraft/GameTestBatchRunner]: Running test batch 'defaultBatch:1' (11 tests)...
+[11:07:30] [Server thread/INFO] [minecraft/GameTestServer]: 13 tests are now running!
+[11:07:30] [Server thread/WARN] [minecraft/MinecraftServer]: Can't keep up! Is the server overloaded? Running 8656ms or 173 ticks behind
+[11:07:31] [Server thread/INFO] [fr.ir.fk.co.SbwCompatibility/]: Irux FK-2000: SBW 0.8.9.1 adapter methods and IFF predicate resolved; gameplay compatibility still requires testing
+[11:07:33] [Server thread/INFO] [minecraft/GameTestServer]: [__+__+__+++  ]
+[11:07:34] [Server thread/INFO] [minecraft/GameTestServer]: [+_+__++_+++  ]
+[11:07:35] [Server thread/INFO] [minecraft/GameTestServer]: [+++__++_+++  ]
+[11:07:35] [Server thread/INFO] [minecraft/GameTestServer]: [++++_++++++  ]
+[11:07:37] [Server thread/INFO] [minecraft/GameTestBatchRunner]: Running test batch 'sbw_compatibility:1' (2 tests)...
+[11:07:38] [Server thread/INFO] [minecraft/GameTestServer]: [++++++++++++_]
+[11:07:38] [Server thread/INFO] [minecraft/GameTestServer]: [++++++++++++_]
+[11:07:39] [Server thread/INFO] [minecraft/GameTestServer]: [++++++++++++_]
+[11:07:39] [Server thread/INFO] [minecraft/GameTestServer]: [+++++++++++++]
+[11:07:39] [Server thread/INFO] [minecraft/GameTestServer]: ========= 13 GAME TESTS COMPLETE ======================
+[11:07:39] [Server thread/INFO] [minecraft/GameTestServer]: All 13 required tests passed :)
+[11:07:39] [Server thread/INFO] [minecraft/GameTestServer]: ====================================================
+[11:07:39] [Server thread/INFO] [minecraft/MinecraftServer]: Stopping server
+[11:07:39] [Server thread/INFO] [minecraft/MinecraftServer]: Saving players
+[11:07:39] [Server thread/INFO] [minecraft/MinecraftServer]: Saving worlds
+[11:07:40] [Server thread/INFO] [minecraft/MinecraftServer]: Saving chunks for level 'ServerLevel[world]'/minecraft:overworld
+[11:07:43] [Server thread/INFO] [minecraft/MinecraftServer]: Saving chunks for level 'ServerLevel[world]'/minecraft:the_end
+[11:07:43] [Server thread/INFO] [minecraft/MinecraftServer]: Saving chunks for level 'ServerLevel[world]'/minecraft:the_nether
+[11:07:43] [Server thread/INFO] [minecraft/MinecraftServer]: ThreadedAnvilChunkStorage (world): All chunks are saved
+[11:07:43] [Server thread/INFO] [minecraft/MinecraftServer]: ThreadedAnvilChunkStorage (DIM1): All chunks are saved
+[11:07:43] [Server thread/INFO] [minecraft/MinecraftServer]: ThreadedAnvilChunkStorage (DIM-1): All chunks are saved
+[11:07:43] [Server thread/INFO] [minecraft/MinecraftServer]: ThreadedAnvilChunkStorage: All dimensions are saved
+[11:07:43] [Server thread/INFO] [minecraft/GameTestServer]: Game test server shutting down
+
+Deprecated Gradle features were used in this build, making it incompatible with Gradle 9.0.
+
+You can use '--warning-mode all' to show the individual deprecation warnings and determine if they come from your own scripts or plugins.
+
+For more on this, please refer to https://docs.gradle.org/8.8/userguide/command_line_interface.html#sec:command_line_warnings in the Gradle documentation.
+
+BUILD SUCCESSFUL in 1m 7s
+15 actionable tasks: 6 executed, 9 up-to-date

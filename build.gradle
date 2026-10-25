@@ -5,7 +5,7 @@ plugins {
 }
 
 group = 'fr.irux.fk2000'
-version = '0.1.0'
+version = '0.2.0'
 base { archivesName = 'iruxfk2000' }
 java.toolchain.languageVersion = JavaLanguageVersion.of(17)
 
@@ -19,6 +19,19 @@ def selectedSbw = providers.gradleProperty('sbwVersion').orNull
 if (selectedSbw != null && !sbwReleases.containsKey(selectedSbw)) {
     throw new GradleException('Unknown sbwVersion. Choose 0.8.9-final, 0.8.9.1-hotfix or 0.8.9.2.')
 }
+def suppliedSbwJar = providers.gradleProperty('sbwLocalJar').orNull
+def suppliedSbwHash = null
+def suppliedSbwDirectory = file('run/local-sbw-dependencies')
+if (suppliedSbwJar != null) {
+    if (selectedSbw != '0.8.9-final') throw new GradleException('Local SBW 0.8.9 jars require -PsbwVersion=0.8.9-final for the legacy dependency profile.')
+    def original = file(suppliedSbwJar)
+    if (!original.isFile()) throw new GradleException('The supplied SBW jar does not exist.')
+    suppliedSbwHash = java.security.MessageDigest.getInstance('SHA-256').digest(original.bytes).encodeHex().toString()
+    suppliedSbwDirectory.mkdirs()
+    def cached = new File(suppliedSbwDirectory, "superbwarfare-uploaded-${suppliedSbwHash}.jar")
+    if (!cached.exists()) java.nio.file.Files.copy(original.toPath(), cached.toPath())
+}
+
 def selectedRunDirectory = providers.gradleProperty('runDirectory').getOrElse('run')
 
 minecraft {
@@ -49,6 +62,7 @@ minecraft {
 
 repositories {
     mavenCentral()
+    if (suppliedSbwJar != null) flatDir { dirs suppliedSbwDirectory }
     maven {
         name = 'Modrinth'
         url = 'https://api.modrinth.com/maven'
@@ -59,7 +73,8 @@ dependencies {
     minecraft 'net.minecraftforge:forge:1.20.1-47.4.10'
     if (selectedSbw != null) {
         // ForgeGradle remaps into its cache; official downloaded jars are untouched.
-        runtimeOnly fg.deobf("maven.modrinth:superb-warfare:${sbwReleases[selectedSbw]}")
+        if (suppliedSbwJar == null) runtimeOnly fg.deobf("maven.modrinth:superb-warfare:${sbwReleases[selectedSbw]}")
+        else runtimeOnly fg.deobf("local.irux:superbwarfare-uploaded:${suppliedSbwHash}")
         runtimeOnly fg.deobf('maven.modrinth:kotlin-for-forge:hmeyC41q') // KFF 4.11.0
         if (selectedSbw == '0.8.9-final') {
             // These are embedded by the newer releases, separate in 0.8.9-final.
